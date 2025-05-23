@@ -1,7 +1,7 @@
 import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useAppSelector } from "@/redux/hooks";
-import { TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
+import { type TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
 import { verifyToken } from "@/utils/verifyToken";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
@@ -32,12 +32,8 @@ const Sidebar: React.FC = () => {
   const token = useAppSelector(useCurrentToken);
   const location = useLocation();
 
-  let user: TUser | null = null;
-  if (token) {
-    user = verifyToken(token);
-  }
-
-  const role = user?.role;
+  const user = token ? (verifyToken(token) as TUser) : null;
+  const role = user?.role as keyof typeof roleBasedPaths;
   const sidebarItems = role ? roleBasedPaths[role] : [];
 
   return (
