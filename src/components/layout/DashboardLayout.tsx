@@ -1,11 +1,14 @@
 // src/layouts/DashboardLayout.tsx
-import { type ReactNode } from "react";
-import Sidebar from "./Sidebar";
 
-const DashboardLayout = ({ children }: { children: ReactNode }) => (
+import Sidebar from "./Sidebar";
+import { Outlet } from "react-router-dom";
+
+const DashboardLayout = () => (
   <div className="flex">
     <Sidebar />
-    <main className="flex-1 p-4">{children}</main>
+    <main className="flex-1 p-4">
+      <Outlet />
+    </main>
   </div>
 );
 

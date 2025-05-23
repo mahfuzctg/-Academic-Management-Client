@@ -1,14 +1,12 @@
 import { createBrowserRouter } from "react-router-dom";
 import App from "../App";
 
-import { adminPaths } from "./admin.routes";
-import { routeGenerator } from "../utils/routesGenerator";
-import { facultyPaths } from "./faculty.routes";
-import { studentPaths } from "./student.routes";
-import ProtectedRoute from "../components/layout/ProtectedRoute";
-import ChangePassword from "../pages/ChangePassword";
 import LoginForm from "@/pages/Login";
 import RegisterForm from "@/pages/Register";
+import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import { routeGenerator } from "@/utils/routesGenerator";
+import { adminPaths } from "./admin.routes";
+import { studentPaths } from "./student.routes";
 
 const router = createBrowserRouter([
   {
@@ -24,15 +22,7 @@ const router = createBrowserRouter([
     ),
     children: routeGenerator(adminPaths),
   },
-  {
-    path: "/faculty",
-    element: (
-      <ProtectedRoute role="faculty">
-        <App />
-      </ProtectedRoute>
-    ),
-    children: routeGenerator(facultyPaths),
-  },
+
   {
     path: "/student",
     element: (
@@ -46,10 +36,7 @@ const router = createBrowserRouter([
     path: "/login",
     element: <LoginForm />,
   },
-  {
-    path: "/change-password",
-    element: <ChangePassword />,
-  },
+
   {
     path: "/register",
     element: <RegisterForm />,

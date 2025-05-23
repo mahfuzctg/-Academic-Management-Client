@@ -1,12 +1,14 @@
 // src/layouts/HomeLayout.tsx
 import Footer from "@/pages/Home/Footer";
 import NavBar from "@/pages/Home/Navbar";
-import { type ReactNode } from "react";
+import { Outlet } from "react-router-dom";
 
-const HomeLayout = ({ children }: { children: ReactNode }) => (
+const HomeLayout = () => (
   <>
     <NavBar />
-    <main>{children}</main>
+    <main>
+      <Outlet />
+    </main>
     <Footer />
   </>
 );
