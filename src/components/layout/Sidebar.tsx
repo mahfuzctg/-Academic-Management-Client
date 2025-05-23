@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { useLocation, Link } from "react-router-dom";
 import { useAppSelector } from "@/redux/hooks";
 import { type TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
@@ -26,6 +26,9 @@ const Sidebar: React.FC = () => {
     ? roleBasedPaths[role as keyof typeof roleBasedPaths]
     : [];
 
+  console.log("User Role:", role);
+  console.log("Sidebar Items:", sidebarItems);
+
   return (
     <>
       {/* Mobile Sheet Menu */}
@@ -45,13 +48,13 @@ const Sidebar: React.FC = () => {
                     key={item.path}
                     to={item.path}
                     className={cn(
-                      "rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                      "rounded-md px-4 py-2 text-base font-semibold",
                       location.pathname === item.path
-                        ? "bg-primary text-black"
-                        : "hover:bg-accent hover:text-accent-foreground text-black"
+                        ? "text-primary"
+                        : "hover:text-primary text-muted-foreground"
                     )}
                   >
-                    {item.label}
+                    {item.name}
                   </Link>
                 ))}
               </nav>
@@ -61,7 +64,7 @@ const Sidebar: React.FC = () => {
       </div>
 
       {/* Desktop Sidebar */}
-      <aside className="w-64 h-screen bg-muted border-r text-muted-foreground sticky top-0 hidden lg:flex flex-col">
+      <aside className="w-64 h-screen  border-r text-primary sticky top-0 hidden lg:flex flex-col">
         <div className="p-4 text-2xl font-bold text-primary border-b">
           PH Uni
         </div>
@@ -72,13 +75,13 @@ const Sidebar: React.FC = () => {
                 key={item.path}
                 to={item.path}
                 className={cn(
-                  "rounded-md px-4 py-2 text-sm font-medium transition-colors",
+                  "rounded-md px-4 py-2 text-primary font-semibold",
                   location.pathname === item.path
-                    ? "bg-primary text-black"
-                    : "hover:bg-accent hover:text-accent-foreground text-black"
+                    ? "text-primary"
+                    : "hover:text-primary text-muted-foreground"
                 )}
               >
-                {item.label}
+                {item.name}
               </Link>
             ))}
           </nav>
