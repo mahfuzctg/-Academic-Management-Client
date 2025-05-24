@@ -1,10 +1,13 @@
-import HomeLayout from "./components/layout/HomeLayout";
+import { RouterProvider } from "react-router-dom";
+import router from "./routes/routes";
+import { Toaster } from "@/components/ui/toaster";
 
 function App() {
   return (
-    // <ProtectedRoute role={undefined}>
-    <HomeLayout></HomeLayout>
-    // </ProtectedRoute>
+    <>
+      <RouterProvider router={router} />
+      <Toaster />
+    </>
   );
 }
 
