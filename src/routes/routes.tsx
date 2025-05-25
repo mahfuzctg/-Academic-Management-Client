@@ -1,4 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
+import { ThemeProvider } from "@/components/theme-provider";
 import App from "../App";
 import HomeLayout from "@/components/layout/HomeLayout";
 import LoginForm from "@/pages/Login";
@@ -13,7 +14,11 @@ import Home from "@/pages/Home";
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <HomeLayout />,
+    element: (
+      <ThemeProvider>
+        <HomeLayout />
+      </ThemeProvider>
+    ),
     children: [
       {
         index: true,
@@ -33,7 +38,9 @@ const router = createBrowserRouter([
     path: "/admin",
     element: (
       // <ProtectedRoute role="admin">
-      <DashboardLayout />
+      <ThemeProvider>
+        <DashboardLayout />
+      </ThemeProvider>
       // </ProtectedRoute>
     ),
     children: routeGenerator(adminPaths),
@@ -42,7 +49,9 @@ const router = createBrowserRouter([
     path: "/student",
     element: (
       // <ProtectedRoute role="student">
-      <DashboardLayout />
+      <ThemeProvider>
+        <DashboardLayout />
+      </ThemeProvider>
       // </ProtectedRoute>
     ),
     children: routeGenerator(studentPaths),
