@@ -10,6 +10,7 @@ import { adminPaths } from "./admin.routes";
 import { studentPaths } from "./student.routes";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Home from "@/pages/Home";
+import JobSection from "@/pages/JobSection";
 
 const router = createBrowserRouter([
   {
@@ -27,6 +28,10 @@ const router = createBrowserRouter([
       {
         path: "login",
         element: <LoginForm />,
+      },
+      {
+        path: "jobs",
+        element: <JobSection />,
       },
       {
         path: "register",
