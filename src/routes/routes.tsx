@@ -11,6 +11,8 @@ import { studentPaths } from "./student.routes";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Home from "@/pages/Home";
 import JobSection from "@/pages/JobSection";
+import CourseEnrollment from "@/pages/CourseEnrollment";
+import InstructorManagement from "@/pages/InstructorManagement";
 
 const router = createBrowserRouter([
   {
@@ -26,12 +28,22 @@ const router = createBrowserRouter([
         element: <Home />,
       },
       {
-        path: "login",
-        element: <LoginForm />,
+        path: "courses",
+        element: <CourseEnrollment />,
       },
+
+      {
+        path: "instructors",
+        element: <InstructorManagement />,
+      },
+
       {
         path: "jobs",
         element: <JobSection />,
+      },
+      {
+        path: "login",
+        element: <LoginForm />,
       },
       {
         path: "register",
