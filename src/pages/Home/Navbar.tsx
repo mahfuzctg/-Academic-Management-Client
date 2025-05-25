@@ -15,7 +15,7 @@ const navLinks = [
   { label: "Students", to: "/students" },
   { label: "Instructors", to: "/instructors" },
   { label: "Courses", to: "/courses" },
-  { label: "Dashboard", to: "/dashboard" },
+  { label: "Dashboard", to: "admin/dashboard" },
   { label: "Jobs", to: "/jobs" },
 ];
 
