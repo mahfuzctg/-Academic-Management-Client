@@ -63,6 +63,18 @@ export const updateStudent = createAsyncThunk(
   }
 );
 
+export const deleteStudent = createAsyncThunk(
+  "students/deleteStudent",
+  async (id: string) => {
+    // TODO: Replace with actual API call
+    const response = await fetch(`/api/students/${id}`, {
+      method: "DELETE",
+    });
+    if (!response.ok) throw new Error("Failed to delete student");
+    return id;
+  }
+);
+
 const studentSlice = createSlice({
   name: "students",
   initialState,
@@ -122,6 +134,19 @@ const studentSlice = createSlice({
       .addCase(updateStudent.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message || "Failed to update student";
+      })
+      // Delete Student
+      .addCase(deleteStudent.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteStudent.fulfilled, (state, action) => {
+        state.loading = false;
+        state.students = state.students.filter((s) => s.id !== action.payload);
+      })
+      .addCase(deleteStudent.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message || "Failed to delete student";
       });
   },
 });

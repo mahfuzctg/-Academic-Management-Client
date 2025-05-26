@@ -1,15 +1,6 @@
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { motion } from "framer-motion";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Table,
   TableBody,
@@ -18,7 +9,16 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -35,7 +35,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
+import StudentForm from "@/components/students/StudentForm";
 import {
   fetchStudents,
   setFilters,
@@ -45,17 +48,15 @@ import {
 } from "@/redux/features/studentSlice";
 import type { RootState } from "@/redux/store";
 import type { Student } from "@/types/student";
-import { useState } from "react";
 
-interface StudentListProps {
-  onEdit: (student: Student) => void;
-}
-
-const StudentList = ({ onEdit }: StudentListProps) => {
+export default function StudentManagement() {
   const dispatch = useDispatch();
+  const { toast } = useToast();
   const { students, loading, error, filters } = useSelector(
     (state: RootState) => state.students
   );
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | undefined>();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
 
@@ -87,7 +88,8 @@ const StudentList = ({ onEdit }: StudentListProps) => {
 
   const handleEdit = (student: Student) => {
     dispatch(setSelectedStudent(student));
-    onEdit(student);
+    setSelectedStudent(student);
+    setIsFormOpen(true);
   };
 
   const handleDelete = (student: Student) => {
@@ -97,10 +99,33 @@ const StudentList = ({ onEdit }: StudentListProps) => {
 
   const confirmDelete = async () => {
     if (studentToDelete) {
-      await dispatch(deleteStudent(studentToDelete.id));
+      try {
+        await dispatch(deleteStudent(studentToDelete.id));
+        toast({
+          title: "Success",
+          description: "Student deleted successfully",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to delete student",
+          variant: "destructive",
+        });
+      }
       setDeleteDialogOpen(false);
       setStudentToDelete(null);
     }
+  };
+
+  const handleFormSuccess = () => {
+    setIsFormOpen(false);
+    setSelectedStudent(undefined);
+    toast({
+      title: "Success",
+      description: selectedStudent
+        ? "Student updated successfully"
+        : "Student added successfully",
+    });
   };
 
   if (loading) {
@@ -120,70 +145,87 @@ const StudentList = ({ onEdit }: StudentListProps) => {
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-    >
-      <Card className="w-full">
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Student Management</h1>
+          <p className="text-muted-foreground mt-1">
+            Manage student profiles, academic records, and personal information
+          </p>
+        </div>
+        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+          <DialogTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add New Student
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <StudentForm
+              student={selectedStudent}
+              onSuccess={handleFormSuccess}
+            />
+          </DialogContent>
+        </Dialog>
+      </div>
+
+      <Card>
         <CardHeader>
-          <CardTitle>Student Management</CardTitle>
+          <CardTitle>Student List</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-4 mb-6">
-            <div className="flex flex-wrap gap-4">
-              <Input
-                placeholder="Search students..."
-                value={filters.search || ""}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="max-w-sm"
-              />
-              <Select
-                value={filters.department}
-                onValueChange={handleDepartmentChange}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="computer-science">
-                    Computer Science
+          <div className="flex flex-wrap gap-4 mb-6">
+            <Input
+              placeholder="Search students..."
+              value={filters.search || ""}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="max-w-sm"
+            />
+            <Select
+              value={filters.department}
+              onValueChange={handleDepartmentChange}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="computer-science">
+                  Computer Science
+                </SelectItem>
+                <SelectItem value="engineering">Engineering</SelectItem>
+                <SelectItem value="business">Business</SelectItem>
+                <SelectItem value="arts">Arts</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filters.status} onValueChange={handleStatusChange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="graduated">Graduated</SelectItem>
+                <SelectItem value="on_leave">On Leave</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select
+              value={filters.semester?.toString()}
+              onValueChange={handleSemesterChange}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Semester" />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
+                  <SelectItem key={sem} value={sem.toString()}>
+                    Semester {sem}
                   </SelectItem>
-                  <SelectItem value="engineering">Engineering</SelectItem>
-                  <SelectItem value="business">Business</SelectItem>
-                  <SelectItem value="arts">Arts</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={filters.status} onValueChange={handleStatusChange}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="graduated">Graduated</SelectItem>
-                  <SelectItem value="on_leave">On Leave</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select
-                value={filters.semester?.toString()}
-                onValueChange={handleSemesterChange}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Semester" />
-                </SelectTrigger>
-                <SelectContent>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                    <SelectItem key={sem} value={sem.toString()}>
-                      Semester {sem}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <Button variant="outline" onClick={handleClearFilters}>
-                Clear Filters
-              </Button>
-            </div>
+                ))}
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={handleClearFilters}>
+              Clear Filters
+            </Button>
           </div>
 
           <div className="rounded-md border">
@@ -282,8 +324,6 @@ const StudentList = ({ onEdit }: StudentListProps) => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </motion.div>
+    </div>
   );
-};
-
-export default StudentList;
+}
