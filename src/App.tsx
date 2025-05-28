@@ -1,13 +1,16 @@
-import { RouterProvider } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { AcademicPerformance } from "./pages/AcademicPerformance";
 import { Toaster } from "@/components/ui/toaster";
-import router from "./routes/routes";
 
 function App() {
   return (
-    <>
-      <RouterProvider router={router} />
+    <Router>
+      <Routes>
+        <Route path="/academic-performance" element={<AcademicPerformance />} />
+        {/* Add other routes as needed */}
+      </Routes>
       <Toaster />
-    </>
+    </Router>
   );
 }
 

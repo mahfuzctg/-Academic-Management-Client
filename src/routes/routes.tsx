@@ -12,7 +12,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import Home from "@/pages/Home";
 import JobSection from "@/pages/JobSection";
 import CourseEnrollment from "@/pages/CourseEnrollment";
-import InstructorManagement from "@/pages/InstructorManagement";
+import InstructorManagement from "@/pages/Instructors/InstructorManagement";
 
 const router = createBrowserRouter([
   {
