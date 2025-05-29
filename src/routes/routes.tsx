@@ -13,6 +13,7 @@ import Home from "@/pages/Home";
 import JobSection from "@/pages/JobSection";
 import CourseEnrollment from "@/pages/CourseEnrollment";
 import InstructorManagement from "@/pages/Instructors/InstructorManagement";
+import { instructorPaths } from "./instructor.routes";
 
 const router = createBrowserRouter([
   {
@@ -72,6 +73,17 @@ const router = createBrowserRouter([
       // </ProtectedRoute>
     ),
     children: routeGenerator(studentPaths),
+  },
+  {
+    path: "/instructor",
+    element: (
+      // <ProtectedRoute role="student">
+      <ThemeProvider>
+        <DashboardLayout />
+      </ThemeProvider>
+      // </ProtectedRoute>
+    ),
+    children: routeGenerator(instructorPaths),
   },
 ]);
 

@@ -1,12 +1,12 @@
-import Dashboard from "@/pages/Dashboard";
-import { StudentDashboard } from "@/pages/StudentDashboard";
+import { InstructorDashboard } from "@/pages/InstructorDashboard";
+
 import StudentManagement from "@/pages/Students/StudentManagement";
 
-export const studentPaths = [
+export const instructorPaths = [
   {
     name: "Dashboard",
     path: "dashboard",
-    element: <StudentDashboard />,
+    element: <InstructorDashboard />,
   },
   {
     name: "Studentmanagement",
