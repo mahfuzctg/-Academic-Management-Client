@@ -3,11 +3,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import InstructorList from "@/components/instructors/InstructorList";
-import InstructorForm from "@/components/instructors/InstructorForm";
+import { mockInstructors } from "@/mock/instructorData";
 import type { Instructor } from "@/types/instructor";
+import InstructorForm from "@/components/instructors/InstructorForm";
 
 export default function InstructorManagement() {
+  const [instructors, setInstructors] = useState<Instructor[]>(mockInstructors);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedInstructor, setSelectedInstructor] = useState<
     Instructor | undefined
@@ -16,7 +17,16 @@ export default function InstructorManagement() {
   const [selectedInstructorForSubjects, setSelectedInstructorForSubjects] =
     useState<Instructor | undefined>();
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = (updatedInstructor?: Instructor) => {
+    if (updatedInstructor) {
+      setInstructors((prev) =>
+        prev.map((instructor) =>
+          instructor.id === updatedInstructor.id
+            ? updatedInstructor
+            : instructor
+        )
+      );
+    }
     setIsFormOpen(false);
     setSelectedInstructor(undefined);
   };
@@ -64,10 +74,61 @@ export default function InstructorManagement() {
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.2 }}
         >
-          <InstructorList
-            onEdit={handleEdit}
-            onViewSubjects={handleViewSubjects}
-          />
+          <div className="grid gap-4">
+            {instructors.map((instructor) => (
+              <div
+                key={instructor.id}
+                className="p-6 border rounded-lg space-y-4"
+              >
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="text-xl font-semibold">
+                      {instructor.firstName} {instructor.lastName}
+                    </h3>
+                    <p className="text-muted-foreground">
+                      {instructor.specialization} | {instructor.department}
+                    </p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      {instructor.email}
+                    </p>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleViewSubjects(instructor)}
+                    >
+                      View Subjects
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEdit(instructor)}
+                    >
+                      Edit
+                    </Button>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="text-sm font-medium mb-2">
+                      Assigned Subjects
+                    </h4>
+                    <div className="space-y-2">
+                      {instructor.assignedSubjects.map((subject) => (
+                        <div
+                          key={subject.id}
+                          className="text-sm p-2 bg-muted rounded"
+                        >
+                          {subject.name} (Semester {subject.semester})
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </motion.div>
       </AnimatePresence>
 
