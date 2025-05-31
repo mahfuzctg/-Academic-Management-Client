@@ -1,6 +1,7 @@
 import { AdminDashboard } from "@/pages/AdminDashboard";
 import Dashboard from "@/pages/Dashboard";
 import InstructorManagement from "@/pages/Instructors/InstructorManagement";
+import JobManagement from "@/pages/Jobs/JobManagement";
 import StudentManagement from "@/pages/Students/StudentManagement";
 
 export const adminPaths = [
@@ -38,5 +39,10 @@ export const adminPaths = [
     name: "Instructors Management",
     path: "instructorsmanagement",
     element: <InstructorManagement />,
+  },
+  {
+    name: "Job Management",
+    path: "jobsmanagement",
+    element: <JobManagement />,
   },
 ];

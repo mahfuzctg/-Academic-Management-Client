@@ -14,6 +14,7 @@ import JobSection from "@/pages/JobSection";
 import CourseEnrollment from "@/pages/CourseEnrollment";
 import InstructorManagement from "@/pages/Instructors/InstructorManagement";
 import { instructorPaths } from "./instructor.routes";
+import JobManagement from "@/pages/Jobs/JobManagement";
 
 const router = createBrowserRouter([
   {
@@ -40,7 +41,7 @@ const router = createBrowserRouter([
 
       {
         path: "jobs",
-        element: <JobSection />,
+        element: <JobManagement />,
       },
       {
         path: "login",
