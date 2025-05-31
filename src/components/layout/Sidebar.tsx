@@ -19,7 +19,7 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
 
   const user = token ? (verifyToken(token) as TUser) : null;
-  const role = user?.role ?? "student";
+  const role = user?.role ?? "admin";
   const sidebarItems = role
     ? roleBasedPaths[role as keyof typeof roleBasedPaths]
     : [];

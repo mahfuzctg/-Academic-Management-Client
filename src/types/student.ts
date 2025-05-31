@@ -21,6 +21,7 @@ export interface Student {
     currentSemester: number;
     gpa: number;
     status: "active" | "inactive" | "graduated" | "on_leave";
+    enrollmentDate: string;
   };
   emergencyContact: {
     name: string;

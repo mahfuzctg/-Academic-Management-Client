@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Table,
@@ -39,55 +38,78 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import StudentForm from "@/components/students/StudentForm";
-import {
-  fetchStudents,
-  setFilters,
-  clearFilters,
-  deleteStudent,
-  setSelectedStudent,
-} from "@/redux/features/studentSlice";
-import type { RootState } from "@/redux/store";
+import { mockStudents } from "@/mock/studentData";
 import type { Student } from "@/types/student";
 
 export default function StudentManagement() {
-  const dispatch = useDispatch();
   const { toast } = useToast();
-  const { students, loading, error, filters } = useSelector(
-    (state: RootState) => state.students
-  );
+  const [students, setStudents] = useState<Student[]>(mockStudents);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedStudent, setSelectedStudent] = useState<Student | undefined>();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
+  const [filters, setFilters] = useState({
+    search: "",
+    department: "",
+    status: "",
+    semester: undefined as number | undefined,
+  });
 
-  useEffect(() => {
-    dispatch(fetchStudents(filters));
-  }, [dispatch, filters]);
+  const filteredStudents = students.filter((student) => {
+    const matchesSearch =
+      !filters.search ||
+      `${student.firstName} ${student.lastName}`
+        .toLowerCase()
+        .includes(filters.search.toLowerCase()) ||
+      student.academicDetails.studentId
+        .toLowerCase()
+        .includes(filters.search.toLowerCase());
+
+    const matchesDepartment =
+      !filters.department ||
+      student.academicDetails.department === filters.department;
+
+    const matchesStatus =
+      !filters.status || student.academicDetails.status === filters.status;
+
+    const matchesSemester =
+      !filters.semester ||
+      student.academicDetails.currentSemester === filters.semester;
+
+    return (
+      matchesSearch && matchesDepartment && matchesStatus && matchesSemester
+    );
+  });
 
   const handleSearch = (value: string) => {
-    dispatch(setFilters({ search: value }));
+    setFilters((prev) => ({ ...prev, search: value }));
   };
 
   const handleDepartmentChange = (value: string) => {
-    dispatch(setFilters({ department: value }));
+    setFilters((prev) => ({ ...prev, department: value }));
   };
 
   const handleStatusChange = (value: string) => {
-    dispatch(
-      setFilters({ status: value as Student["academicDetails"]["status"] })
-    );
+    setFilters((prev) => ({
+      ...prev,
+      status: value as Student["academicDetails"]["status"],
+    }));
   };
 
   const handleSemesterChange = (value: string) => {
-    dispatch(setFilters({ semester: parseInt(value) }));
+    setFilters((prev) => ({ ...prev, semester: parseInt(value) }));
   };
 
   const handleClearFilters = () => {
-    dispatch(clearFilters());
+    setFilters({
+      search: "",
+      department: "",
+      status: "",
+      semester: undefined,
+    });
   };
 
   const handleEdit = (student: Student) => {
-    dispatch(setSelectedStudent(student));
     setSelectedStudent(student);
     setIsFormOpen(true);
   };
@@ -97,27 +119,28 @@ export default function StudentManagement() {
     setDeleteDialogOpen(true);
   };
 
-  const confirmDelete = async () => {
+  const confirmDelete = () => {
     if (studentToDelete) {
-      try {
-        await dispatch(deleteStudent(studentToDelete.id));
-        toast({
-          title: "Success",
-          description: "Student deleted successfully",
-        });
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to delete student",
-          variant: "destructive",
-        });
-      }
+      setStudents((prev) =>
+        prev.filter((student) => student.id !== studentToDelete.id)
+      );
+      toast({
+        title: "Success",
+        description: "Student deleted successfully",
+      });
       setDeleteDialogOpen(false);
       setStudentToDelete(null);
     }
   };
 
-  const handleFormSuccess = () => {
+  const handleFormSuccess = (updatedStudent?: Student) => {
+    if (updatedStudent) {
+      setStudents((prev) =>
+        prev.map((student) =>
+          student.id === updatedStudent.id ? updatedStudent : student
+        )
+      );
+    }
     setIsFormOpen(false);
     setSelectedStudent(undefined);
     toast({
@@ -127,22 +150,6 @@ export default function StudentManagement() {
         : "Student added successfully",
     });
   };
-
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64 text-red-500">
-        Error: {error}
-      </div>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -177,7 +184,7 @@ export default function StudentManagement() {
           <div className="flex flex-wrap gap-4 mb-6">
             <Input
               placeholder="Search students..."
-              value={filters.search || ""}
+              value={filters.search}
               onChange={(e) => handleSearch(e.target.value)}
               className="max-w-sm"
             />
@@ -243,7 +250,7 @@ export default function StudentManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {students.map((student) => (
+                {filteredStudents.map((student) => (
                   <TableRow key={student.id}>
                     <TableCell>{`${student.firstName} ${student.lastName}`}</TableCell>
                     <TableCell>{student.academicDetails.studentId}</TableCell>
@@ -279,16 +286,13 @@ export default function StudentManagement() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleEdit(student)}
-                            className="cursor-pointer"
-                          >
+                          <DropdownMenuItem onClick={() => handleEdit(student)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleDelete(student)}
-                            className="cursor-pointer text-red-600"
+                            className="text-red-600"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete

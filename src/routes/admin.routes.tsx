@@ -1,5 +1,6 @@
 import { AdminDashboard } from "@/pages/AdminDashboard";
 import Dashboard from "@/pages/Dashboard";
+import StudentManagement from "@/pages/Students/StudentManagement";
 
 export const adminPaths = [
   {
@@ -16,5 +17,10 @@ export const adminPaths = [
         element: <h1>ok</h1>,
       },
     ],
+  },
+  {
+    name: "Student Management",
+    path: "studentmanagement",
+    element: <StudentManagement />,
   },
 ];

@@ -131,11 +131,11 @@ export function AdminDashboard() {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Server Status</span>
-                <Badge variant="success">Online</Badge>
+                <Badge variant="secondary">Online</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Database Status</span>
-                <Badge variant="success">Healthy</Badge>
+                <Badge variant="secondary">Healthy</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Last Backup</span>
