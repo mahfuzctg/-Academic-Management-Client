@@ -8,6 +8,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { useRegisterMutation } from "@/redux/features/auth/authApi";
+import { useAppDispatch } from "@/redux/hooks";
+import { setUser } from "@/redux/features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const registerSchema = z
   .object({
@@ -26,17 +31,36 @@ const registerSchema = z
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
 export default function RegisterForm() {
+  const [register] = useRegisterMutation();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const {
-    register,
+    register: registerField,
     handleSubmit,
     formState: { errors },
   } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
   });
 
-  const onSubmit = (data: RegisterFormValues) => {
-    console.log("Register data:", data);
-    // Submit to your backend
+  const onSubmit = async (data: RegisterFormValues) => {
+    try {
+      const { confirmPassword, ...registerData } = data;
+      const result = await register(registerData).unwrap();
+
+      if (result?.data?.accessToken) {
+        dispatch(
+          setUser({
+            user: result.data.user,
+            token: result.data.accessToken,
+          })
+        );
+        toast.success("Registration successful!");
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      toast.error("Registration failed. Please try again.");
+    }
   };
 
   return (
@@ -49,7 +73,7 @@ export default function RegisterForm() {
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <Label htmlFor="name">Name</Label>
-              <Input id="name" {...register("name")} />
+              <Input id="name" {...registerField("name")} />
               {errors.name && (
                 <p className="text-sm text-red-500">{errors.name.message}</p>
               )}
@@ -57,7 +81,7 @@ export default function RegisterForm() {
 
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" {...register("email")} />
+              <Input id="email" type="email" {...registerField("email")} />
               {errors.email && (
                 <p className="text-sm text-red-500">{errors.email.message}</p>
               )}
@@ -65,7 +89,11 @@ export default function RegisterForm() {
 
             <div>
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" {...register("password")} />
+              <Input
+                id="password"
+                type="password"
+                {...registerField("password")}
+              />
               {errors.password && (
                 <p className="text-sm text-red-500">
                   {errors.password.message}
@@ -78,7 +106,7 @@ export default function RegisterForm() {
               <Input
                 id="confirmPassword"
                 type="password"
-                {...register("confirmPassword")}
+                {...registerField("confirmPassword")}
               />
               {errors.confirmPassword && (
                 <p className="text-sm text-red-500">
