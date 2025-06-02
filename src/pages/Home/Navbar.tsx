@@ -9,6 +9,12 @@ import {
 import { Menu, User, Moon, Sun } from "lucide-react";
 import { motion } from "framer-motion";
 import { useTheme } from "@/components/theme-provider";
+import { useAppSelector } from "@/redux/hooks";
+import { selectCurrentUser } from "@/redux/features/auth/authSlice";
+import { useAppDispatch } from "@/redux/hooks";
+import { logout } from "@/redux/features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const navLinks = [
   { label: "Home", to: "/" },
@@ -22,6 +28,15 @@ const navLinks = [
 export default function NavBar() {
   const location = useLocation();
   const { theme, setTheme } = useTheme();
+  const user = useAppSelector(selectCurrentUser);
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    dispatch(logout());
+    toast.success("Logged out successfully");
+    navigate("/");
+  };
 
   return (
     <motion.header
@@ -83,31 +98,55 @@ export default function NavBar() {
               </Button>
             </motion.div>
 
-            {/* User Menu */}
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="text-gray-600 dark:text-gray-300"
-                  >
-                    <User className="h-5 w-5" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="dark:bg-gray-800">
-                  <DropdownMenuItem className="dark:text-gray-300">
-                    <Link to="/profile">Profile</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="dark:text-gray-300">
-                    <Link to="/settings">Settings</Link>
-                  </DropdownMenuItem>
-                  <DropdownMenuItem className="dark:text-gray-300">
-                    <Link to="/logout">Logout</Link>
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </motion.div>
+            {/* Auth Buttons or User Menu */}
+            {user ? (
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-gray-600 dark:text-gray-300"
+                    >
+                      <User className="h-5 w-5" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="dark:bg-gray-800">
+                    <DropdownMenuItem className="dark:text-gray-300">
+                      <Link to="/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem className="dark:text-gray-300">
+                      <Link to="/settings">Settings</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="dark:text-gray-300"
+                      onClick={handleLogout}
+                    >
+                      Logout
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </motion.div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Link to="/login">
+                    <Button
+                      variant="ghost"
+                      className="text-gray-600 dark:text-gray-300"
+                    >
+                      Login
+                    </Button>
+                  </Link>
+                </motion.div>
+              </div>
+            )}
 
             {/* Mobile Menu */}
             <motion.div
@@ -146,6 +185,15 @@ export default function NavBar() {
                       </Link>
                     </DropdownMenuItem>
                   ))}
+                  {!user && (
+                    <>
+                      <DropdownMenuItem className="dark:text-gray-300">
+                        <Link to="/login" className="w-full">
+                          Login
+                        </Link>
+                      </DropdownMenuItem>
+                    </>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             </motion.div>
