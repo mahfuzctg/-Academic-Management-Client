@@ -5,6 +5,11 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { useLoginMutation } from "@/redux/features/auth/authApi";
+import { useAppDispatch } from "@/redux/hooks";
+import { setUser } from "@/redux/features/auth/authSlice";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const loginSchema = z.object({
   email: z.string().email({ message: "Invalid email" }),
@@ -16,6 +21,10 @@ const loginSchema = z.object({
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
+  const [login] = useLoginMutation();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
   const {
     register,
     handleSubmit,
@@ -24,9 +33,23 @@ export default function LoginForm() {
     resolver: zodResolver(loginSchema),
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    console.log("Login data:", data);
-    // handle login logic here
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+      const result = await login(data).unwrap();
+
+      if (result?.data?.accessToken) {
+        dispatch(
+          setUser({
+            user: result.data.user,
+            token: result.data.accessToken,
+          })
+        );
+        toast.success("Login successful!");
+        navigate("/dashboard");
+      }
+    } catch (error) {
+      toast.error("Login failed. Please check your credentials.");
+    }
   };
 
   return (
