@@ -13,7 +13,7 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import studentReducer from "./features/studentSlice";
-import academicPerformanceReducer from "./slices/academicPerformanceSlice";
+import academicPerformanceReducer from "./features/academicPerformanceSlice";
 
 const persistConfig = {
   key: "auth",

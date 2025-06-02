@@ -18,7 +18,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { addGrade, setGrades } from "@/redux/slices/academicPerformanceSlice";
+import { addGrade, setGrades } from "@/redux/features/academicPerformanceSlice";
 import * as XLSX from "xlsx";
 
 interface GradeManagementProps {
