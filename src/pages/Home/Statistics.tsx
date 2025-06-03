@@ -6,7 +6,7 @@ const stats = [
   {
     id: 1,
     label: "Students Enrolled",
-    value: "5,200+",
+    value: "5,000+",
     icon: "👨‍🎓",
   },
   {
