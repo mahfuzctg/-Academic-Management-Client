@@ -1,4 +1,3 @@
-// redux/api/courseApi.ts
 import { baseApi } from "@/redux/api/baseApi";
 import type { ICourse } from "@/types/course";
 
@@ -9,8 +8,10 @@ export const courseApi = baseApi.injectEndpoints({
         url: "/courses",
         method: "GET",
       }),
-
-      transformResponse: (response: { data: ICourse[] }) => response.data,
+      transformResponse: (response: unknown) => {
+        const res = response as { data: ICourse[] };
+        return res.data;
+      },
       providesTags: ["courses"],
     }),
   }),

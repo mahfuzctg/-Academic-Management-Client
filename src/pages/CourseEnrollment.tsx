@@ -10,7 +10,6 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useGetAllCoursesQuery } from "@/redux/features/course/courseApi";
 import type { ICourse } from "@/types/course";
-
 import { useState } from "react";
 
 export default function CourseEnrollment() {
@@ -18,16 +17,19 @@ export default function CourseEnrollment() {
   const [searchQuery, setSearchQuery] = useState("");
   const [enrolledIds, setEnrolledIds] = useState<string[]>([]);
 
-  const { data: courses = [], isLoading, isError } = useGetAllCoursesQuery();
+  const { data, isLoading, isError } = useGetAllCoursesQuery();
+  const courses: ICourse[] = data ?? [];
 
-  const filteredCourses = courses.filter(
-    (course: ICourse) =>
-      (course?.name?.toLowerCase() ?? "").includes(searchQuery.toLowerCase()) ||
-      (course?.code?.toLowerCase() ?? "").includes(searchQuery.toLowerCase()) ||
-      (course?.department?.toLowerCase() ?? "").includes(
-        searchQuery.toLowerCase()
-      )
-  );
+  const filteredCourses = courses.filter((course: ICourse) => {
+    const name = String(course?.name ?? "").toLowerCase();
+    const code = String(course?.code ?? "").toLowerCase();
+    const department = String(course?.department ?? "").toLowerCase();
+    const query = searchQuery.toLowerCase();
+
+    return (
+      name.includes(query) || code.includes(query) || department.includes(query)
+    );
+  });
 
   const handleEnrollment = (course: ICourse) => {
     const isAlreadyEnrolled = enrolledIds.includes(course.id);
@@ -86,18 +88,16 @@ export default function CourseEnrollment() {
               <CardContent>
                 <div className="space-y-2">
                   <p className="text-sm">
-                    <span className="font-medium">Title:</span>
-                    {course?.title}
+                    <span className="font-medium">Title:</span> {course?.title}
                   </p>
                   <p className="text-sm">
                     <span className="font-medium">Prefix:</span> {course.prefix}
                   </p>
-
                   <p className="text-sm">
                     <span className="font-medium">Credits:</span>{" "}
                     {course.credits}
                   </p>
-                  {course.prerequisites?.length > 0 && (
+                  {course?.prerequisites?.length > 0 && (
                     <p className="text-sm">
                       <span className="font-medium">Prerequisites:</span>{" "}
                       {course.prerequisites.join(", ")}

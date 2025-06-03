@@ -58,10 +58,12 @@ export interface EnrollmentFormData {
 
 export interface ICourse {
   id: string;
-  name: string;
-  code: string;
-  instructor: string;
-  department: string;
-  credits: number;
-  prerequisites: string[];
+  name?: string;
+  code?: string;
+  department?: string;
+  title?: string;
+  prefix?: string;
+  credits?: number;
+  prerequisites?: string[] | any;
+  instructor?: string;
 }
