@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,77 +6,61 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-
-interface Course {
-  id: string;
-  code: string;
-  name: string;
-  instructor: string;
-  department: string;
-  credits: number;
-  prerequisites: string[];
-  enrolled: boolean;
-}
+import { useGetAllCoursesQuery } from "@/redux/features/course/courseApi";
+import type { ICourse } from "@/types/course";
+import { useState } from "react";
 
 export default function CourseEnrollment() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [courses, setCourses] = useState<Course[]>([
-    {
-      id: "1",
-      code: "CS101",
-      name: "Introduction to Programming",
-      instructor: "Dr. Jane Smith",
-      department: "Computer Science",
-      credits: 3,
-      prerequisites: [],
-      enrolled: false,
-    },
-    {
-      id: "2",
-      code: "CS201",
-      name: "Data Structures",
-      instructor: "Dr. John Doe",
-      department: "Computer Science",
-      credits: 4,
-      prerequisites: ["CS101"],
-      enrolled: false,
-    },
-    // Add more sample data as needed
-  ]);
+  const [enrolledIds, setEnrolledIds] = useState<string[]>([]);
 
-  const filteredCourses = courses.filter(
-    (course) =>
-      course.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      course.department.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const { data, isLoading, isError } = useGetAllCoursesQuery();
+  const courses: ICourse[] = data ?? [];
 
-  const handleEnrollment = (courseId: string) => {
-    setCourses((prevCourses) =>
-      prevCourses.map((course) =>
-        course.id === courseId
-          ? { ...course, enrolled: !course.enrolled }
-          : course
-      )
+  const filteredCourses = courses.filter((course: ICourse) => {
+    const name = String(course?.name ?? "").toLowerCase();
+    const code = String(course?.code ?? "").toLowerCase();
+    const department = String(course?.department ?? "").toLowerCase();
+    const query = searchQuery.toLowerCase();
+
+    return (
+      name.includes(query) || code.includes(query) || department.includes(query)
     );
+  });
 
-    const course = courses.find((c) => c.id === courseId);
-    if (course) {
-      toast({
-        title: course.enrolled ? "Course Dropped" : "Course Enrolled",
-        description: `You have ${course.enrolled ? "dropped" : "enrolled in"} ${
-          course.name
-        }`,
-      });
-    }
+  const handleEnrollment = (course: ICourse) => {
+    const isAlreadyEnrolled = enrolledIds.includes(course.id);
+    const updatedEnrolledIds = isAlreadyEnrolled
+      ? enrolledIds.filter((id) => id !== course.id)
+      : [...enrolledIds, course.id];
+
+    setEnrolledIds(updatedEnrolledIds);
+
+    toast({
+      title: isAlreadyEnrolled ? "Course Dropped" : "Course Enrolled",
+      description: `You have ${isAlreadyEnrolled ? "dropped" : "enrolled in"} ${
+        course.name
+      }`,
+    });
   };
 
+  if (isLoading) {
+    return <div className="text-center mt-10">Loading courses...</div>;
+  }
+
+  if (isError) {
+    return (
+      <div className="text-center mt-10 text-red-500">
+        Failed to load courses.
+      </div>
+    );
+  }
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-9/12 my-20 mx-auto">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Course Enrollment</h1>
       </div>
@@ -91,40 +75,46 @@ export default function CourseEnrollment() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredCourses.map((course) => (
-          <Card key={course.id}>
-            <CardHeader>
-              <CardTitle>{course.name}</CardTitle>
-              <CardDescription>
-                {course.code} • {course.department}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <p className="text-sm">
-                  <span className="font-medium">Instructor:</span>{" "}
-                  {course.instructor}
-                </p>
-                <p className="text-sm">
-                  <span className="font-medium">Credits:</span> {course.credits}
-                </p>
-                {course.prerequisites.length > 0 && (
+        {filteredCourses.map((course: ICourse) => {
+          const isEnrolled = enrolledIds.includes(course.id);
+          return (
+            <Card key={course.id}>
+              <CardHeader>
+                <CardTitle>{course.name}</CardTitle>
+                <CardDescription>
+                  {course.code} • {course.department}
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
                   <p className="text-sm">
-                    <span className="font-medium">Prerequisites:</span>{" "}
-                    {course.prerequisites.join(", ")}
+                    <span className="font-medium">Title:</span> {course?.title}
                   </p>
-                )}
-                <Button
-                  variant={course.enrolled ? "destructive" : "default"}
-                  className="w-full"
-                  onClick={() => handleEnrollment(course.id)}
-                >
-                  {course.enrolled ? "Drop Course" : "Enroll"}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                  <p className="text-sm">
+                    <span className="font-medium">Prefix:</span> {course.prefix}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium">Credits:</span>{" "}
+                    {course.credits}
+                  </p>
+                  {course?.prerequisites?.length > 0 && (
+                    <p className="text-sm">
+                      <span className="font-medium">Prerequisites:</span>{" "}
+                      {course.prerequisites.join(", ")}
+                    </p>
+                  )}
+                  <Button
+                    variant={isEnrolled ? "destructive" : "default"}
+                    className="w-full"
+                    onClick={() => handleEnrollment(course)}
+                  >
+                    {isEnrolled ? "Drop Course" : "Enroll"}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
     </div>
   );

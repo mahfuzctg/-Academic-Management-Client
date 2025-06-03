@@ -1,4 +1,4 @@
-import { Link, useLocation } from "react-router-dom";
+import { useTheme } from "@/components/theme-provider";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -6,14 +6,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, User, Moon, Sun } from "lucide-react";
+import { logout, selectCurrentUser } from "@/redux/features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { motion } from "framer-motion";
-import { useTheme } from "@/components/theme-provider";
-import { useAppSelector } from "@/redux/hooks";
-import { selectCurrentUser } from "@/redux/features/auth/authSlice";
-import { useAppDispatch } from "@/redux/hooks";
-import { logout } from "@/redux/features/auth/authSlice";
-import { useNavigate } from "react-router-dom";
+import { Menu, Moon, Sun, User } from "lucide-react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const navLinks = [
