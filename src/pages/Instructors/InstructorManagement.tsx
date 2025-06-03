@@ -340,7 +340,7 @@ export default function InstructorManagement() {
           transition={{ duration: 0.2 }}
         >
           <div className="grid gap-4">
-            {instructors.map((instructor) => (
+            {instructors.map((instructor: any) => (
               <div
                 key={instructor.id}
                 className="p-6 border rounded-lg space-y-4"
@@ -351,7 +351,7 @@ export default function InstructorManagement() {
                       {instructor.firstName} {instructor.lastName}
                     </h3>
                     <p className="text-muted-foreground">
-                      {instructor.specialization} | {instructor.department}
+                      {instructor?.academicDepartment?.name}
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">
                       {instructor.email}
@@ -380,7 +380,7 @@ export default function InstructorManagement() {
                       Assigned Subjects
                     </h4>
                     <div className="space-y-2">
-                      {instructor.assignedSubjects.map((subject) => (
+                      {instructor.assignedSubjects.map((subject: any) => (
                         <div
                           key={subject.id}
                           className="text-sm p-2 bg-muted rounded"
