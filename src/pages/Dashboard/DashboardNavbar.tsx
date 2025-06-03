@@ -1,8 +1,8 @@
 // components/dashboard/DashboardNavbar.tsx
 
 import React from "react";
-import { useAppSelector } from "@/redux/hooks";
-import { useCurrentToken } from "@/redux/features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { useCurrentToken, setUser } from "@/redux/features/auth/authSlice";
 import { verifyToken } from "@/utils/verifyToken";
 import { type TUser } from "@/redux/features/auth/authSlice";
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,31 @@ import { Menu, Moon, Sun } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import { motion } from "framer-motion";
 import { useTheme } from "@/components/theme-provider";
+import { useLogoutMutation } from "@/redux/features/auth/authApi";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 
 const DashboardNavbar: React.FC = () => {
   const token = useAppSelector(useCurrentToken);
   const user = token ? (verifyToken(token) as TUser) : null;
   const { theme, setTheme } = useTheme();
+  const [logout] = useLogoutMutation();
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await logout().unwrap();
+      dispatch(setUser({ user: null, token: null }));
+      toast.success("Logged out successfully");
+      navigate("/login");
+    } catch (error) {
+      toast.error("Failed to logout");
+    }
+  };
+
   return (
-    <header className="w-full h-12 px-4 mb-2 lg:px-6 border-b flex items-center justify-between  sticky top-0 z-50">
+    <header className="w-full h-12 px-4 mb-2 lg:px-6 border-b flex items-center justify-between sticky top-0 z-50 bg-background">
       {/* Left: Brand + Mobile Sidebar trigger */}
       <div className="flex items-center gap-3">
         {/* Mobile sidebar trigger */}
@@ -58,10 +76,15 @@ const DashboardNavbar: React.FC = () => {
         </motion.div>
         {user && (
           <div className="text-sm text-muted-foreground hidden sm:block">
-            Hi, <span className="font-semibold">{user?.name}</span>
+            Hi, <span className="font-semibold">{user?.role}</span>
           </div>
         )}
-        <Button variant="outline" size="sm">
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleLogout}
+          className="hover:bg-destructive hover:text-destructive-foreground"
+        >
           Logout
         </Button>
       </div>

@@ -12,7 +12,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 const loginSchema = z.object({
-  email: z.string().email({ message: "Invalid email" }),
+  id: z.string(),
   password: z
     .string()
     .min(6, { message: "Password must be at least 6 characters" }),
@@ -37,6 +37,8 @@ export default function LoginForm() {
     try {
       const result = await login(data).unwrap();
 
+      console.log(result);
+
       if (result?.data?.accessToken) {
         dispatch(
           setUser({
@@ -45,7 +47,7 @@ export default function LoginForm() {
           })
         );
         toast.success("Login successful!");
-        navigate("/dashboard");
+        navigate("/admin/dashboard");
       }
     } catch (error) {
       toast.error("Login failed. Please check your credentials.");
@@ -61,10 +63,10 @@ export default function LoginForm() {
         <CardContent>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <Label htmlFor="email">Email</Label>
-              <Input id="email" type="email" {...register("email")} />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email.message}</p>
+              <Label htmlFor="id">ID</Label>
+              <Input id="id" type="text" {...register("id")} />
+              {errors.id && (
+                <p className="text-sm text-red-500">{errors.id.message}</p>
               )}
             </div>
 
