@@ -1,12 +1,12 @@
-import { motion } from "framer-motion";
 import CourseList from "@/components/courses/CourseList";
 import { useAuth } from "@/hooks/useAuth";
+import { motion } from "framer-motion";
 
 export default function CourseEnrollment() {
   const { user } = useAuth();
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto  py-6 space-y-6">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

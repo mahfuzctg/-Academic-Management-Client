@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -6,9 +6,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
+import { useState } from "react";
 
 interface Course {
   id: string;
@@ -76,7 +76,7 @@ export default function CourseEnrollment() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-9/12 my-20 mx-auto">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Course Enrollment</h1>
       </div>
