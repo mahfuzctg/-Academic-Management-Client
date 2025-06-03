@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Table,
@@ -38,66 +38,64 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import StudentForm from "@/components/students/StudentForm";
-import { mockStudents } from "@/mock/studentData";
-import type { Student } from "@/types/student";
+import { useGetAllStudentsQuery } from "@/redux/features/student/studentApi";
+import type { TQueryParam } from "@/types/global";
+import { Pagination } from "@/components/ui/pagination";
 
 export default function StudentManagement() {
   const { toast } = useToast();
-  const [students, setStudents] = useState<Student[]>(mockStudents);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<Student | undefined>();
+  const [selectedStudent, setSelectedStudent] = useState<any | undefined>();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
+  const [studentToDelete, setStudentToDelete] = useState<any | null>(null);
   const [filters, setFilters] = useState({
     search: "",
     department: "",
     status: "",
     semester: undefined as number | undefined,
   });
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
 
-  const filteredStudents = students.filter((student) => {
-    const matchesSearch =
-      !filters.search ||
-      `${student.firstName} ${student.lastName}`
-        .toLowerCase()
-        .includes(filters.search.toLowerCase()) ||
-      student.academicDetails.studentId
-        .toLowerCase()
-        .includes(filters.search.toLowerCase());
+  // Prepare query params
+  const queryParams: TQueryParam[] = [
+    { name: "page", value: page },
+    { name: "limit", value: limit },
+  ];
 
-    const matchesDepartment =
-      !filters.department ||
-      student.academicDetails.department === filters.department;
+  if (filters.search) {
+    queryParams.push({ name: "searchTerm", value: filters.search });
+  }
+  if (filters.department) {
+    queryParams.push({ name: "department", value: filters.department });
+  }
+  if (filters.status) {
+    queryParams.push({ name: "status", value: filters.status });
+  }
+  if (filters.semester) {
+    queryParams.push({ name: "semester", value: filters.semester.toString() });
+  }
 
-    const matchesStatus =
-      !filters.status || student.academicDetails.status === filters.status;
-
-    const matchesSemester =
-      !filters.semester ||
-      student.academicDetails.currentSemester === filters.semester;
-
-    return (
-      matchesSearch && matchesDepartment && matchesStatus && matchesSemester
-    );
-  });
+  const { data: studentData, isLoading } = useGetAllStudentsQuery(queryParams);
 
   const handleSearch = (value: string) => {
     setFilters((prev) => ({ ...prev, search: value }));
+    setPage(1); // Reset to first page on new search
   };
 
   const handleDepartmentChange = (value: string) => {
     setFilters((prev) => ({ ...prev, department: value }));
+    setPage(1);
   };
 
   const handleStatusChange = (value: string) => {
-    setFilters((prev) => ({
-      ...prev,
-      status: value as Student["academicDetails"]["status"],
-    }));
+    setFilters((prev) => ({ ...prev, status: value }));
+    setPage(1);
   };
 
   const handleSemesterChange = (value: string) => {
     setFilters((prev) => ({ ...prev, semester: parseInt(value) }));
+    setPage(1);
   };
 
   const handleClearFilters = () => {
@@ -107,23 +105,22 @@ export default function StudentManagement() {
       status: "",
       semester: undefined,
     });
+    setPage(1);
   };
 
-  const handleEdit = (student: Student) => {
+  const handleEdit = (student: any) => {
     setSelectedStudent(student);
     setIsFormOpen(true);
   };
 
-  const handleDelete = (student: Student) => {
+  const handleDelete = (student: any) => {
     setStudentToDelete(student);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = () => {
     if (studentToDelete) {
-      setStudents((prev) =>
-        prev.filter((student) => student.id !== studentToDelete.id)
-      );
+      // TODO: Implement delete mutation
       toast({
         title: "Success",
         description: "Student deleted successfully",
@@ -133,14 +130,7 @@ export default function StudentManagement() {
     }
   };
 
-  const handleFormSuccess = (updatedStudent?: Student) => {
-    if (updatedStudent) {
-      setStudents((prev) =>
-        prev.map((student) =>
-          student.id === updatedStudent.id ? updatedStudent : student
-        )
-      );
-    }
+  const handleFormSuccess = (updatedStudent?: any) => {
     setIsFormOpen(false);
     setSelectedStudent(undefined);
     toast({
@@ -250,61 +240,84 @@ export default function StudentManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredStudents.map((student) => (
-                  <TableRow key={student.id}>
-                    <TableCell>{`${student.firstName} ${student.lastName}`}</TableCell>
-                    <TableCell>{student.academicDetails.studentId}</TableCell>
-                    <TableCell>{student.academicDetails.department}</TableCell>
-                    <TableCell>{student.academicDetails.program}</TableCell>
-                    <TableCell>
-                      {student.academicDetails.currentSemester}
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          student.academicDetails.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : student.academicDetails.status === "inactive"
-                            ? "bg-red-100 text-red-800"
-                            : student.academicDetails.status === "graduated"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {student.academicDetails.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {student.academicDetails.gpa.toFixed(2)}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                            <span className="sr-only">Open menu</span>
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => handleEdit(student)}>
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={() => handleDelete(student)}
-                            className="text-red-600"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center">
+                      Loading...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : studentData?.data?.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center">
+                      No students found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  studentData?.data?.map((student: any) => (
+                    <TableRow key={student._id}>
+                      <TableCell>{student.fullName}</TableCell>
+                      <TableCell>{student.id}</TableCell>
+                      <TableCell>{student.academicDepartment?.name}</TableCell>
+                      <TableCell>{student.academicFaculty?.name}</TableCell>
+                      <TableCell>{student.admissionSemester?.name}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            student.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : student.status === "inactive"
+                              ? "bg-red-100 text-red-800"
+                              : student.status === "graduated"
+                              ? "bg-blue-100 text-blue-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {student.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>{student.gpa || "N/A"}</TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(student)}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(student)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
+
+          {/* Pagination */}
+          {studentData?.meta && (
+            <div className="mt-4 flex justify-center">
+              <Pagination
+                currentPage={page}
+                totalPages={Math.ceil(studentData.meta.total / limit)}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 

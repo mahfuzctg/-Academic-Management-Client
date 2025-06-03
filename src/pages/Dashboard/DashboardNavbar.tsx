@@ -11,7 +11,6 @@ import { Menu, Moon, Sun } from "lucide-react";
 import Sidebar from "@/components/layout/Sidebar";
 import { motion } from "framer-motion";
 import { useTheme } from "@/components/theme-provider";
-import { useLogoutMutation } from "@/redux/features/auth/authApi";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -19,19 +18,13 @@ const DashboardNavbar: React.FC = () => {
   const token = useAppSelector(useCurrentToken);
   const user = token ? (verifyToken(token) as TUser) : null;
   const { theme, setTheme } = useTheme();
-  const [logout] = useLogoutMutation();
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
 
-  const handleLogout = async () => {
-    try {
-      await logout().unwrap();
-      dispatch(setUser({ user: null, token: null }));
-      toast.success("Logged out successfully");
-      navigate("/login");
-    } catch (error) {
-      toast.error("Failed to logout");
-    }
+  const handleLogout = () => {
+    dispatch(setUser({ user: null, token: null }));
+    toast.success("Logged out successfully");
+    navigate("/login");
   };
 
   return (
