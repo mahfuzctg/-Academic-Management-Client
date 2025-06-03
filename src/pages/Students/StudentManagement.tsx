@@ -130,7 +130,7 @@ export default function StudentManagement() {
     }
   };
 
-  const handleFormSuccess = (updatedStudent?: any) => {
+  const handleFormSuccess = () => {
     setIsFormOpen(false);
     setSelectedStudent(undefined);
     toast({

@@ -2,12 +2,53 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
+import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { mockInstructors } from "@/mock/instructorData";
 import type { Instructor } from "@/types/instructor";
 import InstructorForm from "@/components/instructors/InstructorForm";
+import {
+  useGetAllInstructorsQuery,
+  useDeleteInstructorMutation,
+} from "@/redux/features/instructor/instructorApi";
+import type { TQueryParam } from "@/types/global";
+import { Pagination } from "@/components/ui/pagination";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 export default function InstructorManagement() {
+  const { toast } = useToast();
   const [instructors, setInstructors] = useState<Instructor[]>(mockInstructors);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedInstructor, setSelectedInstructor] = useState<
@@ -16,6 +57,62 @@ export default function InstructorManagement() {
   const [isSubjectsDialogOpen, setIsSubjectsDialogOpen] = useState(false);
   const [selectedInstructorForSubjects, setSelectedInstructorForSubjects] =
     useState<Instructor | undefined>();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [instructorToDelete, setInstructorToDelete] = useState<any | null>(
+    null
+  );
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [filters, setFilters] = useState({
+    search: "",
+    department: "",
+    status: "",
+  });
+
+  const [deleteInstructor] = useDeleteInstructorMutation();
+
+  // Prepare query params
+  const queryParams: TQueryParam[] = [
+    { name: "page", value: page },
+    { name: "limit", value: limit },
+  ];
+
+  if (filters.search) {
+    queryParams.push({ name: "searchTerm", value: filters.search });
+  }
+  if (filters.department) {
+    queryParams.push({ name: "department", value: filters.department });
+  }
+  if (filters.status) {
+    queryParams.push({ name: "status", value: filters.status });
+  }
+
+  const { data: instructorData, isLoading } =
+    useGetAllInstructorsQuery(queryParams);
+
+  const handleSearch = (value: string) => {
+    setFilters((prev) => ({ ...prev, search: value }));
+    setPage(1);
+  };
+
+  const handleDepartmentChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, department: value }));
+    setPage(1);
+  };
+
+  const handleStatusChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, status: value }));
+    setPage(1);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      search: "",
+      department: "",
+      status: "",
+    });
+    setPage(1);
+  };
 
   const handleFormSuccess = (updatedInstructor?: Instructor) => {
     if (updatedInstructor) {
@@ -29,6 +126,12 @@ export default function InstructorManagement() {
     }
     setIsFormOpen(false);
     setSelectedInstructor(undefined);
+    toast({
+      title: "Success",
+      description: updatedInstructor
+        ? "Instructor updated successfully"
+        : "Instructor added successfully",
+    });
   };
 
   const handleEdit = (instructor: Instructor) => {
@@ -39,6 +142,31 @@ export default function InstructorManagement() {
   const handleViewSubjects = (instructor: Instructor) => {
     setSelectedInstructorForSubjects(instructor);
     setIsSubjectsDialogOpen(true);
+  };
+
+  const handleDelete = (instructor: any) => {
+    setInstructorToDelete(instructor);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async () => {
+    try {
+      if (instructorToDelete) {
+        await deleteInstructor(instructorToDelete._id).unwrap();
+        toast({
+          title: "Success",
+          description: "Instructor deleted successfully",
+        });
+        setDeleteDialogOpen(false);
+        setInstructorToDelete(null);
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete instructor",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -65,6 +193,143 @@ export default function InstructorManagement() {
           </DialogContent>
         </Dialog>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Instructor List</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap gap-4 mb-6">
+            <Input
+              placeholder="Search instructors..."
+              value={filters.search}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="max-w-sm"
+            />
+            <Select
+              value={filters.department}
+              onValueChange={handleDepartmentChange}
+            >
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Department" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="computer-science">
+                  Computer Science
+                </SelectItem>
+                <SelectItem value="engineering">Engineering</SelectItem>
+                <SelectItem value="business">Business</SelectItem>
+                <SelectItem value="arts">Arts</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={filters.status} onValueChange={handleStatusChange}>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
+                <SelectItem value="on_leave">On Leave</SelectItem>
+              </SelectContent>
+            </Select>
+            <Button variant="outline" onClick={handleClearFilters}>
+              Clear Filters
+            </Button>
+          </div>
+
+          <div className="rounded-md border">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Department</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Assigned Subjects</TableHead>
+                  <TableHead className="w-[100px]">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center">
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                ) : instructorData?.data?.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center">
+                      No instructors found
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  instructorData?.data?.map((instructor: any) => (
+                    <TableRow key={instructor._id}>
+                      <TableCell>{instructor.fullName}</TableCell>
+                      <TableCell>
+                        {instructor.academicDepartment?.name}
+                      </TableCell>
+                      <TableCell>{instructor.email}</TableCell>
+                      <TableCell>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            instructor.status === "active"
+                              ? "bg-green-100 text-green-800"
+                              : instructor.status === "inactive"
+                              ? "bg-red-100 text-red-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {instructor.status}
+                        </span>
+                      </TableCell>
+                      <TableCell>
+                        {instructor.assignedSubjects?.length || 0} subjects
+                      </TableCell>
+                      <TableCell>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleEdit(instructor)}
+                            >
+                              <Pencil className="mr-2 h-4 w-4" />
+                              Edit
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(instructor)}
+                              className="text-red-600"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" />
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          </div>
+
+          {/* Pagination */}
+          {instructorData?.meta && (
+            <div className="mt-4 flex justify-center">
+              <Pagination
+                currentPage={page}
+                totalPages={Math.ceil(instructorData.meta.total / limit)}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       <AnimatePresence mode="wait">
         <motion.div
@@ -232,6 +497,27 @@ export default function InstructorManagement() {
           )}
         </DialogContent>
       </Dialog>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              instructor record.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmDelete}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
