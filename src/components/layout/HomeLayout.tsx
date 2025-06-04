@@ -1,6 +1,6 @@
 // src/layouts/HomeLayout.tsx
-import Footer from "@/pages/Home/Footer";
-import NavBar from "@/pages/Home/Navbar";
+import Footer from "@/pages/share/Footer";
+import NavBar from "@/pages/share/Navbar";
 import { Outlet } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 

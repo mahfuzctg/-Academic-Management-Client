@@ -1,5 +1,4 @@
-import Dashboard from "@/pages/Dashboard";
-import { StudentDashboard } from "@/pages/StudentDashboard";
+import { StudentDashboard } from "@/pages/Dashboard/StudentDashboard";
 import StudentManagement from "@/pages/Students/StudentManagement";
 
 export const studentPaths = [

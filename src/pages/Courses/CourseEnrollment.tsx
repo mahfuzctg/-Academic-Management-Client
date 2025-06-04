@@ -1,4 +1,4 @@
-import CourseList from "@/components/courses/CourseList";
+import CourseList from "@/components/form/courses/CourseList";
 import { useAuth } from "@/hooks/useAuth";
 import { motion } from "framer-motion";
 

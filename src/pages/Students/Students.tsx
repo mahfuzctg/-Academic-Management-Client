@@ -3,8 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
-import StudentList from "@/components/students/StudentList";
-import StudentForm from "@/components/students/StudentForm";
+import StudentList from "@/components/form/students/StudentList";
+import StudentForm from "@/components/form/students/StudentForm";
 import type { Student } from "@/types/student";
 
 const Students = () => {

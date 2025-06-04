@@ -1,6 +1,6 @@
 // src/layouts/DashboardLayout.tsx
 
-import DashboardNavbar from "@/pages/Dashboard/DashboardNavbar";
+import DashboardNavbar from "@/pages/share/DashboardNavbar";
 import Sidebar from "./Sidebar";
 import { Outlet } from "react-router-dom";
 

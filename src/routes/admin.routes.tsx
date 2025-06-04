@@ -1,5 +1,5 @@
-import { AdminDashboard } from "@/pages/AdminDashboard";
-import Dashboard from "@/pages/Dashboard";
+import { AdminDashboard } from "@/pages/Dashboard/AdminDashboard";
+
 import InstructorManagement from "@/pages/Instructors/InstructorManagement";
 import JobManagement from "@/pages/Jobs/JobManagement";
 import StudentManagement from "@/pages/Students/StudentManagement";

@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { mockInstructors } from "@/mock/instructorData";
 import type { Instructor } from "@/types/instructor";
-import InstructorForm from "@/components/instructors/InstructorForm";
+import InstructorForm from "@/components/form/instructors/InstructorForm";
 import {
   useGetAllInstructorsQuery,
   useDeleteInstructorMutation,

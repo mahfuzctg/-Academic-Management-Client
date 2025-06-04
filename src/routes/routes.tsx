@@ -1,6 +1,5 @@
 import { createBrowserRouter } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
-import App from "../App";
 import HomeLayout from "@/components/layout/HomeLayout";
 import LoginForm from "@/pages/Login";
 import RegisterForm from "@/pages/Register";
@@ -10,11 +9,10 @@ import { adminPaths } from "./admin.routes";
 import { studentPaths } from "./student.routes";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import Home from "@/pages/Home";
-import JobSection from "@/pages/JobSection";
-import CourseEnrollment from "@/pages/CourseEnrollment";
 import InstructorManagement from "@/pages/Instructors/InstructorManagement";
 import { instructorPaths } from "./instructor.routes";
 import JobManagement from "@/pages/Jobs/JobManagement";
+import CourseEnrollment from "@/pages/Courses/CourseEnrollment";
 
 const router = createBrowserRouter([
   {

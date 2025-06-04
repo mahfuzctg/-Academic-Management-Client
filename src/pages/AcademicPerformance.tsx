@@ -1,6 +1,6 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { GradeManagement } from "@/components/academic/GradeManagement";
-import { GradeHistory } from "@/components/academic/GradeHistory";
+import { GradeManagement } from "@/components/form/academic/GradeManagement";
+import { GradeHistory } from "@/components/form/academic/GradeHistory";
 
 export function AcademicPerformance() {
   // In a real application, this would come from your auth system

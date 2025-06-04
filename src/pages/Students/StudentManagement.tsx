@@ -37,7 +37,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import StudentForm from "@/components/students/StudentForm";
+import StudentForm from "@/components/form/students/StudentForm";
 import { useGetAllStudentsQuery } from "@/redux/features/student/studentApi";
 import type { TQueryParam } from "@/types/global";
 import { Pagination } from "@/components/ui/pagination";

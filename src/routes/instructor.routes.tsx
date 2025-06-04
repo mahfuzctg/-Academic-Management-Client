@@ -1,4 +1,4 @@
-import { InstructorDashboard } from "@/pages/InstructorDashboard";
+import { InstructorDashboard } from "@/pages/Dashboard/InstructorDashboard";
 
 import StudentManagement from "@/pages/Students/StudentManagement";
 

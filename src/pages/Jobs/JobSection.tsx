@@ -28,8 +28,8 @@ import {
 } from "@/redux/features/jobSlice";
 import type { RootState } from "@/redux/store";
 import type { JobListing } from "@/types/job";
-import JobForm from "@/components/jobs/JobForm";
-import ProposalForm from "@/components/jobs/ProposalForm";
+import JobForm from "@/components/form/jobs/JobForm";
+import ProposalForm from "@/components/form/jobs/ProposalForm";
 import { useState } from "react";
 
 export default function JobSection() {
