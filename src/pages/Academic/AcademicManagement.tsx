@@ -16,14 +16,15 @@ import { format } from "date-fns";
 const AcademicManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { data: academicYears, isLoading: isLoadingYears } =
-    useGetAcademicYearsQuery();
+    useGetAcademicYearsQuery(undefined);
   const { data: semesters, isLoading: isLoadingSemesters } =
-    useGetSemestersQuery();
+    useGetSemestersQuery(undefined);
   const { data: departments, isLoading: isLoadingDepartments } =
-    useGetDepartmentsQuery();
+    useGetDepartmentsQuery(undefined);
   const { data: programs, isLoading: isLoadingPrograms } =
-    useGetProgramsQuery();
-  const { data: stats, isLoading: isLoadingStats } = useGetAcademicStatsQuery();
+    useGetProgramsQuery(undefined);
+  const { data: stats, isLoading: isLoadingStats } =
+    useGetAcademicStatsQuery(undefined);
 
   const isLoading =
     isLoadingYears ||

@@ -79,6 +79,7 @@ export const baseApi = createApi({
     "student",
     "instructor",
     "job",
+    "academic",
   ],
   endpoints: () => ({}),
 });
