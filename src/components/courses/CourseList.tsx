@@ -1,8 +1,17 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { motion } from "framer-motion";
-import { Input } from "@/components/ui/input";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -18,31 +27,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Info, AlertCircle } from "lucide-react";
-import {
+  clearFilters,
+  dropCourse,
+  enrollInCourse,
   fetchCourseOfferings,
   fetchEnrollments,
-  enrollInCourse,
-  dropCourse,
   setFilters,
-  clearFilters,
 } from "@/redux/features/enrollmentSlice";
 import type { RootState } from "@/redux/store";
 import type { CourseOffering, Enrollment } from "@/types/course";
-import { useState } from "react";
-import { useToast } from "@/components/ui/use-toast";
+import { motion } from "framer-motion";
+import { Info } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 
 interface CourseListProps {
   studentId: string;
@@ -100,7 +99,7 @@ const CourseList = ({ studentId }: CourseListProps) => {
   const confirmEnroll = async () => {
     if (selectedCourse) {
       try {
-        await dispatch(
+        dispatch(
           enrollInCourse({
             courseOfferingId: selectedCourse.id,
             studentId,
@@ -125,7 +124,7 @@ const CourseList = ({ studentId }: CourseListProps) => {
   const confirmDrop = async () => {
     if (selectedEnrollment) {
       try {
-        await dispatch(dropCourse(selectedEnrollment.id));
+        dispatch(dropCourse(selectedEnrollment.id));
         toast({
           title: "Success",
           description: "Successfully dropped the course",
@@ -144,13 +143,15 @@ const CourseList = ({ studentId }: CourseListProps) => {
 
   const isEnrolled = (courseId: string) => {
     return enrollments.some(
-      (e) => e.courseOfferingId === courseId && e.status === "registered"
+      (e: { courseOfferingId: string; status: string }) =>
+        e.courseOfferingId === courseId && e.status === "registered"
     );
   };
 
   const getEnrollment = (courseId: string) => {
     return enrollments.find(
-      (e) => e.courseOfferingId === courseId && e.status === "registered"
+      (e: { courseOfferingId: string; status: string }) =>
+        e.courseOfferingId === courseId && e.status === "registered"
     );
   };
 
@@ -250,7 +251,7 @@ const CourseList = ({ studentId }: CourseListProps) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {courseOfferings.map((course) => {
+                {courseOfferings.map((course: CourseOffering) => {
                   const enrolled = isEnrolled(course.id);
                   const enrollment = getEnrollment(course.id);
                   return (
