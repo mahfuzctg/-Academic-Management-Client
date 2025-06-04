@@ -31,7 +31,7 @@ const Sidebar: React.FC = () => {
     <>
       {/* Mobile Sheet Menu */}
       <div className="hidden  p-4 relative z-50">
-        <div className="text-xl font-bold text-primary mb-4">PH Uni</div>
+        <div className="text-xl font-bold text-primary mb-4">AcademicMS</div>
         <ScrollArea className="h-full ">
           <nav className="flex flex-col gap-2">
             {sidebarItems.map((item: any) => (
