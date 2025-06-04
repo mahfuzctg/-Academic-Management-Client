@@ -1,5 +1,5 @@
+import AcademicManagement from "@/pages/Academic/AcademicManagement";
 import { AdminDashboard } from "@/pages/Dashboard/AdminDashboard";
-
 import InstructorManagement from "@/pages/Instructors/InstructorManagement";
 import JobManagement from "@/pages/Jobs/JobManagement";
 import StudentManagement from "@/pages/Students/StudentManagement";
@@ -12,23 +12,8 @@ export const adminPaths = [
   },
   {
     name: "Academic Management",
-    children: [
-      {
-        name: "Create A. Semester",
-        path: "create-academic-semester",
-        element: <h1>ok</h1>,
-      },
-      {
-        name: "Create A. Semester",
-        path: "create-academic-semester",
-        element: <h1>ok</h1>,
-      },
-      {
-        name: "Create A. Semester",
-        path: "create-academic-semester",
-        element: <h1>ok</h1>,
-      },
-    ],
+    path: "academic-management",
+    element: <AcademicManagement />,
   },
   {
     name: "Student Management",
