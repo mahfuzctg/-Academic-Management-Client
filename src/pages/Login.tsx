@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { useLoginMutation } from "@/redux/features/auth/authApi";
 import { useAppDispatch } from "@/redux/hooks";
-import { setUser } from "@/redux/features/auth/authSlice";
+import { setUser, type TUser } from "@/redux/features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { verifyToken } from "@/utils/verifyToken";
 
 const loginSchema = z.object({
   id: z.string(),
@@ -35,19 +36,20 @@ export default function LoginForm() {
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const result = await login(data).unwrap();
+      const res = await login(data).unwrap();
 
-      console.log(result);
+      console.log(res);
 
-      if (result?.data?.accessToken) {
-        dispatch(
-          setUser({
-            user: result.data.user,
-            token: result.data.accessToken,
-          })
-        );
-        toast.success("Login successful!");
-        navigate("/admin/dashboard");
+      if (res?.data?.accessToken) {
+        const user = verifyToken(res.data.accessToken) as TUser;
+        dispatch(setUser({ user: user, token: res.data.accessToken }));
+        toast.success("Logged in");
+
+        if (res.data.needsPasswordChange) {
+          navigate(`/change-password`);
+        } else {
+          navigate(`/${user.role}/dashboard`);
+        }
       }
     } catch (error) {
       toast.error("Login failed. Please check your credentials.");

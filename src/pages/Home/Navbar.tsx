@@ -16,14 +16,39 @@ import { logout } from "@/redux/features/auth/authSlice";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
-const navLinks = [
-  { label: "Home", to: "/" },
-  { label: "Students", to: "/students" },
-  { label: "Instructors", to: "/instructors" },
-  { label: "Courses", to: "/courses" },
-  { label: "Dashboard", to: "admin/dashboard" },
-  { label: "Jobs", to: "/jobs" },
-];
+const getNavLinks = (role?: string) => {
+  const commonLinks = [
+    { label: "Home", to: "/" },
+    { label: "Courses", to: "/courses" },
+    { label: "Jobs", to: "/jobs" },
+  ];
+
+  switch (role) {
+    case "student":
+      return [
+        ...commonLinks,
+        { label: "Dashboard", to: "/student/dashboard" },
+        { label: "My Courses", to: "/student/courses" },
+        { label: "Grades", to: "/student/grades" },
+      ];
+    case "instructor":
+      return [
+        ...commonLinks,
+        { label: "Dashboard", to: "/instructor/dashboard" },
+        { label: "My Classes", to: "/instructor/classes" },
+        { label: "Grade Management", to: "/instructor/grades" },
+      ];
+    case "admin":
+      return [
+        ...commonLinks,
+        { label: "Dashboard", to: "/admin/dashboard" },
+        { label: "Students", to: "/students" },
+        { label: "Instructors", to: "/instructors" },
+      ];
+    default:
+      return commonLinks;
+  }
+};
 
 export default function NavBar() {
   const location = useLocation();
@@ -31,6 +56,10 @@ export default function NavBar() {
   const user = useAppSelector(selectCurrentUser);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+
+  const navLinks = getNavLinks(user?.role);
+
+  console.log(user);
 
   const handleLogout = () => {
     dispatch(logout());
