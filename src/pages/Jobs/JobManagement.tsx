@@ -174,14 +174,6 @@ const JobManagement = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64 text-red-500">
-        Error: {error instanceof Error ? error.message : "Failed to load jobs"}
-      </div>
-    );
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
