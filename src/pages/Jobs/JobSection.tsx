@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { motion } from "framer-motion";
 import {
@@ -21,37 +21,28 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Briefcase, MapPin, DollarSign, Clock } from "lucide-react";
-import {
-  fetchJobs,
-  setJobFilters,
-  clearJobFilters,
-} from "@/redux/features/jobSlice";
+import { setFilters, clearFilters } from "@/redux/features/job/jobSlice";
 import type { RootState } from "@/redux/store";
 import type { JobListing } from "@/types/job";
 import JobForm from "@/components/form/jobs/JobForm";
 import ProposalForm from "@/components/form/jobs/ProposalForm";
-import { useState } from "react";
+import { useGetAllJobsQuery } from "@/redux/features/job/jobApi";
 
 export default function JobSection() {
   const { toast } = useToast();
   const dispatch = useDispatch();
-  const { jobs, loading, error, jobFilters } = useSelector(
-    (state: RootState) => state.jobs
-  );
+  const { filters } = useSelector((state: RootState) => state.jobs);
+  const { data: jobsData, isLoading, error } = useGetAllJobsQuery(filters);
   const [isJobFormOpen, setIsJobFormOpen] = useState(false);
   const [isProposalFormOpen, setIsProposalFormOpen] = useState(false);
   const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
 
-  useEffect(() => {
-    dispatch(fetchJobs(jobFilters));
-  }, [dispatch, jobFilters]);
-
   const handleSearch = (value: string) => {
-    dispatch(setJobFilters({ search: value }));
+    dispatch(setFilters({ search: value }));
   };
 
   const handleClearFilters = () => {
-    dispatch(clearJobFilters());
+    dispatch(clearFilters());
   };
 
   const handleApply = (job: JobListing) => {
@@ -59,7 +50,7 @@ export default function JobSection() {
     setIsProposalFormOpen(true);
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -70,10 +61,12 @@ export default function JobSection() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64 text-red-500">
-        Error: {error}
+        Error: {error instanceof Error ? error.message : "Failed to load jobs"}
       </div>
     );
   }
+
+  const jobs = jobsData?.data || [];
 
   return (
     <div className="space-y-6">
@@ -98,7 +91,7 @@ export default function JobSection() {
       <div className="flex items-center space-x-2">
         <Input
           placeholder="Search jobs..."
-          value={jobFilters.search || ""}
+          value={filters.search || ""}
           onChange={(e) => handleSearch(e.target.value)}
           className="max-w-sm"
         />
@@ -108,7 +101,7 @@ export default function JobSection() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {jobs.map((job) => (
+        {jobs.map((job: JobListing) => (
           <Card key={job.id}>
             <CardHeader>
               <CardTitle>{job.title}</CardTitle>
@@ -149,7 +142,7 @@ export default function JobSection() {
                 <div className="space-y-1">
                   <p className="text-sm font-medium">Requirements:</p>
                   <ul className="text-sm list-disc list-inside">
-                    {job.requirements.map((req, index) => (
+                    {job.requirements.map((req: string, index: number) => (
                       <li key={index}>{req}</li>
                     ))}
                   </ul>

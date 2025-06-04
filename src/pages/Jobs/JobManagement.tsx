@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useAuth } from "@/hooks/useAuth";
+import { useAppSelector } from "@/redux/hooks";
+import { selectCurrentUser } from "@/redux/features/auth/authSlice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -12,26 +13,26 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { mockJobs } from "@/mock/jobData";
-import { mockUser } from "@/mock/userData";
-import type { Job } from "@/types/job";
+import { useGetAllJobsQuery } from "@/redux/features/job/jobApi";
+import type { JobListing } from "@/types/job";
 
 const JobManagement = () => {
-  // Use mockUser instead of useAuth for testing
-  const user = mockUser;
-  const [jobs, setJobs] = useState<Job[]>(mockJobs);
+  const user = useAppSelector(selectCurrentUser);
+  const { data: jobsData, isLoading, error } = useGetAllJobsQuery({});
   const [filters, setFilters] = useState({
     search: "",
     type: "",
     department: "",
   });
 
-  const filteredJobs = jobs.filter((job) => {
+  const jobs = jobsData?.data || [];
+
+  const filteredJobs = jobs.filter((job: JobListing) => {
     const matchesSearch =
       !filters.search ||
       job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-      job.company.toLowerCase().includes(filters.search.toLowerCase()) ||
-      job.location.toLowerCase().includes(filters.search.toLowerCase());
+      job.employer.name.toLowerCase().includes(filters.search.toLowerCase()) ||
+      job.location.type.toLowerCase().includes(filters.search.toLowerCase());
 
     const matchesType = !filters.type || job.type === filters.type;
     const matchesDepartment =
@@ -74,6 +75,22 @@ const JobManagement = () => {
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64 text-red-500">
+        Error: {error instanceof Error ? error.message : "Failed to load jobs"}
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -131,14 +148,14 @@ const JobManagement = () => {
           </div>
 
           <div className="grid gap-6">
-            {filteredJobs.map((job) => (
+            {filteredJobs.map((job: JobListing) => (
               <Card key={job.id}>
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
                       <CardTitle className="text-xl">{job.title}</CardTitle>
                       <p className="text-muted-foreground mt-1">
-                        {job.company} • {job.location}
+                        {job.employer.name} • {job.location.type}
                       </p>
                     </div>
                     <Badge className={getTypeColor(job.type)}>
@@ -155,7 +172,7 @@ const JobManagement = () => {
                     <div>
                       <h4 className="font-medium mb-2">Requirements</h4>
                       <ul className="list-disc list-inside text-muted-foreground">
-                        {job.requirements.map((req, index) => (
+                        {job.requirements.map((req: string, index: number) => (
                           <li key={index}>{req}</li>
                         ))}
                       </ul>
