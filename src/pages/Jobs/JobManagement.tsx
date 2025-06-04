@@ -1,8 +1,7 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useAppSelector, useAppDispatch } from "@/redux/hooks";
+import { useAppSelector } from "@/redux/hooks";
 import { selectCurrentUser } from "@/redux/features/auth/authSlice";
-import { setFilters, clearFilters } from "@/redux/features/job/jobSlice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -14,16 +13,59 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { useGetAllJobsQuery } from "@/redux/features/job/jobApi";
-import type { JobListing } from "@/types/job";
+import {
+  useGetAllJobsQuery,
+  useDeleteJobMutation,
+  useUpdateJobStatusMutation,
+} from "@/redux/features/job/jobApi";
+import type { JobListing, JobType, JobFilters } from "@/types/job";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const JobManagement = () => {
-  const dispatch = useAppDispatch();
   const user = useAppSelector(selectCurrentUser);
-  const { filters } = useAppSelector((state) => state.jobs);
+  const [filters, setFilters] = useState<JobFilters>({});
+  const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editedJob, setEditedJob] = useState<Partial<JobListing>>({});
+
   const { data: jobsData, isLoading, error } = useGetAllJobsQuery(filters);
+  const [deleteJob] = useDeleteJobMutation();
+  const [updateJobStatus] = useUpdateJobStatusMutation();
 
   const jobs = jobsData?.data || [];
+  const isAdmin = user?.role === "admin";
+
+  const canManageJob = (job: JobListing) => {
+    return isAdmin || job.employer.id === user?.id;
+  };
 
   const filteredJobs = jobs.filter((job: JobListing) => {
     const matchesSearch =
@@ -33,29 +75,83 @@ const JobManagement = () => {
       job.location.type.toLowerCase().includes(filters.search.toLowerCase());
 
     const matchesType = !filters.type || job.type === filters.type;
-    const matchesDepartment =
-      !filters.department || job?.department === filters.department;
+    const matchesStatus = !filters.status || job.status === filters.status;
 
-    return matchesSearch && matchesType && matchesDepartment;
+    return matchesSearch && matchesType && matchesStatus;
   });
 
   const handleSearch = (value: string) => {
-    dispatch(setFilters({ search: value }));
+    setFilters((prev) => ({ ...prev, search: value }));
   };
 
-  const handleTypeChange = (value: string) => {
-    dispatch(setFilters({ type: value }));
+  const handleTypeChange = (value: JobType) => {
+    setFilters((prev) => ({ ...prev, type: value }));
   };
 
-  const handleDepartmentChange = (value: string) => {
-    dispatch(setFilters({ department: value }));
+  const handleStatusChange = (value: "open" | "closed" | "in-progress") => {
+    setFilters((prev) => ({ ...prev, status: value }));
   };
 
   const handleClearFilters = () => {
-    dispatch(clearFilters());
+    setFilters({});
   };
 
-  const getTypeColor = (type: string) => {
+  const handleDeleteJob = async () => {
+    if (!selectedJob) return;
+
+    try {
+      await deleteJob(selectedJob.id).unwrap();
+      toast.success("Job deleted successfully");
+      setIsDeleteDialogOpen(false);
+      setSelectedJob(null);
+    } catch (error) {
+      toast.error("Failed to delete job");
+    }
+  };
+
+  const handleUpdateStatus = async (
+    jobId: string,
+    status: "open" | "closed" | "in-progress"
+  ) => {
+    try {
+      await updateJobStatus({ jobId, status }).unwrap();
+      toast.success("Job status updated successfully");
+    } catch (error) {
+      toast.error("Failed to update job status");
+    }
+  };
+
+  const handleEditJob = (job: JobListing) => {
+    setSelectedJob(job);
+    setEditedJob({
+      title: job.title,
+      description: job.description,
+      requirements: job.requirements,
+      type: job.type,
+      salary: job.salary,
+      deadline: job.deadline,
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!selectedJob) return;
+
+    try {
+      await updateJobStatus({
+        jobId: selectedJob.id,
+        ...editedJob,
+      }).unwrap();
+      toast.success("Job updated successfully");
+      setIsEditDialogOpen(false);
+      setSelectedJob(null);
+      setEditedJob({});
+    } catch (error) {
+      toast.error("Failed to update job");
+    }
+  };
+
+  const getTypeColor = (type: JobType) => {
     switch (type) {
       case "full-time":
         return "bg-blue-100 text-blue-800";
@@ -63,7 +159,7 @@ const JobManagement = () => {
         return "bg-green-100 text-green-800";
       case "freelance":
         return "bg-purple-100 text-purple-800";
-      case "internship":
+      case "contract":
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
@@ -117,23 +213,20 @@ const JobManagement = () => {
                 <SelectItem value="full-time">Full Time</SelectItem>
                 <SelectItem value="part-time">Part Time</SelectItem>
                 <SelectItem value="freelance">Freelance</SelectItem>
-                <SelectItem value="internship">Internship</SelectItem>
+                <SelectItem value="contract">Contract</SelectItem>
               </SelectContent>
             </Select>
             <Select
-              value={filters.department || ""}
-              onValueChange={handleDepartmentChange}
+              value={filters.status || ""}
+              onValueChange={handleStatusChange}
             >
               <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Department" />
+                <SelectValue placeholder="Status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="computer-science">
-                  Computer Science
-                </SelectItem>
-                <SelectItem value="engineering">Engineering</SelectItem>
-                <SelectItem value="business">Business</SelectItem>
-                <SelectItem value="arts">Arts</SelectItem>
+                <SelectItem value="open">Open</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
+                <SelectItem value="closed">Closed</SelectItem>
               </SelectContent>
             </Select>
             <Button variant="outline" onClick={handleClearFilters}>
@@ -152,9 +245,66 @@ const JobManagement = () => {
                         {job.employer.name} • {job.location.type}
                       </p>
                     </div>
-                    <Badge className={getTypeColor(job.type)}>
-                      {job.type.charAt(0).toUpperCase() + job.type.slice(1)}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge className={getTypeColor(job.type)}>
+                        {job.type.charAt(0).toUpperCase() + job.type.slice(1)}
+                      </Badge>
+                      {canManageJob(job) && (
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            {isAdmin && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleUpdateStatus(job.id, "open")
+                                  }
+                                  disabled={job.status === "open"}
+                                >
+                                  Mark as Open
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleUpdateStatus(job.id, "in-progress")
+                                  }
+                                  disabled={job.status === "in-progress"}
+                                >
+                                  Mark as In Progress
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={() =>
+                                    handleUpdateStatus(job.id, "closed")
+                                  }
+                                  disabled={job.status === "closed"}
+                                >
+                                  Mark as Closed
+                                </DropdownMenuItem>
+                              </>
+                            )}
+                            <DropdownMenuItem
+                              onClick={() => handleEditJob(job)}
+                            >
+                              <Pencil className="h-4 w-4 mr-2" />
+                              Edit Job
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              className="text-red-600"
+                              onClick={() => {
+                                setSelectedJob(job);
+                                setIsDeleteDialogOpen(true);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4 mr-2" />
+                              Delete Job
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      )}
+                    </div>
                   </div>
                 </CardHeader>
                 <CardContent>
@@ -171,6 +321,15 @@ const JobManagement = () => {
                         ))}
                       </ul>
                     </div>
+                    {job.salary && (
+                      <div>
+                        <h4 className="font-medium mb-2">Salary Range</h4>
+                        <p className="text-muted-foreground">
+                          {job.salary.currency} {job.salary.min} -{" "}
+                          {job.salary.max}
+                        </p>
+                      </div>
+                    )}
                     <div className="flex justify-between items-center pt-4">
                       <div className="text-sm text-muted-foreground">
                         <p>Posted: {job.postedAt}</p>
@@ -197,6 +356,121 @@ const JobManagement = () => {
           </p>
         </div>
       )}
+
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the job
+              listing and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDeleteJob}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>Edit Job</DialogTitle>
+            <DialogDescription>
+              Make changes to the job listing here. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">Title</Label>
+              <Input
+                id="title"
+                value={editedJob.title || ""}
+                onChange={(e) =>
+                  setEditedJob((prev) => ({ ...prev, title: e.target.value }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                value={editedJob.description || ""}
+                onChange={(e) =>
+                  setEditedJob((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="requirements">Requirements (one per line)</Label>
+              <Textarea
+                id="requirements"
+                value={editedJob.requirements?.join("\n") || ""}
+                onChange={(e) =>
+                  setEditedJob((prev) => ({
+                    ...prev,
+                    requirements: e.target.value.split("\n"),
+                  }))
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="type">Job Type</Label>
+              <Select
+                value={editedJob.type || ""}
+                onValueChange={(value: JobType) =>
+                  setEditedJob((prev) => ({ ...prev, type: value }))
+                }
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select job type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="full-time">Full Time</SelectItem>
+                  <SelectItem value="part-time">Part Time</SelectItem>
+                  <SelectItem value="freelance">Freelance</SelectItem>
+                  <SelectItem value="contract">Contract</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="deadline">Deadline</Label>
+              <Input
+                id="deadline"
+                type="date"
+                value={editedJob.deadline || ""}
+                onChange={(e) =>
+                  setEditedJob((prev) => ({
+                    ...prev,
+                    deadline: e.target.value,
+                  }))
+                }
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsEditDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit}>Save changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 };

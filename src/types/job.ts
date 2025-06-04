@@ -1,32 +1,68 @@
+export type JobType = "full-time" | "part-time" | "contract" | "freelance";
+
+export interface JobFilters {
+  search?: string;
+  type?: JobType;
+  status?: "open" | "closed" | "in-progress";
+}
+
+export interface JobLocation {
+  type: string;
+  address?: string;
+  city?: string;
+  country?: string;
+  isRemote?: boolean;
+}
+
+export interface JobEmployer {
+  id: string;
+  name: string;
+  logo?: string;
+  description?: string;
+}
+
 export interface JobListing {
   id: string;
   title: string;
-  department: string;
   description: string;
   requirements: string[];
-  budget: {
+  type: JobType;
+  status: "open" | "closed" | "in-progress";
+  location: JobLocation;
+  employer: JobEmployer;
+  salary?: {
     min: number;
     max: number;
     currency: string;
   };
-  duration: string;
-  type: "full-time" | "part-time" | "contract" | "freelance";
-  category: string;
-  skills: string[];
-  location: {
-    type: "remote" | "onsite" | "hybrid";
-    address?: string;
-  };
-  employer: {
-    id: string;
-    name: string;
-    type: "company" | "individual";
-    rating?: number;
-  };
-  status: "open" | "in-progress" | "completed" | "cancelled";
   postedAt: string;
   deadline: string;
-  proposals: Proposal[];
+  department?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface JobFormData {
+  title: string;
+  description: string;
+  requirements: string[];
+  type: JobType;
+  location: JobLocation;
+  salary?: {
+    min: number;
+    max: number;
+    currency: string;
+  };
+  deadline: string;
+  department?: string;
+}
+
+export interface ProposalFormData {
+  jobId: string;
+  coverLetter: string;
+  expectedSalary?: number;
+  availability?: string;
+  attachments?: string[];
 }
 
 export interface FreelancerProfile {
@@ -70,17 +106,6 @@ export interface Proposal {
   submittedAt: string;
 }
 
-export interface JobFilters {
-  search?: string;
-  category?: string;
-  type?: JobListing["type"];
-  location?: JobListing["location"]["type"];
-  minBudget?: number;
-  maxBudget?: number;
-  skills?: string[];
-  status?: JobListing["status"];
-}
-
 export interface FreelancerFilters {
   search?: string;
   skills?: string[];
@@ -88,31 +113,4 @@ export interface FreelancerFilters {
   minRating?: number;
   minExperience?: number;
   status?: FreelancerProfile["status"];
-}
-
-export interface JobFormData {
-  title: string;
-  description: string;
-  requirements: string[];
-  budget: {
-    min: number;
-    max: number;
-    currency: string;
-  };
-  duration: string;
-  type: JobListing["type"];
-  category: string;
-  skills: string[];
-  location: {
-    type: JobListing["location"]["type"];
-    address?: string;
-  };
-  deadline: string;
-}
-
-export interface ProposalFormData {
-  jobId: string;
-  coverLetter: string;
-  bid: number;
-  estimatedDuration: string;
 }
