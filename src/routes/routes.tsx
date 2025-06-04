@@ -56,33 +56,33 @@ const router = createBrowserRouter([
   {
     path: "/admin",
     element: (
-      // <ProtectedRoute role="admin">
-      <ThemeProvider>
-        <DashboardLayout />
-      </ThemeProvider>
-      // </ProtectedRoute>
+      <ProtectedRoute role="admin">
+        <ThemeProvider>
+          <DashboardLayout />
+        </ThemeProvider>
+      </ProtectedRoute>
     ),
     children: routeGenerator(adminPaths),
   },
   {
     path: "/student",
     element: (
-      // <ProtectedRoute role="student">
-      <ThemeProvider>
-        <DashboardLayout />
-      </ThemeProvider>
-      // </ProtectedRoute>
+      <ProtectedRoute role="student">
+        <ThemeProvider>
+          <DashboardLayout />
+        </ThemeProvider>
+      </ProtectedRoute>
     ),
     children: routeGenerator(studentPaths),
   },
   {
     path: "/instructor",
     element: (
-      // <ProtectedRoute role="student">
-      <ThemeProvider>
-        <DashboardLayout />
-      </ThemeProvider>
-      // </ProtectedRoute>
+      <ProtectedRoute role="instructor">
+        <ThemeProvider>
+          <DashboardLayout />
+        </ThemeProvider>
+      </ProtectedRoute>
     ),
     children: routeGenerator(instructorPaths),
   },

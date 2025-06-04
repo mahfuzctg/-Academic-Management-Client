@@ -14,7 +14,7 @@ const instructorApi = baseApi.injectEndpoints({
         }
 
         return {
-          url: "/instructors",
+          url: "/faculty",
           method: "GET",
           params: params,
         };
@@ -30,7 +30,7 @@ const instructorApi = baseApi.injectEndpoints({
 
     addInstructor: builder.mutation({
       query: (data) => ({
-        url: "/instructors",
+        url: "/faculties",
         method: "POST",
         body: data,
       }),
@@ -39,7 +39,7 @@ const instructorApi = baseApi.injectEndpoints({
 
     updateInstructor: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/instructors/${id}`,
+        url: `/faculties/${id}`,
         method: "PATCH",
         body: data,
       }),
@@ -48,7 +48,7 @@ const instructorApi = baseApi.injectEndpoints({
 
     deleteInstructor: builder.mutation({
       query: (id) => ({
-        url: `/instructors/${id}`,
+        url: `/faculties/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["instructor"],
@@ -56,7 +56,7 @@ const instructorApi = baseApi.injectEndpoints({
 
     assignSubject: builder.mutation({
       query: ({ instructorId, subjectId }) => ({
-        url: `/instructors/${instructorId}/subjects`,
+        url: `/faculties/${instructorId}/subjects`,
         method: "POST",
         body: { subjectId },
       }),
@@ -65,7 +65,7 @@ const instructorApi = baseApi.injectEndpoints({
 
     updateGrade: builder.mutation({
       query: ({ instructorId, subjectId, studentId, grade }) => ({
-        url: `/instructors/${instructorId}/subjects/${subjectId}/grades`,
+        url: `/faculties/${instructorId}/subjects/${subjectId}/grades`,
         method: "POST",
         body: { studentId, grade },
       }),
