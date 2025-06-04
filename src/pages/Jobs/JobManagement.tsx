@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useAppSelector } from "@/redux/hooks";
+import { useAppSelector, useAppDispatch } from "@/redux/hooks";
 import { selectCurrentUser } from "@/redux/features/auth/authSlice";
+import { setFilters, clearFilters } from "@/redux/features/job/jobSlice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -17,13 +18,10 @@ import { useGetAllJobsQuery } from "@/redux/features/job/jobApi";
 import type { JobListing } from "@/types/job";
 
 const JobManagement = () => {
+  const dispatch = useAppDispatch();
   const user = useAppSelector(selectCurrentUser);
-  const { data: jobsData, isLoading, error } = useGetAllJobsQuery({});
-  const [filters, setFilters] = useState({
-    search: "",
-    type: "",
-    department: "",
-  });
+  const { filters } = useAppSelector((state) => state.jobs);
+  const { data: jobsData, isLoading, error } = useGetAllJobsQuery(filters);
 
   const jobs = jobsData?.data || [];
 
@@ -36,29 +34,25 @@ const JobManagement = () => {
 
     const matchesType = !filters.type || job.type === filters.type;
     const matchesDepartment =
-      !filters.department || job.department === filters.department;
+      !filters.department || job?.department === filters.department;
 
     return matchesSearch && matchesType && matchesDepartment;
   });
 
   const handleSearch = (value: string) => {
-    setFilters((prev) => ({ ...prev, search: value }));
+    dispatch(setFilters({ search: value }));
   };
 
   const handleTypeChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, type: value }));
+    dispatch(setFilters({ type: value }));
   };
 
   const handleDepartmentChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, department: value }));
+    dispatch(setFilters({ department: value }));
   };
 
   const handleClearFilters = () => {
-    setFilters({
-      search: "",
-      type: "",
-      department: "",
-    });
+    dispatch(clearFilters());
   };
 
   const getTypeColor = (type: string) => {
@@ -111,11 +105,11 @@ const JobManagement = () => {
           <div className="flex flex-wrap gap-4 mb-6">
             <Input
               placeholder="Search jobs..."
-              value={filters.search}
+              value={filters.search || ""}
               onChange={(e) => handleSearch(e.target.value)}
               className="max-w-sm"
             />
-            <Select value={filters.type} onValueChange={handleTypeChange}>
+            <Select value={filters.type || ""} onValueChange={handleTypeChange}>
               <SelectTrigger className="w-[180px]">
                 <SelectValue placeholder="Job Type" />
               </SelectTrigger>
@@ -127,7 +121,7 @@ const JobManagement = () => {
               </SelectContent>
             </Select>
             <Select
-              value={filters.department}
+              value={filters.department || ""}
               onValueChange={handleDepartmentChange}
             >
               <SelectTrigger className="w-[180px]">
@@ -179,7 +173,7 @@ const JobManagement = () => {
                     </div>
                     <div className="flex justify-between items-center pt-4">
                       <div className="text-sm text-muted-foreground">
-                        <p>Posted: {job.postedDate}</p>
+                        <p>Posted: {job.postedAt}</p>
                         <p>Deadline: {job.deadline}</p>
                       </div>
                       <div className="flex gap-2">

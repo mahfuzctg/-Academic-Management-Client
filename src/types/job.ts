@@ -1,6 +1,7 @@
 export interface JobListing {
   id: string;
   title: string;
+  department: string;
   description: string;
   requirements: string[];
   budget: {
