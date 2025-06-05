@@ -1,18 +1,22 @@
-import { createBrowserRouter } from "react-router-dom";
-import { ThemeProvider } from "@/components/theme-provider";
-import HomeLayout from "@/components/layout/HomeLayout";
-import LoginForm from "@/pages/Login";
-import RegisterForm from "@/pages/Register";
-import ProtectedRoute from "@/components/layout/ProtectedRoute";
-import { routeGenerator } from "@/utils/routesGenerator";
-import { adminPaths } from "./admin.routes";
-import { studentPaths } from "./student.routes";
+// src/routes/index.tsx
+
 import DashboardLayout from "@/components/layout/DashboardLayout";
+import HomeLayout from "@/components/layout/HomeLayout";
+import ProtectedRoute from "@/components/layout/ProtectedRoute";
+import { ThemeProvider } from "@/components/theme-provider";
+import CourseEnrollment from "@/pages/Courses/CourseEnrollment";
 import Home from "@/pages/Home";
 import InstructorManagement from "@/pages/Instructors/InstructorManagement";
-import { instructorPaths } from "./instructor.routes";
 import JobManagement from "@/pages/Jobs/JobManagement";
-import CourseEnrollment from "@/pages/Courses/CourseEnrollment";
+import LoginForm from "@/pages/Login";
+
+import NotFound from "@/pages/NotFound/NotFound";
+import RegisterForm from "@/pages/Register";
+import { routeGenerator } from "@/utils/routesGenerator";
+import { createBrowserRouter } from "react-router-dom";
+import { adminPaths } from "./admin.routes";
+import { instructorPaths } from "./instructor.routes";
+import { studentPaths } from "./student.routes";
 
 const router = createBrowserRouter([
   {
@@ -31,12 +35,10 @@ const router = createBrowserRouter([
         path: "courses",
         element: <CourseEnrollment />,
       },
-
       {
         path: "instructors",
         element: <InstructorManagement />,
       },
-
       {
         path: "jobs",
         element: <JobManagement />,
@@ -49,6 +51,10 @@ const router = createBrowserRouter([
         path: "register",
         element: <RegisterForm />,
       },
+      {
+        path: "*",
+        element: <NotFound />,
+      },
     ],
   },
   {
@@ -60,7 +66,10 @@ const router = createBrowserRouter([
         </ThemeProvider>
       </ProtectedRoute>
     ),
-    children: routeGenerator(adminPaths),
+    children: [
+      ...routeGenerator(adminPaths),
+      { path: "*", element: <NotFound /> },
+    ],
   },
   {
     path: "/student",
@@ -71,7 +80,10 @@ const router = createBrowserRouter([
         </ThemeProvider>
       </ProtectedRoute>
     ),
-    children: routeGenerator(studentPaths),
+    children: [
+      ...routeGenerator(studentPaths),
+      { path: "*", element: <NotFound /> },
+    ],
   },
   {
     path: "/instructor",
@@ -82,7 +94,14 @@ const router = createBrowserRouter([
         </ThemeProvider>
       </ProtectedRoute>
     ),
-    children: routeGenerator(instructorPaths),
+    children: [
+      ...routeGenerator(instructorPaths),
+      { path: "*", element: <NotFound /> },
+    ],
+  },
+  {
+    path: "*",
+    element: <NotFound />, // ✅ Global catch-all route for any unknown paths
   },
 ]);
 
