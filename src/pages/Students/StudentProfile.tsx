@@ -1,5 +1,3 @@
-// src/pages/StudentProfile.tsx
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -19,7 +17,7 @@ import { useEffect, useState } from "react";
 
 export default function StudentProfile() {
   const { user } = useAppSelector((state) => state.auth);
-  const studentId = user?.id;
+  const studentId = user?._id;
 
   const { data: studentData, isLoading } = useGetStudentProfileQuery(
     studentId!,
@@ -36,9 +34,10 @@ export default function StudentProfile() {
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
+    email: "",
     contactNumber: "",
     profileImage: "",
-    gender: "male",
+    gender: "male" as "male" | "female" | "other",
     address: {
       street: "",
       city: "",
@@ -53,6 +52,7 @@ export default function StudentProfile() {
       setFormData({
         firstName: student.firstName || "",
         lastName: student.lastName || "",
+        email: student.email || "",
         contactNumber: student.contactNumber || "",
         profileImage: student.profileImage || "",
         gender: student.gender || "male",
@@ -65,13 +65,30 @@ export default function StudentProfile() {
         },
       });
     }
-  }, [student]);
+  }, [student, isEditing]);
 
   const handleEdit = () => {
     setIsEditing(true);
   };
 
   const handleCancel = () => {
+    if (student) {
+      setFormData({
+        firstName: student.firstName || "",
+        lastName: student.lastName || "",
+        email: student.email || "",
+        contactNumber: student.contactNumber || "",
+        profileImage: student.profileImage || "",
+        gender: student.gender || "male",
+        address: {
+          street: student.address?.street || "",
+          city: student.address?.city || "",
+          state: student.address?.state || "",
+          zipCode: student.address?.zipCode || "",
+          country: student.address?.country || "",
+        },
+      });
+    }
     setIsEditing(false);
   };
 
@@ -131,35 +148,54 @@ export default function StudentProfile() {
           {/* Editable Form */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <Label>First Name</Label>
+              <Label htmlFor="firstName">First Name</Label>
               <Input
+                id="firstName"
                 name="firstName"
                 value={formData.firstName}
                 onChange={handleChange}
+                placeholder="Enter first name"
               />
             </div>
             <div>
-              <Label>Last Name</Label>
+              <Label htmlFor="lastName">Last Name</Label>
               <Input
+                id="lastName"
                 name="lastName"
                 value={formData.lastName}
                 onChange={handleChange}
+                placeholder="Enter last name"
               />
             </div>
             <div>
-              <Label>Contact Number</Label>
+              <Label htmlFor="email">Email</Label>
               <Input
+                id="email"
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter email"
+              />
+            </div>
+            <div>
+              <Label htmlFor="contactNumber">Contact Number</Label>
+              <Input
+                id="contactNumber"
                 name="contactNumber"
                 value={formData.contactNumber}
                 onChange={handleChange}
+                placeholder="Enter contact number"
               />
             </div>
             <div>
-              <Label>Profile Image URL</Label>
+              <Label htmlFor="profileImage">Profile Image URL</Label>
               <Input
+                id="profileImage"
                 name="profileImage"
                 value={formData.profileImage}
                 onChange={handleChange}
+                placeholder="Enter image URL"
               />
             </div>
             <div>
@@ -179,43 +215,53 @@ export default function StudentProfile() {
               </Select>
             </div>
             <div>
-              <Label>Street</Label>
+              <Label htmlFor="street">Street</Label>
               <Input
+                id="street"
                 name="street"
                 value={formData.address.street}
                 onChange={(e) => handleChange(e, "address")}
+                placeholder="Enter street"
               />
             </div>
             <div>
-              <Label>City</Label>
+              <Label htmlFor="city">City</Label>
               <Input
+                id="city"
                 name="city"
                 value={formData.address.city}
                 onChange={(e) => handleChange(e, "address")}
+                placeholder="Enter city"
               />
             </div>
             <div>
-              <Label>State</Label>
+              <Label htmlFor="state">State</Label>
               <Input
+                id="state"
                 name="state"
                 value={formData.address.state}
                 onChange={(e) => handleChange(e, "address")}
+                placeholder="Enter state"
               />
             </div>
             <div>
-              <Label>Zip Code</Label>
+              <Label htmlFor="zipCode">Zip Code</Label>
               <Input
+                id="zipCode"
                 name="zipCode"
                 value={formData.address.zipCode}
                 onChange={(e) => handleChange(e, "address")}
+                placeholder="Enter zip code"
               />
             </div>
             <div>
-              <Label>Country</Label>
+              <Label htmlFor="country">Country</Label>
               <Input
+                id="country"
                 name="country"
                 value={formData.address.country}
                 onChange={(e) => handleChange(e, "address")}
+                placeholder="Enter country"
               />
             </div>
           </div>
@@ -231,26 +277,15 @@ export default function StudentProfile() {
         </>
       ) : (
         <>
-          {/* View Mode */}
-          <p>
-            <strong>Name:</strong> {student?.firstName} {student?.lastName}
+          {/* Default view: only profile picture, full name and role */}
+          <p className="text-center text-xl font-semibold">
+            {student?.firstName} {student?.lastName}
           </p>
-          <p>
-            <strong>Email:</strong> {student?.email}
-          </p>
-          <p>
-            <strong>Gender:</strong> {student?.gender}
-          </p>
-          <p>
-            <strong>Contact:</strong> {student?.contactNumber}
-          </p>
-          <p>
-            <strong>Address:</strong> {student?.address?.street},{" "}
-            {student?.address?.city}, {student?.address?.state}{" "}
-            {student?.address?.zipCode}, {student?.address?.country}
+          <p className="text-center text-gray-600 mt-1">
+            Role: {student?.role || "Student"}
           </p>
 
-          <div className="mt-6 text-right">
+          <div className="mt-6 text-center">
             <Button onClick={handleEdit}>Edit Profile</Button>
           </div>
         </>
