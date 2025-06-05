@@ -92,6 +92,16 @@ const studentApi = baseApi.injectEndpoints({
         };
       },
     }),
+
+    // Update own profile
+    updateStudent: builder.mutation({
+      query: ({ id, body }) => ({
+        url: `/students/${id}`,
+        method: "PATCH",
+        body,
+      }),
+      invalidatesTags: ["student-profile"],
+    }),
   }),
 });
 
@@ -102,4 +112,5 @@ export const {
   useDropCourseMutation,
   useGetStudentEnrollmentsQuery,
   useGetStudentProfileQuery,
+  useUpdateStudentMutation,
 } = studentApi;

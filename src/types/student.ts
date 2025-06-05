@@ -3,6 +3,7 @@ export interface Student {
   firstName: string;
   lastName: string;
   email: string;
+  profileImage: string;
   dateOfBirth: string;
   gender: "male" | "female" | "other";
   address: {
