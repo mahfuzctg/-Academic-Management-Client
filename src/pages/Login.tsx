@@ -1,16 +1,16 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useLoginMutation } from "@/redux/features/auth/authApi";
-import { useAppDispatch } from "@/redux/hooks";
 import { setUser, type TUser } from "@/redux/features/auth/authSlice";
+import { useAppDispatch } from "@/redux/hooks";
+import { verifyToken } from "@/utils/verifyToken";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { verifyToken } from "@/utils/verifyToken";
+import * as z from "zod";
 
 const loginSchema = z.object({
   id: z.string(),
@@ -46,9 +46,9 @@ export default function LoginForm() {
         toast.success("Logged in");
 
         if (res.data.needsPasswordChange) {
-          navigate(`/change-password`);
-        } else {
           navigate(`/${user.role}/dashboard`);
+        } else {
+          navigate(`/change-password`);
         }
       }
     } catch (error) {

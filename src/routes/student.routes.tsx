@@ -1,5 +1,5 @@
 import { StudentDashboard } from "@/pages/Dashboard/StudentDashboard";
-import StudentManagement from "@/pages/Students/StudentManagement";
+import StudentProfile from "@/pages/Students/StudentProfile";
 
 export const studentPaths = [
   {
@@ -8,8 +8,8 @@ export const studentPaths = [
     element: <StudentDashboard />,
   },
   {
-    name: "Studentmanagement",
-    path: "studentmanagement",
-    element: <StudentManagement />,
+    name: "Profile",
+    path: "profile",
+    element: <StudentProfile />,
   },
 ];

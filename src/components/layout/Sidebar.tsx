@@ -1,9 +1,9 @@
-import React from "react";
-import { useLocation, Link } from "react-router-dom";
-import { useAppSelector } from "@/redux/hooks";
-import { type TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
-import { verifyToken } from "@/utils/verifyToken";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { type TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
+import { useAppSelector } from "@/redux/hooks";
+import { verifyToken } from "@/utils/verifyToken";
+import React from "react";
+import { Link, useLocation } from "react-router-dom";
 
 import { cn } from "@/lib/utils";
 import { adminPaths } from "@/routes/admin.routes";
@@ -53,8 +53,8 @@ const Sidebar: React.FC = () => {
       </div>
       {/* Desktop Sidebar */}
       <aside className="w-64 h-screen  border-r text-primary sticky top-0 hidden lg:flex flex-col">
-        <div className="p-4 text-2xl font-bold text-primary border-b">
-          PH Uni
+        <div className="p-4 text-xl font-bold text-primary border-b">
+          Academic Management
         </div>
         <ScrollArea className="flex-1 p-4">
           <nav className="flex flex-col gap-2">

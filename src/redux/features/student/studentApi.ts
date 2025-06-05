@@ -1,6 +1,7 @@
 import { baseApi } from "@/redux/api/baseApi";
+import type { CourseOffering, Enrollment } from "@/types/course";
 import type { TQueryParam, TResponseRedux } from "@/types/global";
-import type { Student, Course, Enrollment } from "@/types/student";
+import type { Student } from "@/types/student";
 
 const studentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -37,7 +38,7 @@ const studentApi = baseApi.injectEndpoints({
       providesTags: ["student-courses"],
       transformResponse: (
         response: TResponseRedux<{
-          enrolledCourses: Course[];
+          enrolledCourses: CourseOffering[];
           availableCourses: Course[];
         }>
       ) => {
