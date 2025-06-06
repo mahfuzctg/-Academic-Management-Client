@@ -13,6 +13,7 @@ import InstructorManagement from "@/pages/Instructors/InstructorManagement";
 import { instructorPaths } from "./instructor.routes";
 import JobManagement from "@/pages/Jobs/JobManagement";
 import CourseEnrollment from "@/pages/Courses/CourseEnrollment";
+import NotFound from "@/pages/NotFound";
 
 const router = createBrowserRouter([
   {
@@ -83,6 +84,10 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
     children: routeGenerator(instructorPaths),
+  },
+  {
+    path: "*",
+    element: <NotFound />,
   },
 ]);
 
