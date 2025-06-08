@@ -1,15 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
+import type { CourseOffering } from "@/types/course";
 import type {
-  CourseOffering,
-  Enrollment,
+  TEnrollment,
   EnrollmentFilters,
   EnrollmentFormData,
-} from "@/types/course";
+} from "@/types/enrollment.type";
 
 interface EnrollmentState {
   courseOfferings: CourseOffering[];
-  enrollments: Enrollment[];
+  enrollments: TEnrollment[];
   loading: boolean;
   error: string | null;
   filters: EnrollmentFilters;

@@ -36,16 +36,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import {
-  fetchStudents,
-  setFilters,
-  clearFilters,
-  deleteStudent,
-  setSelectedStudent,
-} from "@/redux/features/studentSlice";
+import { setSelectedStudent } from "@/redux/features/studentSlice";
 import type { RootState } from "@/redux/store";
 import type { TStudent } from "@/types/student";
 import { useState } from "react";
+import {
+  useGetAllStudentsQuery,
+  useDeleteStudentMutation,
+} from "@/redux/features/student/studentApi";
 
 interface StudentListProps {
   onEdit: (student: TStudent) => void;
@@ -53,34 +51,47 @@ interface StudentListProps {
 
 const StudentList = ({ onEdit }: StudentListProps) => {
   const dispatch = useDispatch();
-  const { students, loading, error, filters } = useSelector(
-    (state: RootState) => state.students
-  );
+  const [filters, setFilters] = useState({
+    search: "",
+    department: "",
+    faculty: "",
+    semester: "",
+  });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<TStudent | null>(null);
 
-  useEffect(() => {
-    dispatch(fetchStudents(filters));
-  }, [dispatch, filters]);
+  const {
+    data: studentsData,
+    isLoading,
+    error,
+  } = useGetAllStudentsQuery(filters);
+  const [deleteStudent] = useDeleteStudentMutation();
+
+  const students = studentsData?.data || [];
 
   const handleSearch = (value: string) => {
-    dispatch(setFilters({ search: value }));
+    setFilters((prev) => ({ ...prev, search: value }));
   };
 
   const handleDepartmentChange = (value: string) => {
-    dispatch(setFilters({ department: value }));
+    setFilters((prev) => ({ ...prev, department: value }));
   };
 
   const handleFacultyChange = (value: string) => {
-    dispatch(setFilters({ faculty: value }));
+    setFilters((prev) => ({ ...prev, faculty: value }));
   };
 
   const handleSemesterChange = (value: string) => {
-    dispatch(setFilters({ semester: value }));
+    setFilters((prev) => ({ ...prev, semester: value }));
   };
 
   const handleClearFilters = () => {
-    dispatch(clearFilters());
+    setFilters({
+      search: "",
+      department: "",
+      faculty: "",
+      semester: "",
+    });
   };
 
   const handleEdit = (student: TStudent) => {
@@ -95,13 +106,17 @@ const StudentList = ({ onEdit }: StudentListProps) => {
 
   const confirmDelete = async () => {
     if (studentToDelete) {
-      await dispatch(deleteStudent(studentToDelete.id));
-      setDeleteDialogOpen(false);
-      setStudentToDelete(null);
+      try {
+        await deleteStudent(studentToDelete.id).unwrap();
+        setDeleteDialogOpen(false);
+        setStudentToDelete(null);
+      } catch (error) {
+        console.error("Failed to delete student:", error);
+      }
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -124,7 +139,7 @@ const StudentList = ({ onEdit }: StudentListProps) => {
             <div className="flex flex-wrap gap-4">
               <Input
                 placeholder="Search students..."
-                value={filters.search || ""}
+                value={filters.search}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="max-w-sm"
               />
@@ -191,7 +206,7 @@ const StudentList = ({ onEdit }: StudentListProps) => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {students.map((student) => (
+                {students.map((student: TStudent) => (
                   <TableRow key={student.id}>
                     <TableCell>
                       {`${student.name.firstName} ${

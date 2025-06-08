@@ -86,7 +86,7 @@ const studentApi = baseApi.injectEndpoints({
     //  Add Student
     addStudent: builder.mutation({
       query: (studentData: Partial<TStudent>) => ({
-        url: "/students",
+        url: "/users/create-student",
         method: "POST",
         body: studentData,
       }),

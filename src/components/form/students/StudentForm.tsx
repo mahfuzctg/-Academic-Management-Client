@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion";
@@ -21,11 +21,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { addStudent, updateStudent } from "@/redux/features/studentSlice";
+import { setSelectedStudent } from "@/redux/features/studentSlice";
 import type { TStudent } from "@/types/student";
-import { studentFormSchema } from "@/schema/studentFormSchema";
+import {
+  useAddStudentMutation,
+  useUpdateStudentMutation,
+} from "@/redux/features/student/studentApi";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  createStudentValidationSchema,
+  updateStudentValidationSchema,
+} from "@/schema/studentFormSchema";
 
-type StudentFormData = Omit<TStudent, "id" | "user" | "isDeleted">;
+type StudentFormData = z.infer<
+  typeof createStudentValidationSchema
+>["body"]["student"];
 
 interface StudentFormProps {
   student?: TStudent;
@@ -34,8 +44,15 @@ interface StudentFormProps {
 
 const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
   const dispatch = useDispatch();
+  const { toast } = useToast();
+  const [addStudent] = useAddStudentMutation();
+  const [updateStudent] = useUpdateStudentMutation();
   const form = useForm<StudentFormData>({
-    resolver: zodResolver(studentFormSchema as any),
+    resolver: zodResolver(
+      student
+        ? updateStudentValidationSchema.shape.body.shape.student
+        : createStudentValidationSchema.shape.body.shape.student
+    ) as Resolver<StudentFormData>,
     defaultValues: student || {
       name: {
         firstName: "",
@@ -47,7 +64,7 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
       email: "",
       contactNo: "",
       emergencyContactNo: "",
-      bloogGroup: undefined,
+      bloodGroup: "A+",
       presentAddress: "",
       permanentAddress: "",
       guardian: {
@@ -64,23 +81,37 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
         contactNo: "",
         address: "",
       },
-      profileImg: "",
       admissionSemester: "",
       academicDepartment: "",
-      academicFaculty: "",
     },
   });
 
   const onSubmit = async (data: StudentFormData) => {
     try {
       if (student) {
-        await dispatch(updateStudent({ id: student.id, data })).unwrap();
+        await updateStudent({
+          id: student.id,
+          updatedData: data,
+        }).unwrap();
+        toast({
+          title: "Success",
+          description: "Student updated successfully",
+        });
       } else {
-        await dispatch(addStudent(data)).unwrap();
+        await addStudent(data).unwrap();
+        toast({
+          title: "Success",
+          description: "Student added successfully",
+        });
       }
       onSuccess?.();
     } catch (error) {
       console.error("Error submitting form:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save student data",
+        variant: "destructive",
+      });
     }
   };
 
@@ -227,7 +258,7 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
                   />
                   <FormField
                     control={form.control}
-                    name="bloogGroup"
+                    name="bloodGroup"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Blood Group</FormLabel>
@@ -439,7 +470,7 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
 
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Academic Information</h3>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
                     name="admissionSemester"
@@ -485,34 +516,6 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
                             <SelectItem value="computer-science">
                               Computer Science
                             </SelectItem>
-                            <SelectItem value="engineering">
-                              Engineering
-                            </SelectItem>
-                            <SelectItem value="business">Business</SelectItem>
-                            <SelectItem value="arts">Arts</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="academicFaculty"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Academic Faculty</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select faculty" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="science">Science</SelectItem>
                             <SelectItem value="engineering">
                               Engineering
                             </SelectItem>
