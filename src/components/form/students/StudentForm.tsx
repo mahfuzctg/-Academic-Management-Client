@@ -2,7 +2,6 @@ import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion";
-import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,7 +20,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { setSelectedStudent } from "@/redux/features/studentSlice";
 import type { TStudent } from "@/types/student";
 import {
   useAddStudentMutation,
@@ -32,10 +30,9 @@ import {
   createStudentValidationSchema,
   updateStudentValidationSchema,
 } from "@/schema/studentFormSchema";
+import { useState } from "react";
 
-type StudentFormData = z.infer<
-  typeof createStudentValidationSchema
->["body"]["student"];
+type StudentFormData = z.infer<typeof createStudentValidationSchema>;
 
 interface StudentFormProps {
   student?: TStudent;
@@ -43,51 +40,65 @@ interface StudentFormProps {
 }
 
 const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
-  const dispatch = useDispatch();
   const { toast } = useToast();
   const [addStudent] = useAddStudentMutation();
   const [updateStudent] = useUpdateStudentMutation();
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
   const form = useForm<StudentFormData>({
     resolver: zodResolver(
-      student
-        ? updateStudentValidationSchema.shape.body.shape.student
-        : createStudentValidationSchema.shape.body.shape.student
+      student ? updateStudentValidationSchema : createStudentValidationSchema
     ) as Resolver<StudentFormData>,
     defaultValues: student || {
       name: {
-        firstName: "",
-        middleName: "",
-        lastName: "",
+        firstName: "John",
+        middleName: "William",
+        lastName: "Doe",
       },
       gender: "male",
-      dateOfBirth: "",
-      email: "",
-      contactNo: "",
-      emergencyContactNo: "",
+      dateOfBirth: "2000-01-01",
+      email: "john.doe@example.com",
+      contactNo: "+1234567890",
+      emergencyContactNo: "+1987654321",
       bloodGroup: "A+",
-      presentAddress: "",
-      permanentAddress: "",
+      presentAddress: "123 Main Street, City, State 12345",
+      permanentAddress: "456 Home Avenue, Hometown, State 67890",
       guardian: {
-        fatherName: "",
-        fatherOccupation: "",
-        fatherContactNo: "",
-        motherName: "",
-        motherOccupation: "",
-        motherContactNo: "",
+        fatherName: "Robert Doe",
+        fatherOccupation: "Engineer",
+        fatherContactNo: "+1122334455",
+        motherName: "Mary Doe",
+        motherOccupation: "Teacher",
+        motherContactNo: "+1555666777",
       },
       localGuardian: {
-        name: "",
-        occupation: "",
-        contactNo: "",
-        address: "",
+        name: "James Smith",
+        occupation: "Business Owner",
+        contactNo: "+1888999000",
+        address: "789 Local Street, City, State 54321",
       },
-      admissionSemester: "",
-      academicDepartment: "",
+      admissionSemester: "fall2023",
+      academicDepartment: "computer-science",
     },
   });
 
   const onSubmit = async (data: StudentFormData) => {
     try {
+      const formData = new FormData();
+      const studentData = {
+        password: "123456",
+        student: data,
+      };
+      formData.append("data", JSON.stringify(studentData));
+
+      if (selectedImage) {
+        formData.append("file", selectedImage);
+      }
+
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
       if (student) {
         await updateStudent({
           id: student.id,
@@ -98,7 +109,7 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
           description: "Student updated successfully",
         });
       } else {
-        await addStudent(data).unwrap();
+        await addStudent(formData as any).unwrap();
         toast({
           title: "Success",
           description: "Student added successfully",
@@ -112,6 +123,13 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
         description: "Failed to save student data",
         variant: "destructive",
       });
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
     }
   };
 
@@ -130,6 +148,27 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Personal Information</h3>
+
+                {/* Image Upload Field */}
+                <div className="flex flex-col gap-2">
+                  <FormLabel>Profile Image</FormLabel>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="cursor-pointer"
+                  />
+                  {selectedImage && (
+                    <div className="mt-2">
+                      <img
+                        src={URL.createObjectURL(selectedImage)}
+                        alt="Preview"
+                        className="w-32 h-32 object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <div className="grid grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
