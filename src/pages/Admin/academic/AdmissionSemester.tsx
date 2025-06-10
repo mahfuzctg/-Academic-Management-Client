@@ -27,9 +27,9 @@ import {
   useUpdateSemesterMutation,
 } from "@/redux/features/academic/academicApi";
 import {
-  Semester,
-  CreateSemesterDto,
-  UpdateSemesterDto,
+  type Semester,
+  type CreateSemesterDto,
+  type UpdateSemesterDto,
 } from "@/types/academic";
 import { FormFields } from "@/components/ui/form-field";
 

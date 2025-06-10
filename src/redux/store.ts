@@ -11,6 +11,7 @@ import {
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import { baseApi } from "./api/baseApi";
+import { academicApi } from "./features/academic/academicApi";
 import academicPerformanceReducer from "./features/academicPerformanceSlice";
 import authReducer from "./features/auth/authSlice";
 import studentReducer from "./features/studentSlice";
@@ -25,6 +26,7 @@ const persistedAuthReducer = persistReducer(persistConfig, authReducer);
 export const store = configureStore({
   reducer: {
     [baseApi.reducerPath]: baseApi.reducer,
+    [academicApi.reducerPath]: academicApi.reducer,
     auth: persistedAuthReducer,
     students: studentReducer,
     academicPerformance: academicPerformanceReducer,
@@ -34,7 +36,7 @@ export const store = configureStore({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    }).concat(baseApi.middleware),
+    }).concat(baseApi.middleware, academicApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

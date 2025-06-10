@@ -16,24 +16,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import {
   useAddDepartmentMutation,
   useGetDepartmentsQuery,
   useUpdateDepartmentMutation,
 } from "@/redux/features/academic/academicApi";
+import { FormFields } from "@/components/ui/form-field";
 
 const departmentSchema = z.object({
   name: z.string().min(1, "Department name is required"),
@@ -69,10 +62,7 @@ const AcademicDepartment = () => {
   const onSubmit = async (data: DepartmentFormData) => {
     try {
       if (selectedDepartment) {
-        await updateDepartment({
-          id: selectedDepartment.id,
-          data,
-        }).unwrap();
+        await updateDepartment(data).unwrap();
         toast({
           title: "Success",
           description: "Department updated successfully",
@@ -126,76 +116,40 @@ const AcademicDepartment = () => {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
-                <FormField
-                  control={form.control}
+                <FormFields.TextWithIcon
+                  form={form}
                   name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Department Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="e.g., Computer Science"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Department Name"
+                  placeholder="e.g., Computer Science"
+                  required
                 />
-                <FormField
-                  control={form.control}
+                <FormFields.TextWithIcon
+                  form={form}
                   name="code"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Department Code</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g., CS" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Department Code"
+                  placeholder="e.g., CS"
+                  required
                 />
-                <FormField
-                  control={form.control}
+                <FormFields.TextWithIcon
+                  form={form}
                   name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Description</FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          placeholder="Department description"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Description"
+                  placeholder="Department description"
+                  required
                 />
-                <FormField
-                  control={form.control}
+                <FormFields.TextWithIcon
+                  form={form}
                   name="headOfDepartment"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Head of Department</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g., Dr. John Doe" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Head of Department"
+                  placeholder="e.g., Dr. John Doe"
+                  required
                 />
-                <FormField
-                  control={form.control}
+                <FormFields.TextWithIcon
+                  form={form}
                   name="totalCredits"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Total Credits</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g., 120" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Total Credits"
+                  placeholder="e.g., 120"
+                  required
                 />
                 <Button type="submit" className="w-full">
                   {selectedDepartment ? "Update Department" : "Add Department"}
