@@ -2,7 +2,7 @@ export interface TUserName {
   firstName: string;
   middleName?: string;
   lastName: string;
-<<<<<<< HEAD
+
   email: string;
   profileImage: string;
   dateOfBirth: string;
@@ -32,9 +32,7 @@ export interface TUserName {
   };
   createdAt: string;
   updatedAt: string;
-=======
->>>>>>> 3e1a0a52a587a93e210b4802c457a26d39ff97fd
-}
+
 
 export interface TGuardian {
   fatherName: string;
@@ -53,6 +51,10 @@ export interface TLocalGuardian {
 }
 
 export interface TStudent {
+  lastName: string;
+  firstName: string;
+  contactNumber: string;
+  address: any;
   id: string;
   name: TUserName;
   gender: "male" | "female" | "other";
