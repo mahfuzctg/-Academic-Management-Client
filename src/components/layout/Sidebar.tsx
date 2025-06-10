@@ -53,8 +53,13 @@ const Sidebar: React.FC = () => {
       </div>
       {/* Desktop Sidebar */}
       <aside className="w-64 h-screen  border-r text-primary sticky top-0 hidden lg:flex flex-col">
+<<<<<<< HEAD
         <div className="p-4 text-xl font-bold text-primary border-b">
           Academic Management
+=======
+        <div className="p-4 text-2xl font-bold text-primary border-b">
+          AcademicMS
+>>>>>>> 3e1a0a52a587a93e210b4802c457a26d39ff97fd
         </div>
         <ScrollArea className="flex-1 p-4">
           <nav className="flex flex-col gap-2">

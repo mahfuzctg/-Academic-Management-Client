@@ -17,7 +17,7 @@ import { useEffect, useState } from "react";
 
 export default function StudentProfile() {
   const { user } = useAppSelector((state) => state.auth);
-  const studentId = user?._id;
+  const studentId = user?.id;
 
   const { data: studentData, isLoading } = useGetStudentProfileQuery(
     studentId!,

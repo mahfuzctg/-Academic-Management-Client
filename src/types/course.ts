@@ -1,3 +1,11 @@
+import type {
+  TEnrollment,
+  EnrollmentFilters,
+  EnrollmentFormData,
+} from "./enrollment.type";
+
+export type { TEnrollment, EnrollmentFilters, EnrollmentFormData };
+
 export interface Subject {
   id: string;
   code: string;
@@ -31,29 +39,6 @@ export interface CourseOffering {
   };
   status: "open" | "closed" | "cancelled";
   registrationDeadline: string;
-}
-
-export interface Enrollment {
-  id: string;
-  studentId: string;
-  courseOfferingId: string;
-  courseOffering: CourseOffering;
-  status: "registered" | "dropped" | "completed";
-  registrationDate: string;
-  grade?: string;
-}
-
-export interface EnrollmentFilters {
-  semester?: number;
-  academicYear?: string;
-  department?: string;
-  search?: string;
-  status?: CourseOffering["status"];
-}
-
-export interface EnrollmentFormData {
-  courseOfferingId: string;
-  studentId: string;
 }
 
 export interface ICourse {

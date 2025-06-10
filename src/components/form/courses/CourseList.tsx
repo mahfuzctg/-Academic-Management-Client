@@ -37,7 +37,8 @@ import {
   setFilters,
 } from "@/redux/features/enrollmentSlice";
 import type { RootState } from "@/redux/store";
-import type { CourseOffering, Enrollment } from "@/types/course";
+import type { CourseOffering } from "@/types/course";
+import type { TEnrollment } from "@/types/enrollment.type";
 import { motion } from "framer-motion";
 import { Info } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -59,7 +60,7 @@ const CourseList = ({ studentId }: CourseListProps) => {
     null
   );
   const [selectedEnrollment, setSelectedEnrollment] =
-    useState<Enrollment | null>(null);
+    useState<TEnrollment | null>(null);
 
   useEffect(() => {
     dispatch(fetchCourseOfferings(filters));
@@ -91,7 +92,7 @@ const CourseList = ({ studentId }: CourseListProps) => {
     setEnrollDialogOpen(true);
   };
 
-  const handleDrop = (enrollment: Enrollment) => {
+  const handleDrop = (enrollment: TEnrollment) => {
     setSelectedEnrollment(enrollment);
     setDropDialogOpen(true);
   };

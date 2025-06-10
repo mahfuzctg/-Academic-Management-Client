@@ -85,6 +85,39 @@ export default function LoginForm() {
             <Button type="submit" className="w-full">
               Sign In
             </Button>
+
+            <div className="mt-4 space-y-2">
+              <p className="text-sm text-center text-gray-500">Quick Login</p>
+              <div className="grid grid-cols-1 gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    onSubmit({ id: "A-0001", password: "Admin@123" })
+                  }
+                >
+                  Login as Admin
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    onSubmit({ id: "2025020001", password: "Student@123" })
+                  }
+                >
+                  Login as Student
+                </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    onSubmit({ id: "F-0001", password: "Faculty@123" })
+                  }
+                >
+                  Login as Faculty
+                </Button>
+              </div>
+            </div>
           </form>
         </CardContent>
       </Card>

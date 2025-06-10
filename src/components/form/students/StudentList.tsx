@@ -36,85 +36,90 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import {
-  fetchStudents,
-  setFilters,
-  clearFilters,
-  deleteStudent,
-  setSelectedStudent,
-} from "@/redux/features/studentSlice";
+import { setSelectedStudent } from "@/redux/features/studentSlice";
 import type { RootState } from "@/redux/store";
-import type { Student } from "@/types/student";
+import type { TStudent } from "@/types/student";
 import { useState } from "react";
+import {
+  useGetAllStudentsQuery,
+  useDeleteStudentMutation,
+} from "@/redux/features/student/studentApi";
 
 interface StudentListProps {
-  onEdit: (student: Student) => void;
+  onEdit: (student: TStudent) => void;
 }
 
 const StudentList = ({ onEdit }: StudentListProps) => {
   const dispatch = useDispatch();
-  const { students, loading, error, filters } = useSelector(
-    (state: RootState) => state.students
-  );
+  const [filters, setFilters] = useState({
+    search: "",
+    department: "",
+    faculty: "",
+    semester: "",
+  });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [studentToDelete, setStudentToDelete] = useState<Student | null>(null);
+  const [studentToDelete, setStudentToDelete] = useState<TStudent | null>(null);
 
-  useEffect(() => {
-    dispatch(fetchStudents(filters));
-  }, [dispatch, filters]);
+  const {
+    data: studentsData,
+    isLoading,
+    error,
+  } = useGetAllStudentsQuery(filters);
+  const [deleteStudent] = useDeleteStudentMutation();
+
+  const students = studentsData?.data || [];
 
   const handleSearch = (value: string) => {
-    dispatch(setFilters({ search: value }));
+    setFilters((prev) => ({ ...prev, search: value }));
   };
 
   const handleDepartmentChange = (value: string) => {
-    dispatch(setFilters({ department: value }));
+    setFilters((prev) => ({ ...prev, department: value }));
   };
 
-  const handleStatusChange = (value: string) => {
-    dispatch(
-      setFilters({ status: value as Student["academicDetails"]["status"] })
-    );
+  const handleFacultyChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, faculty: value }));
   };
 
   const handleSemesterChange = (value: string) => {
-    dispatch(setFilters({ semester: parseInt(value) }));
+    setFilters((prev) => ({ ...prev, semester: value }));
   };
 
   const handleClearFilters = () => {
-    dispatch(clearFilters());
+    setFilters({
+      search: "",
+      department: "",
+      faculty: "",
+      semester: "",
+    });
   };
 
-  const handleEdit = (student: Student) => {
+  const handleEdit = (student: TStudent) => {
     dispatch(setSelectedStudent(student));
     onEdit(student);
   };
 
-  const handleDelete = (student: Student) => {
+  const handleDelete = (student: TStudent) => {
     setStudentToDelete(student);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
     if (studentToDelete) {
-      await dispatch(deleteStudent(studentToDelete.id));
-      setDeleteDialogOpen(false);
-      setStudentToDelete(null);
+      try {
+        await deleteStudent(studentToDelete.id).unwrap();
+        setDeleteDialogOpen(false);
+        setStudentToDelete(null);
+      } catch (error) {
+        console.error("Failed to delete student:", error);
+      }
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64 text-red-500">
-        Error: {error}
       </div>
     );
   }
@@ -134,7 +139,7 @@ const StudentList = ({ onEdit }: StudentListProps) => {
             <div className="flex flex-wrap gap-4">
               <Input
                 placeholder="Search students..."
-                value={filters.search || ""}
+                value={filters.search}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="max-w-sm"
               />
@@ -154,30 +159,30 @@ const StudentList = ({ onEdit }: StudentListProps) => {
                   <SelectItem value="arts">Arts</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={filters.status} onValueChange={handleStatusChange}>
+              <Select
+                value={filters.faculty}
+                onValueChange={handleFacultyChange}
+              >
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder="Faculty" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="graduated">Graduated</SelectItem>
-                  <SelectItem value="on_leave">On Leave</SelectItem>
+                  <SelectItem value="science">Science</SelectItem>
+                  <SelectItem value="engineering">Engineering</SelectItem>
+                  <SelectItem value="business">Business</SelectItem>
+                  <SelectItem value="arts">Arts</SelectItem>
                 </SelectContent>
               </Select>
               <Select
-                value={filters.semester?.toString()}
+                value={filters.semester}
                 onValueChange={handleSemesterChange}
               >
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Semester" />
                 </SelectTrigger>
                 <SelectContent>
-                  {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                    <SelectItem key={sem} value={sem.toString()}>
-                      Semester {sem}
-                    </SelectItem>
-                  ))}
+                  <SelectItem value="fall2023">Fall 2023</SelectItem>
+                  <SelectItem value="spring2024">Spring 2024</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline" onClick={handleClearFilters}>
@@ -191,43 +196,31 @@ const StudentList = ({ onEdit }: StudentListProps) => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Name</TableHead>
-                  <TableHead>Student ID</TableHead>
+                  <TableHead>ID</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Contact</TableHead>
                   <TableHead>Department</TableHead>
-                  <TableHead>Program</TableHead>
+                  <TableHead>Faculty</TableHead>
                   <TableHead>Semester</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>GPA</TableHead>
                   <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {students.map((student) => (
+                {students.map((student: TStudent) => (
                   <TableRow key={student.id}>
-                    <TableCell>{`${student.firstName} ${student.lastName}`}</TableCell>
-                    <TableCell>{student.academicDetails.studentId}</TableCell>
-                    <TableCell>{student.academicDetails.department}</TableCell>
-                    <TableCell>{student.academicDetails.program}</TableCell>
                     <TableCell>
-                      {student.academicDetails.currentSemester}
+                      {`${student.name.firstName} ${
+                        student.name.middleName
+                          ? student.name.middleName + " "
+                          : ""
+                      }${student.name.lastName}`}
                     </TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          student.academicDetails.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : student.academicDetails.status === "inactive"
-                            ? "bg-red-100 text-red-800"
-                            : student.academicDetails.status === "graduated"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {student.academicDetails.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {student.academicDetails.gpa.toFixed(2)}
-                    </TableCell>
+                    <TableCell>{student.id}</TableCell>
+                    <TableCell>{student.email}</TableCell>
+                    <TableCell>{student.contactNo}</TableCell>
+                    <TableCell>{student.academicDepartment}</TableCell>
+                    <TableCell>{student.academicFaculty}</TableCell>
+                    <TableCell>{student.admissionSemester}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

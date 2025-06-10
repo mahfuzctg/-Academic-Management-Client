@@ -5,18 +5,20 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 import StudentList from "@/components/form/students/StudentList";
 import StudentForm from "@/components/form/students/StudentForm";
-import type { Student } from "@/types/student";
+import type { TStudent } from "@/types/student";
 
 const Students = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<Student | undefined>();
+  const [selectedStudent, setSelectedStudent] = useState<
+    TStudent | undefined
+  >();
 
   const handleFormSuccess = () => {
     setIsFormOpen(false);
     setSelectedStudent(undefined);
   };
 
-  const handleEdit = (student: Student) => {
+  const handleEdit = (student: TStudent) => {
     setSelectedStudent(student);
     setIsFormOpen(true);
   };

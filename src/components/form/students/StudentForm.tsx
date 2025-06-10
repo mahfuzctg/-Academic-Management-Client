@@ -1,8 +1,7 @@
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion";
-import { useDispatch } from "react-redux";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -21,93 +20,116 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { addStudent, updateStudent } from "@/redux/features/studentSlice";
-import type { Student, StudentFormData } from "@/types/student";
+import type { TStudent } from "@/types/student";
+import {
+  useAddStudentMutation,
+  useUpdateStudentMutation,
+} from "@/redux/features/student/studentApi";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  createStudentValidationSchema,
+  updateStudentValidationSchema,
+} from "@/schema/studentFormSchema";
+import { useState } from "react";
 
-const studentFormSchema = z.object({
-  firstName: z.string().min(2, "First name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Invalid email address"),
-  dateOfBirth: z.string(),
-  gender: z.enum(["male", "female", "other"]),
-  address: z.object({
-    street: z.string().min(1, "Street is required"),
-    city: z.string().min(1, "City is required"),
-    state: z.string().min(1, "State is required"),
-    zipCode: z.string().min(1, "Zip code is required"),
-    country: z.string().min(1, "Country is required"),
-  }),
-  contactNumber: z
-    .string()
-    .min(10, "Contact number must be at least 10 digits"),
-  enrollmentDate: z.string(),
-  academicDetails: z.object({
-    studentId: z.string().min(1, "Student ID is required"),
-    department: z.string().min(1, "Department is required"),
-    program: z.string().min(1, "Program is required"),
-    currentSemester: z.number().min(1).max(8),
-    gpa: z.number().min(0).max(4),
-    status: z.enum(["active", "inactive", "graduated", "on_leave"]),
-  }),
-  emergencyContact: z.object({
-    name: z.string().min(2, "Name must be at least 2 characters"),
-    relationship: z.string().min(1, "Relationship is required"),
-    contactNumber: z
-      .string()
-      .min(10, "Contact number must be at least 10 digits"),
-  }),
-});
+type StudentFormData = z.infer<typeof createStudentValidationSchema>;
 
 interface StudentFormProps {
-  student?: Student;
+  student?: TStudent;
   onSuccess?: () => void;
 }
 
 const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
-  const dispatch = useDispatch();
+  const { toast } = useToast();
+  const [addStudent] = useAddStudentMutation();
+  const [updateStudent] = useUpdateStudentMutation();
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+
   const form = useForm<StudentFormData>({
-    resolver: zodResolver(studentFormSchema),
+    resolver: zodResolver(
+      student ? updateStudentValidationSchema : createStudentValidationSchema
+    ) as Resolver<StudentFormData>,
     defaultValues: student || {
-      firstName: "",
-      lastName: "",
-      email: "",
-      dateOfBirth: "",
+      name: {
+        firstName: "John",
+        middleName: "William",
+        lastName: "Doe",
+      },
       gender: "male",
-      address: {
-        street: "",
-        city: "",
-        state: "",
-        zipCode: "",
-        country: "",
+      dateOfBirth: "2000-01-01",
+      email: "john.doe@example.com",
+      contactNo: "+1234567890",
+      emergencyContactNo: "+1987654321",
+      bloodGroup: "A+",
+      presentAddress: "123 Main Street, City, State 12345",
+      permanentAddress: "456 Home Avenue, Hometown, State 67890",
+      guardian: {
+        fatherName: "Robert Doe",
+        fatherOccupation: "Engineer",
+        fatherContactNo: "+1122334455",
+        motherName: "Mary Doe",
+        motherOccupation: "Teacher",
+        motherContactNo: "+1555666777",
       },
-      contactNumber: "",
-      enrollmentDate: "",
-      academicDetails: {
-        studentId: "",
-        department: "",
-        program: "",
-        currentSemester: 1,
-        gpa: 0,
-        status: "active",
+      localGuardian: {
+        name: "James Smith",
+        occupation: "Business Owner",
+        contactNo: "+1888999000",
+        address: "789 Local Street, City, State 54321",
       },
-      emergencyContact: {
-        name: "",
-        relationship: "",
-        contactNumber: "",
-      },
+      admissionSemester: "fall2023",
+      academicDepartment: "computer-science",
     },
   });
 
   const onSubmit = async (data: StudentFormData) => {
     try {
+      const formData = new FormData();
+      const studentData = {
+        password: "123456",
+        student: data,
+      };
+      formData.append("data", JSON.stringify(studentData));
+
+      if (selectedImage) {
+        formData.append("file", selectedImage);
+      }
+
+      for (let [key, value] of formData.entries()) {
+        console.log(`${key}:`, value);
+      }
+
       if (student) {
-        await dispatch(updateStudent({ id: student.id, data }));
+        await updateStudent({
+          id: student.id,
+          updatedData: data,
+        }).unwrap();
+        toast({
+          title: "Success",
+          description: "Student updated successfully",
+        });
       } else {
-        await dispatch(addStudent(data));
+        await addStudent(formData as any).unwrap();
+        toast({
+          title: "Success",
+          description: "Student added successfully",
+        });
       }
       onSuccess?.();
     } catch (error) {
       console.error("Error submitting form:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save student data",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setSelectedImage(file);
     }
   };
 
@@ -124,142 +146,36 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>First Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Last Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
-                      <FormControl>
-                        <Input type="email" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="contactNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact Number</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="dateOfBirth"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Date of Birth</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="gender"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Gender</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select gender" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="male">Male</SelectItem>
-                          <SelectItem value="female">Female</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
               <div className="space-y-4">
-                <h3 className="text-lg font-medium">Address</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="address.street"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Street</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                <h3 className="text-lg font-medium">Personal Information</h3>
+
+                {/* Image Upload Field */}
+                <div className="flex flex-col gap-2">
+                  <FormLabel>Profile Image</FormLabel>
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    className="cursor-pointer"
                   />
-                  <FormField
-                    control={form.control}
-                    name="address.city"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>City</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                  {selectedImage && (
+                    <div className="mt-2">
+                      <img
+                        src={URL.createObjectURL(selectedImage)}
+                        alt="Preview"
+                        className="w-32 h-32 object-cover rounded-lg"
+                      />
+                    </div>
+                  )}
                 </div>
+
                 <div className="grid grid-cols-3 gap-4">
                   <FormField
                     control={form.control}
-                    name="address.state"
+                    name="name.firstName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>State</FormLabel>
+                        <FormLabel>First Name</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -269,10 +185,10 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
                   />
                   <FormField
                     control={form.control}
-                    name="address.zipCode"
+                    name="name.middleName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Zip Code</FormLabel>
+                        <FormLabel>Middle Name</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -282,10 +198,10 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
                   />
                   <FormField
                     control={form.control}
-                    name="address.country"
+                    name="name.lastName"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Country</FormLabel>
+                        <FormLabel>Last Name</FormLabel>
                         <FormControl>
                           <Input {...field} />
                         </FormControl>
@@ -294,30 +210,39 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
                     )}
                   />
                 </div>
-              </div>
 
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Academic Details</h3>
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="academicDetails.studentId"
+                    name="gender"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Student ID</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
+                        <FormLabel>Gender</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select gender" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="male">Male</SelectItem>
+                            <SelectItem value="female">Female</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   <FormField
                     control={form.control}
-                    name="enrollmentDate"
+                    name="dateOfBirth"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Enrollment Date</FormLabel>
+                        <FormLabel>Date of Birth</FormLabel>
                         <FormControl>
                           <Input type="date" {...field} />
                         </FormControl>
@@ -326,13 +251,297 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
                     )}
                   />
                 </div>
+
                 <div className="grid grid-cols-2 gap-4">
                   <FormField
                     control={form.control}
-                    name="academicDetails.department"
+                    name="email"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Department</FormLabel>
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input type="email" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="contactNo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Contact Number</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="emergencyContactNo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Emergency Contact Number</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="bloodGroup"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Blood Group</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select blood group" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="A+">A+</SelectItem>
+                            <SelectItem value="A-">A-</SelectItem>
+                            <SelectItem value="B+">B+</SelectItem>
+                            <SelectItem value="B-">B-</SelectItem>
+                            <SelectItem value="AB+">AB+</SelectItem>
+                            <SelectItem value="AB-">AB-</SelectItem>
+                            <SelectItem value="O+">O+</SelectItem>
+                            <SelectItem value="O-">O-</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="presentAddress"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Present Address</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="permanentAddress"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Permanent Address</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Guardian Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="guardian.fatherName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Father's Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="guardian.fatherOccupation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Father's Occupation</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="guardian.fatherContactNo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Father's Contact Number</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="guardian.motherName"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mother's Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="guardian.motherOccupation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mother's Occupation</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="guardian.motherContactNo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Mother's Contact Number</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">
+                  Local Guardian Information
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="localGuardian.name"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Local Guardian's Name</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="localGuardian.occupation"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Local Guardian's Occupation</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="localGuardian.contactNo"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Local Guardian's Contact Number</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="localGuardian.address"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Local Guardian's Address</FormLabel>
+                        <FormControl>
+                          <Input {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium">Academic Information</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <FormField
+                    control={form.control}
+                    name="admissionSemester"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Admission Semester</FormLabel>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select semester" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="fall2023">Fall 2023</SelectItem>
+                            <SelectItem value="spring2024">
+                              Spring 2024
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="academicDepartment"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Academic Department</FormLabel>
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
@@ -357,144 +566,7 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
                       </FormItem>
                     )}
                   />
-                  <FormField
-                    control={form.control}
-                    name="academicDetails.program"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Program</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
                 </div>
-                <div className="grid grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="academicDetails.currentSemester"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Current Semester</FormLabel>
-                        <Select
-                          onValueChange={(value) =>
-                            field.onChange(parseInt(value))
-                          }
-                          defaultValue={field.value.toString()}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select semester" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {[1, 2, 3, 4, 5, 6, 7, 8].map((sem) => (
-                              <SelectItem key={sem} value={sem.toString()}>
-                                Semester {sem}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="academicDetails.gpa"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>GPA</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="number"
-                            step="0.01"
-                            min="0"
-                            max="4"
-                            {...field}
-                            onChange={(e) =>
-                              field.onChange(parseFloat(e.target.value))
-                            }
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="academicDetails.status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="active">Active</SelectItem>
-                            <SelectItem value="inactive">Inactive</SelectItem>
-                            <SelectItem value="graduated">Graduated</SelectItem>
-                            <SelectItem value="on_leave">On Leave</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium">Emergency Contact</h3>
-                <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="emergencyContact.name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="emergencyContact.relationship"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Relationship</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
-                <FormField
-                  control={form.control}
-                  name="emergencyContact.contactNumber"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contact Number</FormLabel>
-                      <FormControl>
-                        <Input {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
               <Button type="submit" className="w-full">
