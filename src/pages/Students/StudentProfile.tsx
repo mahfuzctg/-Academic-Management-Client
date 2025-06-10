@@ -4,16 +4,12 @@ import { useGetMeQuery } from "@/redux/features/users/userApi";
 const StudentProfile = () => {
   const { data, isLoading, error } = useGetMeQuery(undefined);
 
-  if (isLoading)
-    return (
-      <>
-        <StudentProfileSkeleton />
-      </>
-    );
+  if (isLoading) return <StudentProfileSkeleton />;
+
   if (error)
     return (
       <div className="flex justify-center items-center min-h-screen">
-        <p className="text-red-500">Error loading profile.</p>
+        <p className="text-red-500 dark:text-red-400">Error loading profile.</p>
       </div>
     );
 
@@ -24,28 +20,29 @@ const StudentProfile = () => {
   } ${user?.name?.lastName || ""}`.trim();
 
   return (
-    <div className="flex justify-center bg-gray-50 p-4 min-h-screen">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-3xl p-5 space-y-5">
+    <div className="flex justify-center bg-gray-50 dark:bg-gray-900 p-4 min-h-screen transition-colors duration-500">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-3xl p-5 space-y-5">
         {/* Header */}
         <div className="flex items-center gap-4">
           <img
             src={user?.profileImg || "https://i.ibb.co/4pDNDk1/avatar.png"}
             alt="Profile"
-            className="w-20 h-20 rounded-full object-cover border border-gray-300"
+            className="w-20 h-20 rounded-full object-cover border border-gray-300 dark:border-gray-600"
           />
           <div>
-            <h2 className="text-xl font-semibold text-gray-800">{fullName}</h2>
-            <p className="text-xs font-medium text-indigo-600 uppercase tracking-wide">
+            <h2 className="text-xl font-semibold text-gray-800 dark:text-white">
+              {fullName}
+            </h2>
+            <p className="text-xs font-medium text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">
               {user?.user?.role}
             </p>
-            <p className="text-xs text-gray-500 truncate max-w-xs">
+            <p className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">
               {user?.email}
             </p>
           </div>
         </div>
 
         {/* Sections */}
-        {/* Personal Info */}
         <Section title="Personal Information">
           <InfoGrid>
             <InfoItem label="Student ID" value={user?.id} />
@@ -77,7 +74,6 @@ const StudentProfile = () => {
           </InfoGrid>
         </Section>
 
-        {/* Guardian Info */}
         <Section title="Guardian Information">
           <InfoGrid>
             <InfoItem
@@ -107,7 +103,6 @@ const StudentProfile = () => {
           </InfoGrid>
         </Section>
 
-        {/* Local Guardian Info */}
         <Section title="Local Guardian">
           <InfoGrid>
             <InfoItem label="Name" value={user?.localGuardian?.name} />
@@ -132,7 +127,7 @@ const Section = ({
   children: React.ReactNode;
 }) => (
   <div>
-    <h3 className="text-lg font-semibold text-gray-700 mb-3 border-b border-gray-200 pb-1">
+    <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-200 mb-3 border-b border-gray-200 dark:border-gray-600 pb-1">
       {title}
     </h3>
     {children}
@@ -140,7 +135,7 @@ const Section = ({
 );
 
 const InfoGrid = ({ children }: { children: React.ReactNode }) => (
-  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700">
+  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm text-gray-700 dark:text-gray-300">
     {children}
   </div>
 );
@@ -153,7 +148,7 @@ const InfoItem = ({
   value: string | number | undefined | null;
 }) => (
   <p>
-    <span className="font-medium text-gray-900">{label}: </span>
+    <span className="font-medium text-gray-900 dark:text-white">{label}: </span>
     <span>{value || "-"}</span>
   </p>
 );
