@@ -15,6 +15,7 @@ import {
   type Faculty,
   type CreateFacultyDto,
   type UpdateFacultyDto,
+  type AcademicStats,
 } from "@/types/academic";
 
 export const academicApi = createApi({
@@ -166,6 +167,18 @@ export const academicApi = createApi({
       }),
       invalidatesTags: ["Faculty"],
     }),
+
+    // Academic Stats endpoint
+    getAcademicStats: builder.query<AcademicStats, void>({
+      query: () => "academic/stats",
+      providesTags: [
+        "Department",
+        "Semester",
+        "AcademicYear",
+        "Course",
+        "Faculty",
+      ],
+    }),
   }),
 });
 
@@ -199,4 +212,7 @@ export const {
   useAddFacultyMutation,
   useUpdateFacultyMutation,
   useDeleteFacultyMutation,
+
+  // Academic Stats hook
+  useGetAcademicStatsQuery,
 } = academicApi;

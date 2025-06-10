@@ -34,31 +34,24 @@ export interface Program {
   id: string;
   name: string;
   code: string;
-  description?: string;
+  description: string;
   departmentId: string;
   duration: number;
   totalCredits: number;
+  degreeType: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface AcademicStats {
   totalStudents: number;
-  totalInstructors: number;
-  totalCourses: number;
+  totalFaculty: number;
   totalDepartments: number;
-  totalPrograms: number;
+  totalCourses: number;
   activeSemesters: number;
-  enrollmentStats: {
-    totalEnrollments: number;
-    activeEnrollments: number;
-    completedEnrollments: number;
-  };
-  courseStats: {
-    totalOffered: number;
-    activeCourses: number;
-    completedCourses: number;
-  };
+  upcomingEvents: number;
+  recentAdmissions: number;
+  recentGraduations: number;
 }
 
 export interface CreateDepartmentDto {
@@ -137,5 +130,19 @@ export interface CreateFacultyDto {
 }
 
 export interface UpdateFacultyDto extends CreateFacultyDto {
+  id: string;
+}
+
+export interface CreateProgramDto {
+  name: string;
+  code: string;
+  description: string;
+  departmentId: string;
+  duration: number;
+  totalCredits: number;
+  degreeType: string;
+}
+
+export interface UpdateProgramDto extends CreateProgramDto {
   id: string;
 }
