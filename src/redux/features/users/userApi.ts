@@ -1,15 +1,14 @@
+// userApi.ts
 import { baseApi } from "@/redux/api/baseApi";
-import type { TResponseRedux } from "@/types/global";
-import type { IUserProfile } from "@/types/user";
 
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Fetch logged-in user profile (student/admin/faculty)
-    getMe: builder.query<TResponseRedux<IUserProfile>, void>({
+    getMe: builder.query<any, void>({
       query: () => ({
         url: "/users/me",
         method: "GET",
       }),
+      transformResponse: (response: any) => response.data,
       providesTags: ["user-profile"],
     }),
   }),

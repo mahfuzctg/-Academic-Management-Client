@@ -1,31 +1,31 @@
 import { useGetMeQuery } from "@/redux/features/users/userApi";
 
 const StudentProfile = () => {
-  const { data, error, isLoading } = useGetMeQuery();
+  const { data, isLoading, error } = useGetMeQuery(undefined);
 
   if (isLoading) return <p>Loading profile...</p>;
-  if (error) return <p>Error loading profile</p>;
+  if (error) return <p>Error loading profile.</p>;
 
   const user = data?.data;
 
-  if (!user) return <p>No profile data found.</p>;
+  // Protect against undefined access
+  const fullName = `${user?.name?.firstName || ""} ${
+    user?.name?.middleName || ""
+  } ${user?.name?.lastName || ""}`.trim();
 
   return (
     <div>
-      <h2>User Profile</h2>
+      <h2>Student Profile</h2>
       <p>
-        <strong>Full Name:</strong> {user.fullName || "N/A"}
+        <strong>Full Name:</strong> {fullName}
       </p>
       <p>
-        <strong>Email:</strong> {user.email || "N/A"}
+        <strong>Email:</strong> {user?.email}
       </p>
       <p>
-        <strong>Role:</strong> {user.role}
+        <strong>Role:</strong> {user?.user?.role}
       </p>
-
-      {user.role === "student" && <p>Student-specific info can go here</p>}
-      {user.role === "admin" && <p>Admin-specific info can go here</p>}
-      {user.role === "faculty" && <p>Faculty-specific info can go here</p>}
+      {/* Add more fields safely like above */}
     </div>
   );
 };
