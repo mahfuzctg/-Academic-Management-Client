@@ -8,7 +8,6 @@ import CourseEnrollment from "@/pages/Courses/CourseEnrollment";
 import Home from "@/pages/Home";
 import InstructorManagement from "@/pages/Instructors/InstructorManagement";
 import JobManagement from "@/pages/Jobs/JobManagement";
-<<<<<<< HEAD
 import LoginForm from "@/pages/Login";
 
 import NotFound from "@/pages/NotFound/NotFound";
@@ -18,10 +17,6 @@ import { createBrowserRouter } from "react-router-dom";
 import { adminPaths } from "./admin.routes";
 import { instructorPaths } from "./instructor.routes";
 import { studentPaths } from "./student.routes";
-=======
-import CourseEnrollment from "@/pages/Courses/CourseEnrollment";
-import NotFound from "@/pages/NotFound";
->>>>>>> 3e1a0a52a587a93e210b4802c457a26d39ff97fd
 
 const router = createBrowserRouter([
   {

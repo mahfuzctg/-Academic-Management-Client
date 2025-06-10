@@ -34,10 +34,10 @@ export const academicFacultyApi = baseApi.injectEndpoints({
         method: "GET",
         params: arg,
       }),
-      transformResponse: (response: { data: any; meta: any }) => {
+      transformResponse: (baseQueryReturnValue: any) => {
         return {
-          data: response.data,
-          meta: response.meta,
+          data: baseQueryReturnValue.data,
+          meta: baseQueryReturnValue.meta,
         };
       },
       providesTags: ["AcademicFaculty"],

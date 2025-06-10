@@ -1,38 +1,53 @@
 import { baseApi } from "@/redux/api/baseApi";
-import type { CourseOffering, Enrollment } from "@/types/course";
+import type { Course } from "@/types/academic";
+import type { CourseOffering, Enrollment, TEnrollment } from "@/types/course";
 import type { TQueryParam, TResponseRedux } from "@/types/global";
-<<<<<<< HEAD
-import type { Student } from "@/types/student";
+import type { Student, TStudent } from "@/types/student";
 
-=======
-import type { TStudent } from "@/types/student";
-import type { TOfferedCourse } from "@/types/studentCourse.type";
-import type { TEnrollment } from "@/types/enrollment.type";
->>>>>>> 3e1a0a52a587a93e210b4802c457a26d39ff97fd
-const studentApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
-    getAllStudents: builder.query({
-      query: (args) => {
-        const params = new URLSearchParams();
-        if (args) {
-          args.forEach((item: TQueryParam) => {
-            params.append(item.name, item.value as string);
-          });
-        }
-        return {
-          url: "/students",
-          method: "GET",
-          params,
-        };
-      },
-      providesTags: ["student"],
-      transformResponse: (response: TResponseRedux<any>) => ({
-        data: response.data,
-        meta: response.meta,
+export const studentApi = baseApi.injectEndpoints({
+  endpoints: (build) => ({
+    createStudent: build.mutation({
+      query: (data) => ({
+        url: "/students/create-student",
+        method: "POST",
+        data,
       }),
+      invalidatesTags: ["Student"],
     }),
 
-    getStudentCourses: builder.query({
+    getSingleStudent: build.query({
+      query: (id) => ({
+        url: `/students/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["Student"],
+    }),
+
+    updateStudent: build.mutation({
+      query: ({ id, data }) => ({
+        url: `/students/${id}`,
+        method: "PATCH",
+        data,
+      }),
+      invalidatesTags: ["Student"],
+    }),
+
+    getAllStudents: build.query({
+      query: (arg: Record<string, any>) => ({
+        url: "/students",
+        method: "GET",
+        params: arg,
+      }),
+      transformResponse: (baseQueryReturnValue: any) => {
+        return {
+          data: baseQueryReturnValue.data,
+          meta: baseQueryReturnValue.meta,
+        };
+      },
+      providesTags: ["Student"],
+    }),
+
+    getStudentCourses: build.query({
       query: (studentId) => ({
         url: `/students/${studentId}/courses`,
         method: "GET",
@@ -40,13 +55,8 @@ const studentApi = baseApi.injectEndpoints({
       providesTags: ["student-courses"],
       transformResponse: (
         response: TResponseRedux<{
-<<<<<<< HEAD
           enrolledCourses: CourseOffering[];
           availableCourses: Course[];
-=======
-          enrolledCourses: TOfferedCourse[];
-          availableCourses: TOfferedCourse[];
->>>>>>> 3e1a0a52a587a93e210b4802c457a26d39ff97fd
         }>
       ) => ({
         data: response.data,
@@ -54,7 +64,7 @@ const studentApi = baseApi.injectEndpoints({
       }),
     }),
 
-    enrollInCourse: builder.mutation({
+    enrollInCourse: build.mutation({
       query: ({ studentId, courseId }) => ({
         url: `/students/${studentId}/courses/${courseId}/enroll`,
         method: "POST",
@@ -62,7 +72,7 @@ const studentApi = baseApi.injectEndpoints({
       invalidatesTags: ["student-courses"],
     }),
 
-    dropCourse: builder.mutation({
+    dropCourse: build.mutation({
       query: ({ studentId, courseId }) => ({
         url: `/students/${studentId}/courses/${courseId}/drop`,
         method: "DELETE",
@@ -70,7 +80,7 @@ const studentApi = baseApi.injectEndpoints({
       invalidatesTags: ["student-courses"],
     }),
 
-    getStudentEnrollments: builder.query({
+    getStudentEnrollments: build.query({
       query: (studentId) => ({
         url: `/students/${studentId}/enrollments`,
         method: "GET",
@@ -82,7 +92,7 @@ const studentApi = baseApi.injectEndpoints({
       }),
     }),
 
-    getStudentProfile: builder.query({
+    getStudentProfile: build.query({
       query: (studentId) => ({
         url: `/students/${studentId}`,
         method: "GET",
@@ -95,7 +105,7 @@ const studentApi = baseApi.injectEndpoints({
     }),
 
     //  Add Student
-    addStudent: builder.mutation({
+    addStudent: build.mutation({
       query: (studentData: Partial<TStudent>) => ({
         url: "/users/create-student",
         method: "POST",
@@ -105,31 +115,7 @@ const studentApi = baseApi.injectEndpoints({
     }),
 
     //  Update Student
-    updateStudent: builder.mutation({
-      query: ({
-        id,
-        updatedData,
-      }: {
-        id: string;
-        updatedData: Partial<TStudent>;
-      }) => ({
-        url: `/students/${id}`,
-        method: "PATCH",
-        body: updatedData,
-      }),
-      invalidatesTags: ["student", "student-profile"],
-    }),
-
-    deleteStudent: builder.mutation({
-      query: (id: string) => ({
-        url: `/students/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["student"],
-    }),
-
-    // Update own profile
-    updateStudent: builder.mutation({
+    updateOwnProfile: build.mutation({
       query: ({ id, body }) => ({
         url: `/students/${id}`,
         method: "PATCH",
@@ -137,21 +123,28 @@ const studentApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["student-profile"],
     }),
+
+    deleteStudent: build.mutation({
+      query: (id: string) => ({
+        url: `/students/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["student"],
+    }),
   }),
 });
 
 export const {
+  useCreateStudentMutation,
+  useGetSingleStudentQuery,
+  useUpdateStudentMutation,
   useGetAllStudentsQuery,
   useGetStudentCoursesQuery,
   useEnrollInCourseMutation,
   useDropCourseMutation,
   useGetStudentEnrollmentsQuery,
   useGetStudentProfileQuery,
-<<<<<<< HEAD
-  useUpdateStudentMutation,
-=======
   useAddStudentMutation,
-  useUpdateStudentMutation,
+  useUpdateOwnProfileMutation,
   useDeleteStudentMutation,
->>>>>>> 3e1a0a52a587a93e210b4802c457a26d39ff97fd
 } = studentApi;
