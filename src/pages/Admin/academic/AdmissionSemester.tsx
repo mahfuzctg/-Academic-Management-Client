@@ -16,19 +16,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import {
   useAddSemesterMutation,
   useGetSemestersQuery,
@@ -39,6 +31,7 @@ import {
   CreateSemesterDto,
   UpdateSemesterDto,
 } from "@/types/academic";
+import { FormFields } from "@/components/ui/form-field";
 
 const semesterSchema = z.object({
   name: z.string().min(1, "Semester name is required"),
@@ -140,75 +133,36 @@ const AdmissionSemester = () => {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
-                <FormField
-                  control={form.control}
+                <FormFields.TextWithIcon
+                  form={form}
                   name="name"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Semester Name</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g., Fall 2024" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Semester Name"
+                  placeholder="e.g., Fall 2024"
+                  required
                 />
-                <FormField
-                  control={form.control}
+                <FormFields.TextWithIcon
+                  form={form}
                   name="year"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Year</FormLabel>
-                      <FormControl>
-                        <Input {...field} placeholder="e.g., 2024" />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Year"
+                  placeholder="e.g., 2024"
+                  required
                 />
-                <FormField
-                  control={form.control}
+                <FormFields.Date
+                  form={form}
                   name="startDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Start Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Start Date"
+                  required
                 />
-                <FormField
-                  control={form.control}
+                <FormFields.Date
+                  form={form}
                   name="endDate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>End Date</FormLabel>
-                      <FormControl>
-                        <Input type="date" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="End Date"
+                  required
                 />
-                <FormField
-                  control={form.control}
+                <FormFields.Checkbox
+                  form={form}
                   name="isActive"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center space-x-2">
-                      <FormControl>
-                        <input
-                          type="checkbox"
-                          checked={field.value}
-                          onChange={field.onChange}
-                          className="h-4 w-4 rounded border-gray-300"
-                        />
-                      </FormControl>
-                      <FormLabel>Active Semester</FormLabel>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  label="Active Semester"
                 />
                 <Button type="submit" className="w-full">
                   {selectedSemester ? "Update Semester" : "Add Semester"}

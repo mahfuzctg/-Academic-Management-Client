@@ -15,13 +15,23 @@ import {
   type Faculty,
   type CreateFacultyDto,
   type UpdateFacultyDto,
+  type Program,
+  type CreateProgramDto,
+  type UpdateProgramDto,
   type AcademicStats,
 } from "@/types/academic";
 
 export const academicApi = createApi({
   reducerPath: "academicApi",
   baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
-  tagTypes: ["Department", "Semester", "AcademicYear", "Course", "Faculty"],
+  tagTypes: [
+    "Department",
+    "Semester",
+    "AcademicYear",
+    "Course",
+    "Faculty",
+    "Program",
+  ],
   endpoints: (builder) => ({
     // Department endpoints
     getDepartments: builder.query<Department[], void>({
@@ -168,6 +178,35 @@ export const academicApi = createApi({
       invalidatesTags: ["Faculty"],
     }),
 
+    // Program endpoints
+    getPrograms: builder.query<Program[], void>({
+      query: () => "programs",
+      providesTags: ["Program"],
+    }),
+    addProgram: builder.mutation<Program, CreateProgramDto>({
+      query: (data) => ({
+        url: "programs",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Program"],
+    }),
+    updateProgram: builder.mutation<Program, UpdateProgramDto>({
+      query: ({ id, ...data }) => ({
+        url: `programs/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Program"],
+    }),
+    deleteProgram: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `programs/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Program"],
+    }),
+
     // Academic Stats endpoint
     getAcademicStats: builder.query<AcademicStats, void>({
       query: () => "academic/stats",
@@ -177,6 +216,7 @@ export const academicApi = createApi({
         "AcademicYear",
         "Course",
         "Faculty",
+        "Program",
       ],
     }),
   }),
@@ -212,6 +252,12 @@ export const {
   useAddFacultyMutation,
   useUpdateFacultyMutation,
   useDeleteFacultyMutation,
+
+  // Program hooks
+  useGetProgramsQuery,
+  useAddProgramMutation,
+  useUpdateProgramMutation,
+  useDeleteProgramMutation,
 
   // Academic Stats hook
   useGetAcademicStatsQuery,
