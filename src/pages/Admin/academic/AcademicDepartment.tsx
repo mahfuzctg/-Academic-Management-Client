@@ -62,7 +62,7 @@ const AcademicDepartment = () => {
   const onSubmit = async (data: DepartmentFormData) => {
     try {
       if (selectedDepartment) {
-        await updateDepartment(data).unwrap();
+        await updateDepartment(data as any).unwrap();
         toast({
           title: "Success",
           description: "Department updated successfully",
@@ -174,7 +174,7 @@ const AcademicDepartment = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {departments?.map((department) => (
+            {departments?.map((department: any) => (
               <TableRow key={department.id}>
                 <TableCell>{department.name}</TableCell>
                 <TableCell>{department.code}</TableCell>

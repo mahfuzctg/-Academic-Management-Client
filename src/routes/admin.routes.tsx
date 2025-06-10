@@ -1,6 +1,8 @@
 import AcademicManagement from "@/pages/Academic/AcademicManagement";
 import AcademicDepartment from "@/pages/Admin/academic/AcademicDepartment";
 import AcademicSemester from "@/pages/Admin/academic/AdmissionSemester";
+import Faculty from "@/pages/Admin/academic/Faculty";
+
 import { AdminDashboard } from "@/pages/Dashboard/AdminDashboard";
 import InstructorManagement from "@/pages/Instructors/InstructorManagement";
 import JobManagement from "@/pages/Jobs/JobManagement";
@@ -18,10 +20,16 @@ export const adminPaths = [
     element: <AcademicManagement />,
   },
   {
+    name: "Faculty Management",
+    path: "faculty-management",
+    element: <Faculty />,
+  },
+  {
     name: "Academic Department",
     path: "academic-department",
     element: <AcademicDepartment />,
   },
+
   {
     name: "Academic Semester   ",
     path: "academic-semester",
