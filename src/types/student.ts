@@ -2,6 +2,38 @@ export interface TUserName {
   firstName: string;
   middleName?: string;
   lastName: string;
+<<<<<<< HEAD
+  email: string;
+  profileImage: string;
+  dateOfBirth: string;
+  gender: "male" | "female" | "other";
+  address: {
+    street: string;
+    city: string;
+    state: string;
+    zipCode: string;
+    country: string;
+  };
+  contactNumber: string;
+  enrollmentDate: string;
+  academicDetails: {
+    studentId: string;
+    department: string;
+    program: string;
+    currentSemester: number;
+    gpa: number;
+    status: "active" | "inactive" | "graduated" | "on_leave";
+    enrollmentDate: string;
+  };
+  emergencyContact: {
+    name: string;
+    relationship: string;
+    contactNumber: string;
+  };
+  createdAt: string;
+  updatedAt: string;
+=======
+>>>>>>> 3e1a0a52a587a93e210b4802c457a26d39ff97fd
 }
 
 export interface TGuardian {
