@@ -1,4 +1,4 @@
-import { useGetMeQuery } from "@/redux/features/student/studentApi";
+import { useGetMeQuery } from "@/redux/features/users/userApi";
 
 const StudentProfile = () => {
   const { data, error, isLoading } = useGetMeQuery();

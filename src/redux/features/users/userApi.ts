@@ -1,6 +1,6 @@
 import { baseApi } from "@/redux/api/baseApi";
 import type { TResponseRedux } from "@/types/global";
-import type { IUserProfile } from "@/types/user"; // create this type if not already present
+import type { IUserProfile } from "@/types/user";
 
 export const userApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
