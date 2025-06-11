@@ -1,215 +1,335 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import {
-  type Department,
-  type CreateDepartmentDto,
-  type UpdateDepartmentDto,
-  type Semester,
-  type CreateSemesterDto,
-  type UpdateSemesterDto,
-  type AcademicYear,
-  type CreateAcademicYearDto,
-  type UpdateAcademicYearDto,
-  type Course,
-  type CreateCourseDto,
-  type UpdateCourseDto,
-  type Faculty,
-  type CreateFacultyDto,
-  type UpdateFacultyDto,
-  type Program,
-  type CreateProgramDto,
-  type UpdateProgramDto,
-  type AcademicStats,
+import { baseApi } from "@/redux/api/baseApi";
+import type {
+  Department,
+  CreateDepartmentDto,
+  UpdateDepartmentDto,
+  Semester,
+  CreateSemesterDto,
+  UpdateSemesterDto,
+  AcademicYear,
+  CreateAcademicYearDto,
+  UpdateAcademicYearDto,
+  Course,
+  CreateCourseDto,
+  UpdateCourseDto,
+  Faculty,
+  CreateFacultyDto,
+  UpdateFacultyDto,
+  Program,
+  CreateProgramDto,
+  UpdateProgramDto,
+  AcademicStats,
 } from "@/types/academic";
+import type { TQueryParam, TResponseRedux } from "@/types/global";
 
-export const academicApi = createApi({
-  reducerPath: "academicApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "/api" }),
-  tagTypes: [
-    "Department",
-    "Semester",
-    "AcademicYear",
-    "Course",
-    "Faculty",
-    "Program",
-  ],
+export const academicApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Department endpoints
-    getDepartments: builder.query<Department[], void>({
-      query: () => "departments",
+    getDepartments: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((item: TQueryParam) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+        return {
+          url: "/departments",
+          method: "GET",
+          params: params,
+        };
+      },
       providesTags: ["Department"],
+      transformResponse: (response: TResponseRedux<Department[]>) => {
+        return {
+          data: response.data,
+          meta: response.meta,
+        };
+      },
     }),
-    addDepartment: builder.mutation<Department, CreateDepartmentDto>({
-      query: (data) => ({
-        url: "departments",
+
+    addDepartment: builder.mutation({
+      query: (data: CreateDepartmentDto) => ({
+        url: "/departments",
         method: "POST",
         body: data,
       }),
       invalidatesTags: ["Department"],
     }),
-    updateDepartment: builder.mutation<Department, UpdateDepartmentDto>({
-      query: ({ id, ...data }) => ({
-        url: `departments/${id}`,
-        method: "PUT",
+
+    updateDepartment: builder.mutation({
+      query: ({ id, data }: { id: string; data: UpdateDepartmentDto }) => ({
+        url: `/departments/${id}`,
+        method: "PATCH",
         body: data,
       }),
       invalidatesTags: ["Department"],
     }),
-    deleteDepartment: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `departments/${id}`,
+
+    deleteDepartment: builder.mutation({
+      query: (id: string) => ({
+        url: `/departments/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Department"],
     }),
 
     // Semester endpoints
-    getSemesters: builder.query<Semester[], void>({
-      query: () => "semesters",
+    getSemesters: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((item: TQueryParam) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+        return {
+          url: "/semesters",
+          method: "GET",
+          params: params,
+        };
+      },
       providesTags: ["Semester"],
+      transformResponse: (response: TResponseRedux<Semester[]>) => {
+        return {
+          data: response.data,
+          meta: response.meta,
+        };
+      },
     }),
-    addSemester: builder.mutation<Semester, CreateSemesterDto>({
-      query: (data) => ({
-        url: "semesters",
+
+    addSemester: builder.mutation({
+      query: (data: CreateSemesterDto) => ({
+        url: "/semesters",
         method: "POST",
         body: data,
       }),
       invalidatesTags: ["Semester"],
     }),
-    updateSemester: builder.mutation<Semester, UpdateSemesterDto>({
-      query: ({ id, ...data }) => ({
-        url: `semesters/${id}`,
-        method: "PUT",
+
+    updateSemester: builder.mutation({
+      query: ({ id, data }: { id: string; data: UpdateSemesterDto }) => ({
+        url: `/semesters/${id}`,
+        method: "PATCH",
         body: data,
       }),
       invalidatesTags: ["Semester"],
     }),
-    deleteSemester: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `semesters/${id}`,
+
+    deleteSemester: builder.mutation({
+      query: (id: string) => ({
+        url: `/semesters/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Semester"],
     }),
 
     // Academic Year endpoints
-    getAcademicYears: builder.query<AcademicYear[], void>({
-      query: () => "academic-years",
+    getAcademicYears: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((item: TQueryParam) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+        return {
+          url: "/academic-years",
+          method: "GET",
+          params: params,
+        };
+      },
       providesTags: ["AcademicYear"],
+      transformResponse: (response: TResponseRedux<AcademicYear[]>) => {
+        return {
+          data: response.data,
+          meta: response.meta,
+        };
+      },
     }),
-    addAcademicYear: builder.mutation<AcademicYear, CreateAcademicYearDto>({
-      query: (data) => ({
-        url: "academic-years",
+
+    addAcademicYear: builder.mutation({
+      query: (data: CreateAcademicYearDto) => ({
+        url: "/academic-years",
         method: "POST",
         body: data,
       }),
       invalidatesTags: ["AcademicYear"],
     }),
-    updateAcademicYear: builder.mutation<AcademicYear, UpdateAcademicYearDto>({
-      query: ({ id, ...data }) => ({
-        url: `academic-years/${id}`,
-        method: "PUT",
+
+    updateAcademicYear: builder.mutation({
+      query: ({ id, data }: { id: string; data: UpdateAcademicYearDto }) => ({
+        url: `/academic-years/${id}`,
+        method: "PATCH",
         body: data,
       }),
       invalidatesTags: ["AcademicYear"],
     }),
-    deleteAcademicYear: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `academic-years/${id}`,
+
+    deleteAcademicYear: builder.mutation({
+      query: (id: string) => ({
+        url: `/academic-years/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["AcademicYear"],
     }),
 
     // Course endpoints
-    getCourses: builder.query<Course[], void>({
-      query: () => "courses",
+    getCourses: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((item: TQueryParam) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+        return {
+          url: "/courses",
+          method: "GET",
+          params: params,
+        };
+      },
       providesTags: ["Course"],
+      transformResponse: (response: TResponseRedux<Course[]>) => {
+        return {
+          data: response.data,
+          meta: response.meta,
+        };
+      },
     }),
-    addCourse: builder.mutation<Course, CreateCourseDto>({
-      query: (data) => ({
-        url: "courses",
+
+    addCourse: builder.mutation({
+      query: (data: CreateCourseDto) => ({
+        url: "/courses",
         method: "POST",
         body: data,
       }),
       invalidatesTags: ["Course"],
     }),
-    updateCourse: builder.mutation<Course, UpdateCourseDto>({
-      query: ({ id, ...data }) => ({
-        url: `courses/${id}`,
-        method: "PUT",
+
+    updateCourse: builder.mutation({
+      query: ({ id, data }: { id: string; data: UpdateCourseDto }) => ({
+        url: `/courses/${id}`,
+        method: "PATCH",
         body: data,
       }),
       invalidatesTags: ["Course"],
     }),
-    deleteCourse: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `courses/${id}`,
+
+    deleteCourse: builder.mutation({
+      query: (id: string) => ({
+        url: `/courses/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Course"],
     }),
 
     // Faculty endpoints
-    getFaculties: builder.query<Faculty[], void>({
-      query: () => "faculties",
+    getFaculties: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((item: TQueryParam) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+        return {
+          url: "/faculties",
+          method: "GET",
+          params: params,
+        };
+      },
       providesTags: ["Faculty"],
+      transformResponse: (response: TResponseRedux<Faculty[]>) => {
+        return {
+          data: response.data,
+          meta: response.meta,
+        };
+      },
     }),
-    addFaculty: builder.mutation<Faculty, CreateFacultyDto>({
-      query: (data) => ({
-        url: "faculties",
+
+    addFaculty: builder.mutation({
+      query: (data: CreateFacultyDto) => ({
+        url: "/faculties",
         method: "POST",
         body: data,
       }),
       invalidatesTags: ["Faculty"],
     }),
-    updateFaculty: builder.mutation<Faculty, UpdateFacultyDto>({
-      query: ({ id, ...data }) => ({
-        url: `faculties/${id}`,
-        method: "PUT",
+
+    updateFaculty: builder.mutation({
+      query: ({ id, data }: { id: string; data: UpdateFacultyDto }) => ({
+        url: `/faculties/${id}`,
+        method: "PATCH",
         body: data,
       }),
       invalidatesTags: ["Faculty"],
     }),
-    deleteFaculty: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `faculties/${id}`,
+
+    deleteFaculty: builder.mutation({
+      query: (id: string) => ({
+        url: `/faculties/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Faculty"],
     }),
 
     // Program endpoints
-    getPrograms: builder.query<Program[], void>({
-      query: () => "programs",
+    getPrograms: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((item: TQueryParam) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+        return {
+          url: "/programs",
+          method: "GET",
+          params: params,
+        };
+      },
       providesTags: ["Program"],
+      transformResponse: (response: TResponseRedux<Program[]>) => {
+        return {
+          data: response.data,
+          meta: response.meta,
+        };
+      },
     }),
-    addProgram: builder.mutation<Program, CreateProgramDto>({
-      query: (data) => ({
-        url: "programs",
+
+    addProgram: builder.mutation({
+      query: (data: CreateProgramDto) => ({
+        url: "/programs",
         method: "POST",
         body: data,
       }),
       invalidatesTags: ["Program"],
     }),
-    updateProgram: builder.mutation<Program, UpdateProgramDto>({
-      query: ({ id, ...data }) => ({
-        url: `programs/${id}`,
-        method: "PUT",
+
+    updateProgram: builder.mutation({
+      query: ({ id, data }: { id: string; data: UpdateProgramDto }) => ({
+        url: `/programs/${id}`,
+        method: "PATCH",
         body: data,
       }),
       invalidatesTags: ["Program"],
     }),
-    deleteProgram: builder.mutation<void, string>({
-      query: (id) => ({
-        url: `programs/${id}`,
+
+    deleteProgram: builder.mutation({
+      query: (id: string) => ({
+        url: `/programs/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Program"],
     }),
 
     // Academic Stats endpoint
-    getAcademicStats: builder.query<AcademicStats, void>({
-      query: () => "academic/stats",
+    getAcademicStats: builder.query({
+      query: () => ({
+        url: "/academic/stats",
+        method: "GET",
+      }),
       providesTags: [
         "Department",
         "Semester",
@@ -218,6 +338,12 @@ export const academicApi = createApi({
         "Faculty",
         "Program",
       ],
+      transformResponse: (response: TResponseRedux<AcademicStats>) => {
+        return {
+          data: response.data,
+          meta: response.meta,
+        };
+      },
     }),
   }),
 });

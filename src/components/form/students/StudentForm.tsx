@@ -3,14 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -22,7 +15,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TStudent } from "@/types/student";
 import {
-  useAddStudentMutation,
+  useCreateStudentMutation,
   useUpdateStudentMutation,
 } from "@/redux/features/student/studentApi";
 import { useToast } from "@/components/ui/use-toast";
@@ -31,6 +24,7 @@ import {
   updateStudentValidationSchema,
 } from "@/schema/studentFormSchema";
 import { useState } from "react";
+import { FormFields } from "@/components/ui/form-field";
 
 type StudentFormData = z.infer<typeof createStudentValidationSchema>;
 
@@ -41,7 +35,7 @@ interface StudentFormProps {
 
 const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
   const { toast } = useToast();
-  const [addStudent] = useAddStudentMutation();
+  const [createStudent] = useCreateStudentMutation();
   const [updateStudent] = useUpdateStudentMutation();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
@@ -95,21 +89,17 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
         formData.append("file", selectedImage);
       }
 
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
-
       if (student) {
         await updateStudent({
           id: student.id,
-          updatedData: data,
+          data,
         }).unwrap();
         toast({
           title: "Success",
           description: "Student updated successfully",
         });
       } else {
-        await addStudent(formData as any).unwrap();
+        await createStudent(formData as any).unwrap();
         toast({
           title: "Success",
           description: "Student added successfully",
@@ -151,12 +141,12 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
 
                 {/* Image Upload Field */}
                 <div className="flex flex-col gap-2">
-                  <FormLabel>Profile Image</FormLabel>
-                  <Input
+                  <FormFields.TextWithIcon
+                    form={form}
+                    name="profileImage"
+                    label="Profile Image"
                     type="file"
-                    accept="image/*"
                     onChange={handleImageChange}
-                    className="cursor-pointer"
                   />
                   {selectedImage && (
                     <div className="mt-2">
@@ -170,189 +160,106 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
                 </div>
 
                 <div className="grid grid-cols-3 gap-4">
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="name.firstName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>First Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="First Name"
+                    placeholder="Enter first name"
+                    required
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="name.middleName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Middle Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Middle Name"
+                    placeholder="Enter middle name"
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="name.lastName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Last Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Last Name"
+                    placeholder="Enter last name"
+                    required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
+                  <FormFields.Select
+                    form={form}
                     name="gender"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Gender</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select gender" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="male">Male</SelectItem>
-                            <SelectItem value="female">Female</SelectItem>
-                            <SelectItem value="other">Other</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Gender"
+                    options={[
+                      { label: "Male", value: "male" },
+                      { label: "Female", value: "female" },
+                      { label: "Other", value: "other" },
+                    ]}
+                    required
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.DatePicker
+                    form={form}
                     name="dateOfBirth"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Date of Birth</FormLabel>
-                        <FormControl>
-                          <Input type="date" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Date of Birth"
+                    required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Email</FormLabel>
-                        <FormControl>
-                          <Input type="email" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Email"
+                    type="email"
+                    placeholder="Enter email"
+                    required
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="contactNo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Contact Number</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Contact Number"
+                    placeholder="Enter contact number"
+                    required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="emergencyContactNo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Emergency Contact Number</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Emergency Contact Number"
+                    placeholder="Enter emergency contact"
+                    required
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.Select
+                    form={form}
                     name="bloodGroup"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Blood Group</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select blood group" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="A+">A+</SelectItem>
-                            <SelectItem value="A-">A-</SelectItem>
-                            <SelectItem value="B+">B+</SelectItem>
-                            <SelectItem value="B-">B-</SelectItem>
-                            <SelectItem value="AB+">AB+</SelectItem>
-                            <SelectItem value="AB-">AB-</SelectItem>
-                            <SelectItem value="O+">O+</SelectItem>
-                            <SelectItem value="O-">O-</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Blood Group"
+                    options={[
+                      { label: "A+", value: "A+" },
+                      { label: "A-", value: "A-" },
+                      { label: "B+", value: "B+" },
+                      { label: "B-", value: "B-" },
+                      { label: "AB+", value: "AB+" },
+                      { label: "AB-", value: "AB-" },
+                      { label: "O+", value: "O+" },
+                      { label: "O-", value: "O-" },
+                    ]}
+                    required
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="presentAddress"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Present Address</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Present Address"
+                    placeholder="Enter present address"
+                    required
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="permanentAddress"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Permanent Address</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Permanent Address"
+                    placeholder="Enter permanent address"
+                    required
                   />
                 </div>
               </div>
@@ -360,87 +267,51 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Guardian Information</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="guardian.fatherName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Father's Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Father's Name"
+                    placeholder="Enter father's name"
+                    required
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="guardian.fatherOccupation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Father's Occupation</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Father's Occupation"
+                    placeholder="Enter father's occupation"
+                    required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="guardian.fatherContactNo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Father's Contact Number</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Father's Contact Number"
+                    placeholder="Enter father's contact"
+                    required
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="guardian.motherName"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mother's Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Mother's Name"
+                    placeholder="Enter mother's name"
+                    required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="guardian.motherOccupation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mother's Occupation</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Mother's Occupation"
+                    placeholder="Enter mother's occupation"
+                    required
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="guardian.motherContactNo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mother's Contact Number</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Mother's Contact Number"
+                    placeholder="Enter mother's contact"
+                    required
                   />
                 </div>
               </div>
@@ -450,59 +321,35 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
                   Local Guardian Information
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="localGuardian.name"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Local Guardian's Name</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Local Guardian's Name"
+                    placeholder="Enter local guardian's name"
+                    required
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="localGuardian.occupation"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Local Guardian's Occupation</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Local Guardian's Occupation"
+                    placeholder="Enter local guardian's occupation"
+                    required
                   />
                 </div>
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="localGuardian.contactNo"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Local Guardian's Contact Number</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Local Guardian's Contact Number"
+                    placeholder="Enter local guardian's contact"
+                    required
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.TextWithIcon
+                    form={form}
                     name="localGuardian.address"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Local Guardian's Address</FormLabel>
-                        <FormControl>
-                          <Input {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Local Guardian's Address"
+                    placeholder="Enter local guardian's address"
+                    required
                   />
                 </div>
               </div>
@@ -510,61 +357,27 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Academic Information</h3>
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
+                  <FormFields.Select
+                    form={form}
                     name="admissionSemester"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Admission Semester</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select semester" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="fall2023">Fall 2023</SelectItem>
-                            <SelectItem value="spring2024">
-                              Spring 2024
-                            </SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Admission Semester"
+                    options={[
+                      { label: "Fall 2023", value: "fall2023" },
+                      { label: "Spring 2024", value: "spring2024" },
+                    ]}
+                    required
                   />
-                  <FormField
-                    control={form.control}
+                  <FormFields.Select
+                    form={form}
                     name="academicDepartment"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Academic Department</FormLabel>
-                        <Select
-                          onValueChange={field.onChange}
-                          defaultValue={field.value}
-                        >
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select department" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            <SelectItem value="computer-science">
-                              Computer Science
-                            </SelectItem>
-                            <SelectItem value="engineering">
-                              Engineering
-                            </SelectItem>
-                            <SelectItem value="business">Business</SelectItem>
-                            <SelectItem value="arts">Arts</SelectItem>
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
+                    label="Academic Department"
+                    options={[
+                      { label: "Computer Science", value: "computer-science" },
+                      { label: "Engineering", value: "engineering" },
+                      { label: "Business", value: "business" },
+                      { label: "Arts", value: "arts" },
+                    ]}
+                    required
                   />
                 </div>
               </div>

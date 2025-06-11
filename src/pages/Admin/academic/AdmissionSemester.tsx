@@ -72,7 +72,7 @@ const AdmissionSemester = () => {
           id: selectedSemester.id,
           ...data,
         };
-        await updateSemester(updateData).unwrap();
+        await updateSemester(updateData as any).unwrap();
         toast({
           title: "Success",
           description: "Semester updated successfully",

@@ -110,6 +110,22 @@ export const FormFields = {
     />
   ),
 
+  // DatePicker input
+  DatePicker: ({
+    form,
+    name,
+    label,
+    required,
+  }: Omit<CustomFormFieldProps, "type" | "customRender">) => (
+    <CustomFormField
+      form={form}
+      name={name}
+      label={label}
+      type="date"
+      required={required}
+    />
+  ),
+
   // Checkbox input
   Checkbox: ({
     form,
