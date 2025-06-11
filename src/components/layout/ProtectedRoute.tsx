@@ -26,7 +26,11 @@ const ProtectedRoute = ({ children, role }: TProtectedRoute) => {
     return <Navigate to="/login" replace />;
   }
 
-  if (role && (user as any).role !== role) {
+  if (
+    role &&
+    (user as any).role !== role &&
+    (user as any).role !== "superAdmin"
+  ) {
     dispatch(logout());
     return <Navigate to="/login" replace />;
   }

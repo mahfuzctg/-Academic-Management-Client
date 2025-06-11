@@ -36,6 +36,7 @@ const getNavLinks = (role?: string) => {
         { label: "Grade Management", to: "/instructor/grades" },
       ];
     case "admin":
+    case "superAdmin":
       return [
         ...commonLinks,
         { label: "Dashboard", to: "/admin/dashboard" },

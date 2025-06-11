@@ -11,6 +11,7 @@ import { studentPaths } from "@/routes/student.routes";
 
 const roleBasedPaths = {
   admin: adminPaths,
+  superAdmin: adminPaths,
   student: studentPaths,
 };
 
