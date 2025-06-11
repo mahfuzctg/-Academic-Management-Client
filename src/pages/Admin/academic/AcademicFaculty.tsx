@@ -28,62 +28,45 @@ import {
 } from "@/redux/features/academic/academicFacultyApi";
 import { FormFields } from "@/components/ui/form-field";
 
-const createAcademicFacultyValidationSchema = z.object({
-  body: z.object({
-    name: z.string({
-      invalid_type_error: "Academic faculty must be string",
-    }),
-  }),
+const academicFacultyValidationSchema = z.object({
+  name: z.string().min(1, "Academic faculty name is required"),
 });
 
-const updateAcademicFacultyValidationSchema = z.object({
-  body: z.object({
-    name: z.string({
-      invalid_type_error: "Academic faculty must be string",
-    }),
-  }),
-});
-
-type AcademicFacultyFormData = z.infer<
-  typeof createAcademicFacultyValidationSchema
->;
+type AcademicFacultyFormData = z.infer<typeof academicFacultyValidationSchema>;
 
 const AcademicFacultyPage = () => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedFaculty, setSelectedFaculty] = useState<any>(null);
 
-  const { data: faculties, isLoading } =
-    useGetAllAcademicFacultiesQuery(undefined);
+  const { data: faculties, isLoading } = useGetAllAcademicFacultiesQuery({
+    page: 1,
+    limit: 10,
+  });
   const [createAcademicFaculty] = useCreateAcademicFacultyMutation();
   const [updateAcademicFaculty] = useUpdateAcademicFacultyMutation();
 
   const form = useForm<AcademicFacultyFormData>({
-    resolver: zodResolver(
-      selectedFaculty
-        ? updateAcademicFacultyValidationSchema
-        : createAcademicFacultyValidationSchema
-    ),
+    resolver: zodResolver(academicFacultyValidationSchema),
     defaultValues: {
-      body: {
-        name: "",
-      },
+      name: "",
     },
   });
 
-  const onSubmit = async (data: AcademicFacultyFormData) => {
+  const onSubmit = async (facultyData: AcademicFacultyFormData) => {
+    console.log(facultyData);
     try {
       if (selectedFaculty) {
         await updateAcademicFaculty({
-          id: selectedFaculty.id,
-          data,
+          id: selectedFaculty._id,
+          data: { name: facultyData.name },
         }).unwrap();
         toast({
           title: "Success",
           description: "Academic faculty updated successfully",
         });
       } else {
-        await createAcademicFaculty(data).unwrap();
+        await createAcademicFaculty({ name: facultyData.name }).unwrap();
         toast({
           title: "Success",
           description: "Academic faculty created successfully",
@@ -104,9 +87,7 @@ const AcademicFacultyPage = () => {
   const handleEdit = (faculty: any) => {
     setSelectedFaculty(faculty);
     form.reset({
-      body: {
-        name: faculty.name,
-      },
+      name: faculty.name,
     });
     setIsOpen(true);
   };
@@ -139,7 +120,7 @@ const AcademicFacultyPage = () => {
               >
                 <FormFields.TextWithIcon
                   form={form}
-                  name="body.name"
+                  name="name"
                   label="Academic Faculty Name"
                   placeholder="Enter academic faculty name"
                   required
@@ -165,7 +146,7 @@ const AcademicFacultyPage = () => {
           </TableHeader>
           <TableBody>
             {faculties?.data?.map((faculty: any) => (
-              <TableRow key={faculty.id}>
+              <TableRow key={faculty._id}>
                 <TableCell>{faculty.name}</TableCell>
                 <TableCell>
                   <div className="flex gap-2">

@@ -4,16 +4,16 @@ export const academicFacultyApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
     createAcademicFaculty: build.mutation({
       query: (data) => ({
-        url: "/academic-faculty/create-academic-faculty",
+        url: "/academic-faculties/create-academic-faculty",
         method: "POST",
-        data,
+        body: data,
       }),
       invalidatesTags: ["AcademicFaculty"],
     }),
 
     getSingleAcademicFaculty: build.query({
       query: (id) => ({
-        url: `/academic-faculty/${id}`,
+        url: `/academic-faculties/${id}`,
         method: "GET",
       }),
       providesTags: ["AcademicFaculty"],
@@ -21,16 +21,16 @@ export const academicFacultyApi = baseApi.injectEndpoints({
 
     updateAcademicFaculty: build.mutation({
       query: ({ id, data }) => ({
-        url: `/academic-faculty/${id}`,
+        url: `/academic-faculties/${id}`,
         method: "PATCH",
-        data,
+        body: data,
       }),
       invalidatesTags: ["AcademicFaculty"],
     }),
 
     getAllAcademicFaculties: build.query({
       query: (arg: Record<string, any>) => ({
-        url: "/academic-faculty",
+        url: "/academic-faculties",
         method: "GET",
         params: arg,
       }),
