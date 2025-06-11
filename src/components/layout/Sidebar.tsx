@@ -5,14 +5,17 @@ import { useAppSelector } from "@/redux/hooks";
 import { verifyToken } from "@/utils/verifyToken";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
+import { Home } from "lucide-react";
 
 import { adminPaths } from "@/routes/admin.routes";
 import { studentPaths } from "@/routes/student.routes";
+import { instructorPaths } from "@/routes/instructor.routes";
 
 const roleBasedPaths = {
   admin: adminPaths,
   superAdmin: adminPaths,
   student: studentPaths,
+  instructor: instructorPaths,
 };
 
 const Sidebar: React.FC = () => {
@@ -46,8 +49,8 @@ const Sidebar: React.FC = () => {
                       : "text-muted-foreground hover:bg-muted hover:text-primary"
                   )}
                 >
-                  {iconMap[item.name] || <FiHome className="mr-2" />}
-                  {item.name}
+                  {item.icon}
+                  <span className="ml-2">{item.name}</span>
                 </Link>
               ))}
             </nav>
@@ -60,8 +63,8 @@ const Sidebar: React.FC = () => {
             to="/"
             className="flex items-center justify-center px-4 py-2 text-white bg-primary hover:bg-primary/90 rounded-md transition"
           >
-            <FiHome className="mr-2" />
-            Back to Home
+            <Home className="w-5 h-5" />
+            <span className="ml-2">Back to Home</span>
           </Link>
         </div>
       </aside>
