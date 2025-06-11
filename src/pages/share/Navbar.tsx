@@ -66,7 +66,7 @@ export default function NavBar() {
 
   return (
     <motion.header
-      className="bg-white dark:bg-gray-900 shadow-md fixed w-full z-50 top-0"
+      className="bg-white dark:bg-gray-900  fixed w-full z-50 top-0"
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ duration: 0.5 }}
