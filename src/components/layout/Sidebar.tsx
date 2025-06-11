@@ -1,17 +1,29 @@
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 import { type TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
 import { useAppSelector } from "@/redux/hooks";
 import { verifyToken } from "@/utils/verifyToken";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
-import { cn } from "@/lib/utils";
+// Icons
+import { BsFillPersonFill } from "react-icons/bs";
+import { FiBook, FiHome, FiUsers } from "react-icons/fi";
+
 import { adminPaths } from "@/routes/admin.routes";
 import { studentPaths } from "@/routes/student.routes";
 
 const roleBasedPaths = {
   admin: adminPaths,
   student: studentPaths,
+};
+
+// Optional: Map route names to icons (extendable)
+const iconMap: Record<string, React.ReactNode> = {
+  Dashboard: <FiHome className="mr-2" />,
+  "Manage Students": <FiUsers className="mr-2" />,
+  "My Profile": <BsFillPersonFill className="mr-2" />,
+  Courses: <FiBook className="mr-2" />,
 };
 
 const Sidebar: React.FC = () => {
@@ -24,62 +36,45 @@ const Sidebar: React.FC = () => {
     ? roleBasedPaths[role as keyof typeof roleBasedPaths]
     : [];
 
-  console.log("User Role:", role);
-  console.log("Sidebar Items:", sidebarItems);
-
   return (
     <>
-      {/* Mobile Sheet Menu */}
-      <div className="hidden  p-4 relative z-50">
-        <div className="text-xl font-bold text-primary mb-4">AcademicMS</div>
-        <ScrollArea className="h-full ">
-          <nav className="flex flex-col gap-2">
-            {sidebarItems.map((item: any) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "rounded-md px-4 py-2 text-base font-semibold",
-                  location.pathname === item.path
-                    ? "text-primary"
-                    : "hover:text-primary text-muted-foreground"
-                )}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-        </ScrollArea>
-      </div>
       {/* Desktop Sidebar */}
-      <aside className="w-64 h-screen  border-r text-primary sticky top-0 hidden lg:flex flex-col">
-        <div className="p-4 text-xl font-bold text-primary border-b">
-          Academic Management
-
+      <aside className="w-64 h-screen border-r bg-white text-primary sticky top-0 hidden lg:flex flex-col justify-between">
+        <div>
+          <div className="p-4 text-xl font-bold text-primary border-b">
+            AcademicMS
+          </div>
+          <ScrollArea className="flex-1 p-4">
+            <nav className="flex flex-col gap-2">
+              {sidebarItems.map((item: any) => (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={cn(
+                    "flex items-center rounded-md px-4 py-2 font-medium transition-colors",
+                    location.pathname === item.path
+                      ? "bg-primary text-white"
+                      : "text-muted-foreground hover:bg-muted hover:text-primary"
+                  )}
+                >
+                  {iconMap[item.name] || <FiHome className="mr-2" />}
+                  {item.name}
+                </Link>
+              ))}
+            </nav>
+          </ScrollArea>
         </div>
-        <div className="p-4 text-2xl font-bold text-primary border-b">
-          AcademicMS
 
-
+        {/* Back to Home Button */}
+        <div className="p-4 border-t">
+          <Link
+            to="/"
+            className="flex items-center justify-center px-4 py-2 text-white bg-primary hover:bg-primary/90 rounded-md transition"
+          >
+            <FiHome className="mr-2" />
+            Back to Home
+          </Link>
         </div>
-        <ScrollArea className="flex-1 p-4">
-          <nav className="flex flex-col gap-2">
-            {sidebarItems.map((item: any) => (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={cn(
-                  "rounded-md px-4 py-2 text-primary font-semibold",
-                  location.pathname === item.path
-                    ? "text-primary"
-                    : "hover:text-primary text-muted-foreground"
-                )}
-              >
-                {item.name}
-              </Link>
-            ))}
-          </nav>
-        </ScrollArea>
       </aside>
     </>
   );
