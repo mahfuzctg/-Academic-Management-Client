@@ -15,6 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 import { useForm } from "react-hook-form";
@@ -25,15 +27,26 @@ import {
   useAddDepartmentMutation,
   useGetDepartmentsQuery,
   useUpdateDepartmentMutation,
+  useDeleteDepartmentMutation,
 } from "@/redux/features/academic/academicApi";
 import { FormFields } from "@/components/ui/form-field";
+import { Pencil, Trash2, Plus } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useGetAllAcademicFacultiesQuery } from "@/redux/features/academic/academicFacultyApi";
 
 const departmentSchema = z.object({
   name: z.string().min(1, "Department name is required"),
-  code: z.string().min(1, "Department code is required"),
-  description: z.string().min(1, "Description is required"),
-  headOfDepartment: z.string().min(1, "Head of Department is required"),
-  totalCredits: z.string().min(1, "Total credits is required"),
+  academicFaculty: z.string().min(1, "Academic faculty is required"),
 });
 
 type DepartmentFormData = z.infer<typeof departmentSchema>;
@@ -41,28 +54,30 @@ type DepartmentFormData = z.infer<typeof departmentSchema>;
 const AcademicDepartment = () => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedDepartment, setSelectedDepartment] =
-    useState<DepartmentFormData | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
 
   const { data: departments, isLoading } = useGetDepartmentsQuery(undefined);
+  const { data: faculties } = useGetAllAcademicFacultiesQuery({});
   const [addDepartment] = useAddDepartmentMutation();
   const [updateDepartment] = useUpdateDepartmentMutation();
+  const [deleteDepartment] = useDeleteDepartmentMutation();
 
   const form = useForm<DepartmentFormData>({
     resolver: zodResolver(departmentSchema),
     defaultValues: {
       name: "",
-      code: "",
-      description: "",
-      headOfDepartment: "",
-      totalCredits: "",
+      academicFaculty: "",
     },
   });
 
   const onSubmit = async (data: DepartmentFormData) => {
     try {
       if (selectedDepartment) {
-        await updateDepartment(data as any).unwrap();
+        await updateDepartment({
+          id: selectedDepartment._id,
+          data,
+        }).unwrap();
         toast({
           title: "Success",
           description: "Department updated successfully",
@@ -86,10 +101,33 @@ const AcademicDepartment = () => {
     }
   };
 
-  const handleEdit = (department: DepartmentFormData) => {
+  const handleEdit = (department: any) => {
     setSelectedDepartment(department);
-    form.reset(department);
+    form.reset({
+      name: department.name,
+      academicFaculty: department.academicFaculty._id,
+    });
     setIsOpen(true);
+  };
+
+  const handleDelete = async () => {
+    if (!selectedDepartment) return;
+
+    try {
+      await deleteDepartment(selectedDepartment._id).unwrap();
+      toast({
+        title: "Success",
+        description: "Department deleted successfully",
+      });
+      setIsDeleteDialogOpen(false);
+      setSelectedDepartment(null);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete department",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -99,101 +137,142 @@ const AcademicDepartment = () => {
       transition={{ duration: 0.5 }}
       className="p-6"
     >
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Academic Departments</h1>
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
-          <DialogTrigger asChild>
-            <Button>Add New Department</Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>
-                {selectedDepartment ? "Edit Department" : "Add New Department"}
-              </DialogTitle>
-            </DialogHeader>
-            <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="space-y-4"
-              >
-                <FormFields.TextWithIcon
-                  form={form}
-                  name="name"
-                  label="Department Name"
-                  placeholder="e.g., Computer Science"
-                  required
-                />
-                <FormFields.TextWithIcon
-                  form={form}
-                  name="code"
-                  label="Department Code"
-                  placeholder="e.g., CS"
-                  required
-                />
-                <FormFields.TextWithIcon
-                  form={form}
-                  name="description"
-                  label="Description"
-                  placeholder="Department description"
-                  required
-                />
-                <FormFields.TextWithIcon
-                  form={form}
-                  name="headOfDepartment"
-                  label="Head of Department"
-                  placeholder="e.g., Dr. John Doe"
-                  required
-                />
-                <FormFields.TextWithIcon
-                  form={form}
-                  name="totalCredits"
-                  label="Total Credits"
-                  placeholder="e.g., 120"
-                  required
-                />
-                <Button type="submit" className="w-full">
-                  {selectedDepartment ? "Update Department" : "Add Department"}
-                </Button>
-              </form>
-            </Form>
-          </DialogContent>
-        </Dialog>
-      </div>
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle className="text-2xl font-bold">
+            Academic Departments
+          </CardTitle>
+          <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <Plus className="w-4 h-4 mr-2" />
+                Add New Department
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {selectedDepartment
+                    ? "Edit Department"
+                    : "Add New Department"}
+                </DialogTitle>
+                <DialogDescription>
+                  {selectedDepartment
+                    ? "Update the department information below."
+                    : "Fill in the department information below."}
+                </DialogDescription>
+              </DialogHeader>
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(onSubmit)}
+                  className="space-y-4"
+                >
+                  <FormFields.TextWithIcon
+                    form={form}
+                    name="name"
+                    label="Department Name"
+                    placeholder="e.g., Computer Science"
+                    required
+                  />
+                  <FormFields.Select
+                    form={form}
+                    name="academicFaculty"
+                    label="Academic Faculty"
+                    placeholder="Select academic faculty"
+                    options={
+                      faculties?.data?.map((faculty) => ({
+                        label: faculty.name,
+                        value: faculty._id,
+                      })) || []
+                    }
+                    required
+                  />
+                  <DialogFooter>
+                    <Button type="submit" className="w-full">
+                      {selectedDepartment
+                        ? "Update Department"
+                        : "Add Department"}
+                    </Button>
+                  </DialogFooter>
+                </form>
+              </Form>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          {isLoading ? (
+            <div className="flex items-center justify-center h-32">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Department Name</TableHead>
+                  <TableHead>Academic Faculty</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {departments?.data?.map((department: any) => (
+                  <TableRow key={department._id}>
+                    <TableCell className="font-medium">
+                      {department.name}
+                    </TableCell>
+                    <TableCell>{department.academicFaculty?.name}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex justify-end gap-2">
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          onClick={() => handleEdit(department)}
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          onClick={() => {
+                            setSelectedDepartment(department);
+                            setIsDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          )}
+        </CardContent>
+      </Card>
 
-      {isLoading ? (
-        <div>Loading...</div>
-      ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Department Name</TableHead>
-              <TableHead>Code</TableHead>
-              <TableHead>Head of Department</TableHead>
-              <TableHead>Total Credits</TableHead>
-              <TableHead>Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {departments?.map((department: any) => (
-              <TableRow key={department.id}>
-                <TableCell>{department.name}</TableCell>
-                <TableCell>{department.code}</TableCell>
-                <TableCell>{department.headOfDepartment}</TableCell>
-                <TableCell>{department.totalCredits}</TableCell>
-                <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleEdit(department)}
-                  >
-                    Edit
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      )}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              department
+              {selectedDepartment && ` "${selectedDepartment.name}"`}.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 };

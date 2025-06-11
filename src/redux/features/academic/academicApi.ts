@@ -34,7 +34,7 @@ export const academicApi = baseApi.injectEndpoints({
           });
         }
         return {
-          url: "/departments",
+          url: "/academic-departments",
           method: "GET",
           params: params,
         };
@@ -50,7 +50,7 @@ export const academicApi = baseApi.injectEndpoints({
 
     addDepartment: builder.mutation({
       query: (data: CreateDepartmentDto) => ({
-        url: "/departments",
+        url: "/academic-departments/create-academic-department",
         method: "POST",
         body: data,
       }),
@@ -59,7 +59,7 @@ export const academicApi = baseApi.injectEndpoints({
 
     updateDepartment: builder.mutation({
       query: ({ id, data }: { id: string; data: UpdateDepartmentDto }) => ({
-        url: `/departments/${id}`,
+        url: `/academic-departments/${id}`,
         method: "PATCH",
         body: data,
       }),
@@ -68,7 +68,7 @@ export const academicApi = baseApi.injectEndpoints({
 
     deleteDepartment: builder.mutation({
       query: (id: string) => ({
-        url: `/departments/${id}`,
+        url: `/academic-departments/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Department"],

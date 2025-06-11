@@ -28,6 +28,14 @@ export const academicFacultyApi = baseApi.injectEndpoints({
       invalidatesTags: ["AcademicFaculty"],
     }),
 
+    deleteAcademicFaculty: build.mutation({
+      query: (id) => ({
+        url: `/academic-faculties/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["AcademicFaculty"],
+    }),
+
     getAllAcademicFaculties: build.query({
       query: (arg: Record<string, any>) => ({
         url: "/academic-faculties",
@@ -49,5 +57,6 @@ export const {
   useCreateAcademicFacultyMutation,
   useGetSingleAcademicFacultyQuery,
   useUpdateAcademicFacultyMutation,
+  useDeleteAcademicFacultyMutation,
   useGetAllAcademicFacultiesQuery,
 } = academicFacultyApi;
