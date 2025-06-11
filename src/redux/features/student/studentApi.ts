@@ -2,15 +2,41 @@ import { baseApi } from "@/redux/api/baseApi";
 import type { Course } from "@/types/academic";
 import type { CourseOffering } from "@/types/course";
 import type { TEnrollment } from "@/types/enrollment.type";
-import type { TResponseRedux } from "@/types/global";
+import type { TQueryParam, TResponseRedux } from "@/types/global";
 import type { TStudent } from "@/types/student";
 import type { IUserProfile } from "@/types/user";
 
 export const studentApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Get all students with query filters
+    getAllStudents: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+
+        if (args) {
+          args.forEach((item: TQueryParam) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+
+        return {
+          url: "/students",
+          method: "GET",
+          params: params,
+        };
+      },
+      providesTags: ["student"],
+      transformResponse: (response: TResponseRedux<TStudent[]>) => {
+        return {
+          data: response.data,
+          meta: response.meta,
+        };
+      },
+    }),
+
     // Create Student
     createStudent: builder.mutation({
-      query: (data: Partial<TStudent>) => ({
+      query: (data) => ({
         url: "/users/create-student",
         method: "POST",
         body: data,
@@ -19,7 +45,7 @@ export const studentApi = baseApi.injectEndpoints({
     }),
 
     // Get a single student
-    getSingleStudent: builder.query<TStudent, string>({
+    getSingleStudent: builder.query({
       query: (id) => ({
         url: `/students/${id}`,
         method: "GET",
@@ -29,35 +55,12 @@ export const studentApi = baseApi.injectEndpoints({
 
     // Update any student by ID
     updateStudent: builder.mutation({
-      query: ({
-        id,
-        updatedData,
-      }: {
-        id: string;
-        updatedData: Partial<TStudent>;
-      }) => ({
+      query: ({ id, updatedData }) => ({
         url: `/students/${id}`,
         method: "PATCH",
         body: updatedData,
       }),
       invalidatesTags: ["student"],
-    }),
-
-    // Get all students with query filters
-    getAllStudents: builder.query<
-      TResponseRedux<TStudent[]>,
-      Record<string, any>
-    >({
-      query: (params) => ({
-        url: "/students",
-        method: "GET",
-        params,
-      }),
-      transformResponse: (response: TResponseRedux<TStudent[]>) => ({
-        data: response.data,
-        meta: response.meta,
-      }),
-      providesTags: ["student"],
     }),
 
     // Get student courses (enrolled + available)
@@ -117,7 +120,7 @@ export const studentApi = baseApi.injectEndpoints({
     ),
 
     // Get my student profile
-    getMyStudentProfile: builder.query<TResponseRedux<TStudent>, void>({
+    getMyStudentProfile: builder.query({
       query: () => ({
         url: "/students/my-profile",
         method: "GET",
@@ -126,7 +129,7 @@ export const studentApi = baseApi.injectEndpoints({
     }),
 
     // Get any student's profile
-    getStudentProfile: builder.query<TStudent, string>({
+    getStudentProfile: builder.query({
       query: (studentId) => ({
         url: `/students/${studentId}`,
         method: "GET",
@@ -136,7 +139,7 @@ export const studentApi = baseApi.injectEndpoints({
 
     // Update own profile
     updateOwnProfile: builder.mutation({
-      query: ({ id, body }: { id: string; body: Partial<TStudent> }) => ({
+      query: ({ id, body }) => ({
         url: `/students/${id}`,
         method: "PATCH",
         body,
@@ -146,7 +149,7 @@ export const studentApi = baseApi.injectEndpoints({
 
     // Delete student
     deleteStudent: builder.mutation({
-      query: (id: string) => ({
+      query: (id) => ({
         url: `/students/${id}`,
         method: "DELETE",
       }),
@@ -165,18 +168,17 @@ export const studentApi = baseApi.injectEndpoints({
 });
 
 export const {
+  useGetAllStudentsQuery,
   useCreateStudentMutation,
   useGetSingleStudentQuery,
   useUpdateStudentMutation,
-  useGetAllStudentsQuery,
+  useDeleteStudentMutation,
+  useGetMyStudentProfileQuery,
+  useGetStudentProfileQuery,
+  useUpdateOwnProfileMutation,
   useGetStudentCoursesQuery,
   useEnrollInCourseMutation,
   useDropCourseMutation,
   useGetStudentEnrollmentsQuery,
-  useGetMyStudentProfileQuery,
-  useGetStudentProfileQuery,
-
-  useUpdateOwnProfileMutation,
-  useDeleteStudentMutation,
   useGetMeQuery,
 } = studentApi;

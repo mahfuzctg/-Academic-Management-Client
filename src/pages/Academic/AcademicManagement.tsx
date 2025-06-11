@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle, Search } from "lucide-react";
 import { format } from "date-fns";
+import { AcademicSemesterName, Months } from "@/types/academic";
 
 const AcademicManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,9 +56,11 @@ const AcademicManagement = () => {
               Total Students
             </CardTitle>
           </CardHeader>
-          {/*   <CardContent>
-            <div className="text-2xl font-bold">{stats?.data?.totalStudents}</div>
-          </CardContent> */}
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.data?.totalStudents || 0}
+            </div>
+          </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -65,19 +68,21 @@ const AcademicManagement = () => {
               Total Instructors
             </CardTitle>
           </CardHeader>
-          {/*   <CardContent>
+          <CardContent>
             <div className="text-2xl font-bold">
-              {stats?.data?.totalInstructors}
+              {stats?.data?.totalInstructors || 0}
             </div>
-          </CardContent> */}
+          </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
           </CardHeader>
-          {/*   <CardContent>
-            <div className="text-2xl font-bold">{stats?.data?.totalCourses}</div>
-          </CardContent> */}
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.data?.totalCourses || 0}
+            </div>
+          </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -85,23 +90,11 @@ const AcademicManagement = () => {
               Active Semesters
             </CardTitle>
           </CardHeader>
-          {/*   <CardContent>
+          <CardContent>
             <div className="text-2xl font-bold">
-              data?.
-            
-              data?.
-            
-              data?.
-            
-              data?.
-            
-              data?.
-            
-              data?.
-            
-              {stats?.data?.activeSemesters}
+              {stats?.data?.activeSemesters || 0}
             </div>
-          </CardContent> */}
+          </CardContent>
         </Card>
       </div>
 
@@ -129,13 +122,13 @@ const AcademicManagement = () => {
             {academicYears?.data?.map((year) => (
               <Card key={year.id}>
                 <CardHeader>
-                  <CardTitle>{year.year}</CardTitle>
+                  <CardTitle>Academic Year {year.title}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <p>Start Date: {format(new Date(year.startDate), "PPP")}</p>
-                    <p>End Date: {format(new Date(year.endDate), "PPP")}</p>
-                    <p>Status: {year.isActive ? "Active" : "Inactive"}</p>
+                    <p>Start Month: {year.startMonth}</p>
+                    <p>End Month: {year.endMonth}</p>
+                    <p>Status: {year.status}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -152,13 +145,10 @@ const AcademicManagement = () => {
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-2">
-                    <p>
-                      Start Date: {format(new Date(semester?.startDate), "PPP")}
-                    </p>
-                    <p>
-                      End Date: {format(new Date(semester?.endDate), "PPP")}
-                    </p>
-                    <p>Status: {semester?.isActive ? "Active" : "Inactive"}</p>
+                    <p>Year: {semester.year}</p>
+                    <p>Code: {semester.code}</p>
+                    <p>Start Month: {semester.startMonth}</p>
+                    <p>End Month: {semester.endMonth}</p>
                   </div>
                 </CardContent>
               </Card>

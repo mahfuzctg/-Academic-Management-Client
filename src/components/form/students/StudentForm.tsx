@@ -1,10 +1,16 @@
-import { useForm, type Resolver } from "react-hook-form";
+import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Form } from "@/components/ui/form";
-
+import {
+  Form,
+  FormMessage,
+  FormControl,
+  FormLabel,
+  FormItem,
+  FormField,
+} from "@/components/ui/form";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { TStudent } from "@/types/student";
 import {
@@ -12,14 +18,53 @@ import {
   useUpdateStudentMutation,
 } from "@/redux/features/student/studentApi";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  createStudentValidationSchema,
-  updateStudentValidationSchema,
-} from "@/schema/studentFormSchema";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FormFields } from "@/components/ui/form-field";
+import {
+  useGetSemestersQuery,
+  useGetDepartmentsQuery,
+} from "@/redux/features/academic/academicApi";
+import { Input } from "@/components/ui/input";
 
-type StudentFormData = z.infer<typeof createStudentValidationSchema>;
+const studentSchema = z.object({
+  name: z.object({
+    firstName: z
+      .string()
+      .min(1, "First name is required")
+      .max(20, "Name cannot be more than 20 characters"),
+    middleName: z.string().optional(),
+    lastName: z
+      .string()
+      .min(1, "Last name is required")
+      .max(20, "Name cannot be more than 20 characters"),
+  }),
+  gender: z.enum(["male", "female", "other"]),
+  dateOfBirth: z.string(),
+  email: z.string().email("Invalid email address"),
+  contactNo: z.string().min(1, "Contact number is required"),
+  emergencyContactNo: z.string().min(1, "Emergency contact number is required"),
+  bloodGroup: z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]),
+  presentAddress: z.string().min(1, "Present address is required"),
+  permanentAddress: z.string().min(1, "Permanent address is required"),
+  guardian: z.object({
+    fatherName: z.string().min(1, "Father's name is required"),
+    fatherOccupation: z.string().min(1, "Father's occupation is required"),
+    fatherContactNo: z.string().min(1, "Father's contact number is required"),
+    motherName: z.string().min(1, "Mother's name is required"),
+    motherOccupation: z.string().min(1, "Mother's occupation is required"),
+    motherContactNo: z.string().min(1, "Mother's contact number is required"),
+  }),
+  localGuardian: z.object({
+    name: z.string().min(1, "Local guardian's name is required"),
+    occupation: z.string().min(1, "Local guardian's occupation is required"),
+    contactNo: z.string().min(1, "Local guardian's contact number is required"),
+    address: z.string().min(1, "Local guardian's address is required"),
+  }),
+  admissionSemester: z.string().min(1, "Admission Semester is required"),
+  academicDepartment: z.string().min(1, "Academic Department is required"),
+});
+
+type StudentFormData = z.infer<typeof studentSchema>;
 
 interface StudentFormProps {
   student?: TStudent;
@@ -31,50 +76,75 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
   const [createStudent] = useCreateStudentMutation();
   const [updateStudent] = useUpdateStudentMutation();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const { data: semestersData } = useGetSemestersQuery(undefined);
+  const { data: departmentsData } = useGetDepartmentsQuery(undefined);
 
   const form = useForm<StudentFormData>({
-    resolver: zodResolver(
-      student ? updateStudentValidationSchema : createStudentValidationSchema
-    ) as Resolver<StudentFormData>,
-    defaultValues: student || {
+    resolver: zodResolver(studentSchema),
+    defaultValues: {
       name: {
-        firstName: "John",
-        middleName: "William",
-        lastName: "Doe",
+        firstName: "",
+        middleName: "",
+        lastName: "",
       },
       gender: "male",
-      dateOfBirth: "2000-01-01",
-      email: "john.doe@example.com",
-      contactNo: "+1234567890",
-      emergencyContactNo: "+1987654321",
+      dateOfBirth: "",
+      email: "",
+      contactNo: "",
+      emergencyContactNo: "",
       bloodGroup: "A+",
-      presentAddress: "123 Main Street, City, State 12345",
-      permanentAddress: "456 Home Avenue, Hometown, State 67890",
+      presentAddress: "",
+      permanentAddress: "",
       guardian: {
-        fatherName: "Robert Doe",
-        fatherOccupation: "Engineer",
-        fatherContactNo: "+1122334455",
-        motherName: "Mary Doe",
-        motherOccupation: "Teacher",
-        motherContactNo: "+1555666777",
+        fatherName: "",
+        fatherOccupation: "",
+        fatherContactNo: "",
+        motherName: "",
+        motherOccupation: "",
+        motherContactNo: "",
       },
       localGuardian: {
-        name: "James Smith",
-        occupation: "Business Owner",
-        contactNo: "+1888999000",
-        address: "789 Local Street, City, State 54321",
+        name: "",
+        occupation: "",
+        contactNo: "",
+        address: "",
       },
-      admissionSemester: "fall2023",
-      academicDepartment: "computer-science",
+      admissionSemester: "",
+      academicDepartment: "",
     },
   });
 
+  useEffect(() => {
+    if (student) {
+      form.reset({
+        name: student.name,
+        gender: student.gender,
+        dateOfBirth: student.dateOfBirth,
+        email: student.email,
+        contactNo: student.contactNo,
+        emergencyContactNo: student.emergencyContactNo,
+        bloodGroup: student.bloodGroup,
+        presentAddress: student.presentAddress,
+        permanentAddress: student.permanentAddress,
+        guardian: student.guardian,
+        localGuardian: student.localGuardian,
+        admissionSemester: student.admissionSemester,
+        academicDepartment: student.academicDepartment,
+      });
+    }
+  }, [student, form]);
+
   const onSubmit = async (data: StudentFormData) => {
+    console.log(data);
     try {
       const formData = new FormData();
       const studentData = {
         password: "123456",
-        student: data,
+        student: {
+          ...data,
+          user: student?.user || "",
+          id: student?.id || "",
+        },
       };
       formData.append("data", JSON.stringify(studentData));
 
@@ -85,7 +155,10 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
       if (student) {
         await updateStudent({
           id: student.id,
-          data,
+          updatedData: {
+            ...data,
+            user: student.user,
+          },
         }).unwrap();
         toast({
           title: "Success",
@@ -116,6 +189,20 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
     }
   };
 
+  // Convert data to select options format
+  const semesterOptions =
+    semestersData?.data?.map((semester) => ({
+      label: `${semester.name} ${semester.year}`,
+      value: semester._id,
+    })) || [];
+
+  const departmentOptions =
+    departmentsData?.data?.map((department) => ({
+      label: department.name,
+      value: department._id,
+    })) || [];
+  console.log(semesterOptions);
+  console.log(departmentOptions);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -134,12 +221,26 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
 
                 {/* Image Upload Field */}
                 <div className="flex flex-col gap-2">
-                  <FormFields.TextWithIcon
-                    form={form}
-                    name="profileImage"
-                    label="Profile Image"
-                    type="file"
-                    onChange={handleImageChange}
+                  <FormField
+                    control={form.control}
+                    name="profileImg"
+                    render={({ field: { onChange, value, ...field } }) => (
+                      <FormItem>
+                        <FormLabel>Profile Image</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="file"
+                            accept="image/*"
+                            onChange={(e) => {
+                              handleImageChange(e);
+                              onChange(e.target.files?.[0]);
+                            }}
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
                   />
                   {selectedImage && (
                     <div className="mt-2">
@@ -200,7 +301,6 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
                     form={form}
                     name="email"
                     label="Email"
-                    type="email"
                     placeholder="Enter email"
                     required
                   />
@@ -354,22 +454,14 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
                     form={form}
                     name="admissionSemester"
                     label="Admission Semester"
-                    options={[
-                      { label: "Fall 2023", value: "fall2023" },
-                      { label: "Spring 2024", value: "spring2024" },
-                    ]}
+                    options={semesterOptions}
                     required
                   />
                   <FormFields.Select
                     form={form}
                     name="academicDepartment"
                     label="Academic Department"
-                    options={[
-                      { label: "Computer Science", value: "computer-science" },
-                      { label: "Engineering", value: "engineering" },
-                      { label: "Business", value: "business" },
-                      { label: "Arts", value: "arts" },
-                    ]}
+                    options={departmentOptions}
                     required
                   />
                 </div>

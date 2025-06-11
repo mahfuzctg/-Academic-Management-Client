@@ -1,5 +1,5 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,21 +35,30 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash2, Edit2 } from "lucide-react";
 import { setSelectedStudent } from "@/redux/features/studentSlice";
-import type { RootState } from "@/redux/store";
 import type { TStudent } from "@/types/student";
-import { useState } from "react";
 import {
   useGetAllStudentsQuery,
   useDeleteStudentMutation,
 } from "@/redux/features/student/studentApi";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface StudentListProps {
   onEdit: (student: TStudent) => void;
+  semesterId?: string;
+  departmentId?: string;
+  students: TStudent[];
+  isLoading: boolean;
 }
 
-const StudentList = ({ onEdit }: StudentListProps) => {
+const StudentList = ({
+  onEdit,
+  semesterId,
+  departmentId,
+  students,
+  isLoading,
+}: StudentListProps) => {
   const dispatch = useDispatch();
   const [filters, setFilters] = useState({
     search: "",
@@ -59,15 +68,31 @@ const StudentList = ({ onEdit }: StudentListProps) => {
   });
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<TStudent | null>(null);
+  const [filteredStudents, setFilteredStudents] = useState<TStudent[]>([]);
 
-  const {
-    data: studentsData,
-    isLoading,
-    error,
-  } = useGetAllStudentsQuery(filters);
+  const { data: studentsData, isLoading: apiLoading } =
+    useGetAllStudentsQuery(filters);
   const [deleteStudent] = useDeleteStudentMutation();
 
-  const students = studentsData?.data || [];
+  useEffect(() => {
+    if (studentsData?.data) {
+      let filtered = [...studentsData.data];
+
+      if (semesterId) {
+        filtered = filtered.filter(
+          (student) => student.admissionSemester === semesterId
+        );
+      }
+
+      if (departmentId) {
+        filtered = filtered.filter(
+          (student) => student.academicDepartment === departmentId
+        );
+      }
+
+      setFilteredStudents(filtered);
+    }
+  }, [studentsData, semesterId, departmentId]);
 
   const handleSearch = (value: string) => {
     setFilters((prev) => ({ ...prev, search: value }));
@@ -118,8 +143,12 @@ const StudentList = ({ onEdit }: StudentListProps) => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="space-y-4">
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
+        <Skeleton className="h-10 w-full" />
       </div>
     );
   }
@@ -200,7 +229,6 @@ const StudentList = ({ onEdit }: StudentListProps) => {
                   <TableHead>Email</TableHead>
                   <TableHead>Contact</TableHead>
                   <TableHead>Department</TableHead>
-                  <TableHead>Faculty</TableHead>
                   <TableHead>Semester</TableHead>
                   <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
@@ -218,9 +246,16 @@ const StudentList = ({ onEdit }: StudentListProps) => {
                     <TableCell>{student.id}</TableCell>
                     <TableCell>{student.email}</TableCell>
                     <TableCell>{student.contactNo}</TableCell>
-                    <TableCell>{student.academicDepartment}</TableCell>
-                    <TableCell>{student.academicFaculty}</TableCell>
-                    <TableCell>{student.admissionSemester}</TableCell>
+                    <TableCell>
+                      {typeof student.academicDepartment === "object"
+                        ? student.academicDepartment.name
+                        : student.academicDepartment}
+                    </TableCell>
+                    <TableCell>
+                      {typeof student.admissionSemester === "object"
+                        ? `${student.admissionSemester.name} ${student.admissionSemester.year}`
+                        : student.admissionSemester}
+                    </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

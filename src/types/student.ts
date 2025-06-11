@@ -1,4 +1,4 @@
-export interface TUserName {
+export type TUserName = {
   firstName: string;
   middleName?: string;
   lastName: string;
@@ -32,37 +32,34 @@ export interface TUserName {
   };
   createdAt: string;
   updatedAt: string;
+};
 
-
-export interface TGuardian {
+export type TGuardian = {
   fatherName: string;
   fatherOccupation: string;
   fatherContactNo: string;
   motherName: string;
   motherOccupation: string;
   motherContactNo: string;
-}
+};
 
-export interface TLocalGuardian {
+export type TLocalGuardian = {
   name: string;
   occupation: string;
   contactNo: string;
   address: string;
-}
+};
 
-export interface TStudent {
-  lastName: string;
-  firstName: string;
-  contactNumber: string;
-  address: any;
+export type TStudent = {
   id: string;
+  user: string;
   name: TUserName;
   gender: "male" | "female" | "other";
   dateOfBirth: string;
   email: string;
   contactNo: string;
   emergencyContactNo: string;
-  bloogGroup?: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+  bloogGroup: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
   presentAddress: string;
   permanentAddress: string;
   guardian: TGuardian;
@@ -70,11 +67,13 @@ export interface TStudent {
   profileImg?: string;
   admissionSemester: string;
   academicDepartment: string;
-  academicFaculty: string;
-  createdAt: string;
-  updatedAt: string;
-  isDeleted: boolean;
-}
+  academicFaculty?: string;
+  isDeleted?: boolean;
+};
+
+export type StudentModel = {
+  isUserExists(id: string): Promise<TStudent | null>;
+};
 
 export type StudentFormData = Omit<
   TStudent,
