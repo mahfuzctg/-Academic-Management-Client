@@ -1,11 +1,5 @@
 import type { FC } from "react";
-import {
-  FaEnvelope,
-  FaFacebookF,
-  FaLinkedinIn,
-  FaPhone,
-  FaYoutube,
-} from "react-icons/fa";
+import { Mail, Facebook, Linkedin, Phone, Youtube } from "lucide-react";
 
 type Faculty = {
   name: string;
@@ -45,18 +39,18 @@ const FacultyCard: FC<Faculty> = ({
             </p>
 
             <div className="flex gap-4 text-gray-600 dark:text-gray-400 text-lg mb-4">
-              <FaLinkedinIn className="cursor-pointer transition-colors duration-200 hover:text-blue-700 dark:hover:text-blue-400" />
-              <FaFacebookF className="cursor-pointer transition-colors duration-200 hover:text-blue-600 dark:hover:text-blue-300" />
-              <FaYoutube className="cursor-pointer transition-colors duration-200 hover:text-red-600 dark:hover:text-red-400" />
+              <Linkedin className="w-5 h-5 cursor-pointer transition-colors duration-200 hover:text-blue-700 dark:hover:text-blue-400" />
+              <Facebook className="w-5 h-5 cursor-pointer transition-colors duration-200 hover:text-blue-600 dark:hover:text-blue-300" />
+              <Youtube className="w-5 h-5 cursor-pointer transition-colors duration-200 hover:text-red-600 dark:hover:text-red-400" />
             </div>
 
             <div className="space-y-2 text-sm text-gray-700 dark:text-gray-300 mb-2">
               <p className="flex items-center gap-2">
-                <FaEnvelope className="text-blue-600 dark:text-blue-400" />
+                <Mail className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 {email}
               </p>
               <p className="flex items-center gap-2">
-                <FaPhone className="text-blue-600 dark:text-blue-400" />
+                <Phone className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                 {phone}
               </p>
             </div>

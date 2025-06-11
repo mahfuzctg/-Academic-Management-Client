@@ -6,10 +6,6 @@ import { verifyToken } from "@/utils/verifyToken";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
 
-// Icons
-import { BsFillPersonFill } from "react-icons/bs";
-import { FiBook, FiHome, FiUsers } from "react-icons/fi";
-
 import { adminPaths } from "@/routes/admin.routes";
 import { studentPaths } from "@/routes/student.routes";
 
@@ -17,14 +13,6 @@ const roleBasedPaths = {
   admin: adminPaths,
   superAdmin: adminPaths,
   student: studentPaths,
-};
-
-// Optional: Map route names to icons (extendable)
-const iconMap: Record<string, React.ReactNode> = {
-  Dashboard: <FiHome className="mr-2" />,
-  "Manage Students": <FiUsers className="mr-2" />,
-  "My Profile": <BsFillPersonFill className="mr-2" />,
-  Courses: <FiBook className="mr-2" />,
 };
 
 const Sidebar: React.FC = () => {
