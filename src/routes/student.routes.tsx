@@ -15,4 +15,14 @@ export const studentPaths = [
     element: <StudentProfile />,
     icon: <User className="w-5 h-5" />,
   },
+  {
+    name: "My Courses",
+    path: "profile",
+    element: <StudentProfile />,
+  },
+  {
+    name: "Grades",
+    path: "profile",
+    element: <StudentProfile />,
+  },
 ];
