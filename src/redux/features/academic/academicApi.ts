@@ -84,7 +84,7 @@ export const academicApi = baseApi.injectEndpoints({
           });
         }
         return {
-          url: "/semesters",
+          url: "/academic-semesters",
           method: "GET",
           params: params,
         };
@@ -100,7 +100,7 @@ export const academicApi = baseApi.injectEndpoints({
 
     addSemester: builder.mutation({
       query: (data: CreateSemesterDto) => ({
-        url: "/semesters",
+        url: "/academic-semesters/create-academic-semester",
         method: "POST",
         body: data,
       }),
@@ -109,7 +109,7 @@ export const academicApi = baseApi.injectEndpoints({
 
     updateSemester: builder.mutation({
       query: ({ id, data }: { id: string; data: UpdateSemesterDto }) => ({
-        url: `/semesters/${id}`,
+        url: `/academic-semesters/${id}`,
         method: "PATCH",
         body: data,
       }),
@@ -118,7 +118,7 @@ export const academicApi = baseApi.injectEndpoints({
 
     deleteSemester: builder.mutation({
       query: (id: string) => ({
-        url: `/semesters/${id}`,
+        url: `/academic-semesters/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Semester"],

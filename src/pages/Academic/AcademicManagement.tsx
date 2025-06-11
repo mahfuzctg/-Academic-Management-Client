@@ -55,9 +55,9 @@ const AcademicManagement = () => {
               Total Students
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalStudents}</div>
-          </CardContent>
+          {/*   <CardContent>
+            <div className="text-2xl font-bold">{stats?.data?.totalStudents}</div>
+          </CardContent> */}
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -65,17 +65,19 @@ const AcademicManagement = () => {
               Total Instructors
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalInstructors}</div>
-          </CardContent>
+          {/*   <CardContent>
+            <div className="text-2xl font-bold">
+              {stats?.data?.totalInstructors}
+            </div>
+          </CardContent> */}
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Courses</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.totalCourses}</div>
-          </CardContent>
+          {/*   <CardContent>
+            <div className="text-2xl font-bold">{stats?.data?.totalCourses}</div>
+          </CardContent> */}
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -83,9 +85,23 @@ const AcademicManagement = () => {
               Active Semesters
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{stats?.activeSemesters}</div>
-          </CardContent>
+          {/*   <CardContent>
+            <div className="text-2xl font-bold">
+              data?.
+            
+              data?.
+            
+              data?.
+            
+              data?.
+            
+              data?.
+            
+              data?.
+            
+              {stats?.data?.activeSemesters}
+            </div>
+          </CardContent> */}
         </Card>
       </div>
 
@@ -110,7 +126,7 @@ const AcademicManagement = () => {
 
         <TabsContent value="years" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {academicYears?.map((year) => (
+            {academicYears?.data?.map((year) => (
               <Card key={year.id}>
                 <CardHeader>
                   <CardTitle>{year.year}</CardTitle>
@@ -129,7 +145,7 @@ const AcademicManagement = () => {
 
         <TabsContent value="semesters" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {semesters?.map((semester) => (
+            {semesters?.data?.map((semester) => (
               <Card key={semester.id}>
                 <CardHeader>
                   <CardTitle>{semester.name}</CardTitle>
@@ -137,10 +153,12 @@ const AcademicManagement = () => {
                 <CardContent>
                   <div className="space-y-2">
                     <p>
-                      Start Date: {format(new Date(semester.startDate), "PPP")}
+                      Start Date: {format(new Date(semester?.startDate), "PPP")}
                     </p>
-                    <p>End Date: {format(new Date(semester.endDate), "PPP")}</p>
-                    <p>Status: {semester.isActive ? "Active" : "Inactive"}</p>
+                    <p>
+                      End Date: {format(new Date(semester?.endDate), "PPP")}
+                    </p>
+                    <p>Status: {semester?.isActive ? "Active" : "Inactive"}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -150,7 +168,7 @@ const AcademicManagement = () => {
 
         <TabsContent value="departments" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {departments?.map((department) => (
+            {departments?.data?.map((department) => (
               <Card key={department.id}>
                 <CardHeader>
                   <CardTitle>{department.name}</CardTitle>
@@ -173,7 +191,7 @@ const AcademicManagement = () => {
 
         <TabsContent value="programs" className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {programs?.map((program) => (
+            {programs?.data?.map((program) => (
               <Card key={program.id}>
                 <CardHeader>
                   <CardTitle>{program.name}</CardTitle>

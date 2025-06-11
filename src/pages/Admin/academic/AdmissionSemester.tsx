@@ -30,15 +30,26 @@ import {
   type Semester,
   type CreateSemesterDto,
   type UpdateSemesterDto,
+  AcademicSemesterName,
+  AcademicSemesterCode,
+  Months,
 } from "@/types/academic";
 import { FormFields } from "@/components/ui/form-field";
 
 const semesterSchema = z.object({
-  name: z.string().min(1, "Semester name is required"),
+  name: z.nativeEnum(AcademicSemesterName, {
+    required_error: "Semester name is required",
+  }),
   year: z.string().min(1, "Year is required"),
-  startDate: z.string().min(1, "Start date is required"),
-  endDate: z.string().min(1, "End date is required"),
-  isActive: z.boolean().default(false),
+  code: z.nativeEnum(AcademicSemesterCode, {
+    required_error: "Semester code is required",
+  }),
+  startMonth: z.nativeEnum(Months, {
+    required_error: "Start month is required",
+  }),
+  endMonth: z.nativeEnum(Months, {
+    required_error: "End month is required",
+  }),
 });
 
 type SemesterFormData = z.infer<typeof semesterSchema>;
@@ -57,22 +68,28 @@ const AdmissionSemester = () => {
   const form = useForm<SemesterFormData>({
     resolver: zodResolver(semesterSchema),
     defaultValues: {
-      name: "",
+      name: AcademicSemesterName.AUTUMN,
       year: "",
-      startDate: "",
-      endDate: "",
-      isActive: false,
+      code: AcademicSemesterCode.AUTUMN,
+      startMonth: Months.JANUARY,
+      endMonth: Months.DECEMBER,
     },
   });
 
   const onSubmit = async (data: SemesterFormData) => {
     try {
       if (selectedSemester) {
-        const updateData: UpdateSemesterDto = {
+        const updateData = {
           id: selectedSemester.id,
-          ...data,
+          data: {
+            name: data.name,
+            year: data.year,
+            code: data.code,
+            startMonth: data.startMonth,
+            endMonth: data.endMonth,
+          },
         };
-        await updateSemester(updateData as any).unwrap();
+        await updateSemester(updateData).unwrap();
         toast({
           title: "Success",
           description: "Semester updated successfully",
@@ -102,12 +119,32 @@ const AdmissionSemester = () => {
     form.reset({
       name: semester.name,
       year: semester.year,
-      startDate: semester.startDate,
-      endDate: semester.endDate,
-      isActive: semester.isActive,
+      code: semester.code,
+      startMonth: semester.startMonth,
+      endMonth: semester.endMonth,
     });
     setIsOpen(true);
   };
+
+  // Convert enum values to select options format
+  const semesterNameOptions = Object.values(AcademicSemesterName).map(
+    (value) => ({
+      label: value,
+      value: value,
+    })
+  );
+
+  const semesterCodeOptions = Object.values(AcademicSemesterCode).map(
+    (value) => ({
+      label: value,
+      value: value,
+    })
+  );
+
+  const monthOptions = Object.values(Months).map((value) => ({
+    label: value,
+    value: value,
+  }));
 
   return (
     <motion.div
@@ -117,7 +154,7 @@ const AdmissionSemester = () => {
       className="p-6"
     >
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Admission Semesters</h1>
+        <h1 className="text-2xl font-bold">Academic Semesters</h1>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
           <DialogTrigger asChild>
             <Button>Add New Semester</Button>
@@ -133,11 +170,11 @@ const AdmissionSemester = () => {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className="space-y-4"
               >
-                <FormFields.TextWithIcon
+                <FormFields.Select
                   form={form}
                   name="name"
                   label="Semester Name"
-                  placeholder="e.g., Fall 2024"
+                  options={semesterNameOptions}
                   required
                 />
                 <FormFields.TextWithIcon
@@ -147,22 +184,26 @@ const AdmissionSemester = () => {
                   placeholder="e.g., 2024"
                   required
                 />
-                <FormFields.Date
+                <FormFields.Select
                   form={form}
-                  name="startDate"
-                  label="Start Date"
+                  name="code"
+                  label="Semester Code"
+                  options={semesterCodeOptions}
                   required
                 />
-                <FormFields.Date
+                <FormFields.Select
                   form={form}
-                  name="endDate"
-                  label="End Date"
+                  name="startMonth"
+                  label="Start Month"
+                  options={monthOptions}
                   required
                 />
-                <FormFields.Checkbox
+                <FormFields.Select
                   form={form}
-                  name="isActive"
-                  label="Active Semester"
+                  name="endMonth"
+                  label="End Month"
+                  options={monthOptions}
+                  required
                 />
                 <Button type="submit" className="w-full">
                   {selectedSemester ? "Update Semester" : "Add Semester"}
@@ -181,34 +222,20 @@ const AdmissionSemester = () => {
             <TableRow>
               <TableHead>Semester Name</TableHead>
               <TableHead>Year</TableHead>
-              <TableHead>Start Date</TableHead>
-              <TableHead>End Date</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Code</TableHead>
+              <TableHead>Start Month</TableHead>
+              <TableHead>End Month</TableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {semesters?.map((semester) => (
+            {semesters?.data?.map((semester) => (
               <TableRow key={semester.id}>
                 <TableCell>{semester.name}</TableCell>
                 <TableCell>{semester.year}</TableCell>
-                <TableCell>
-                  {new Date(semester.startDate).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  {new Date(semester.endDate).toLocaleDateString()}
-                </TableCell>
-                <TableCell>
-                  <span
-                    className={`px-2 py-1 rounded-full text-xs ${
-                      semester.isActive
-                        ? "bg-green-100 text-green-800"
-                        : "bg-gray-100 text-gray-800"
-                    }`}
-                  >
-                    {semester.isActive ? "Active" : "Inactive"}
-                  </span>
-                </TableCell>
+                <TableCell>{semester.code}</TableCell>
+                <TableCell>{semester.startMonth}</TableCell>
+                <TableCell>{semester.endMonth}</TableCell>
                 <TableCell>
                   <Button
                     variant="outline"

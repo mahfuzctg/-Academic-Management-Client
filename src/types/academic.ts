@@ -8,13 +8,40 @@ export interface AcademicYear {
   updatedAt: string;
 }
 
+export enum AcademicSemesterName {
+  AUTUMN = "Autumn",
+  SUMMER = "Summer",
+  FALL = "Fall",
+}
+
+export enum AcademicSemesterCode {
+  AUTUMN = "01",
+  SUMMER = "02",
+  FALL = "03",
+}
+
+export enum Months {
+  JANUARY = "January",
+  FEBRUARY = "February",
+  MARCH = "March",
+  APRIL = "April",
+  MAY = "May",
+  JUNE = "June",
+  JULY = "July",
+  AUGUST = "August",
+  SEPTEMBER = "September",
+  OCTOBER = "October",
+  NOVEMBER = "November",
+  DECEMBER = "December",
+}
+
 export interface Semester {
   id: string;
-  name: string;
+  name: AcademicSemesterName;
   year: string;
-  startDate: string;
-  endDate: string;
-  isActive: boolean;
+  code: AcademicSemesterCode;
+  startMonth: Months;
+  endMonth: Months;
   createdAt: string;
   updatedAt: string;
 }
@@ -67,11 +94,11 @@ export interface UpdateDepartmentDto extends CreateDepartmentDto {
 }
 
 export interface CreateSemesterDto {
-  name: string;
+  name: AcademicSemesterName;
   year: string;
-  startDate: string;
-  endDate: string;
-  isActive: boolean;
+  code: AcademicSemesterCode;
+  startMonth: Months;
+  endMonth: Months;
 }
 
 export interface UpdateSemesterDto extends CreateSemesterDto {
