@@ -1,7 +1,5 @@
-import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { motion } from "framer-motion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const announcements = [
   {
@@ -39,36 +37,36 @@ const typeToVariant = (type: string) => {
 
 const Announcements = () => {
   return (
-    <section className="py-12 ">
+    <section className="py-16 bg-gray-50 dark:bg-gray-900 transition-colors duration-500">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl font-bold text-center mb-8">
+        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800 dark:text-white">
           Latest Announcements
         </h2>
-        <div className="grid gap-6 md:grid-cols-3">
-          {announcements.map((announcement, idx) => (
-            <motion.div
+
+        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+          {announcements.map((announcement) => (
+            <Card
               key={announcement.id}
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: idx * 0.15, duration: 0.5 }}
+              className="h-full rounded-xl shadow-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
             >
-              <Card className="hover:shadow-lg transition-shadow duration-300">
-                <CardHeader className="flex flex-row items-center justify-between pb-2">
-                  <Badge variant={typeToVariant(announcement.type)}>
-                    {announcement.type.charAt(0).toUpperCase() +
-                      announcement.type.slice(1)}
-                  </Badge>
-                  <span className="text-sm text-muted-foreground">
-                    {announcement.date}
-                  </span>
-                </CardHeader>
-                <CardContent>
-                  <CardTitle className="text-xl font-semibold mb-2">
-                    {announcement.title}
-                  </CardTitle>
-                </CardContent>
-              </Card>
-            </motion.div>
+              <CardHeader className="flex flex-row items-center justify-between pb-3">
+                <Badge
+                  variant={typeToVariant(announcement.type)}
+                  className="text-xs px-3 py-1"
+                >
+                  {announcement.type.charAt(0).toUpperCase() +
+                    announcement.type.slice(1)}
+                </Badge>
+                <span className="text-sm text-gray-500 dark:text-gray-400">
+                  {announcement.date}
+                </span>
+              </CardHeader>
+              <CardContent>
+                <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white">
+                  {announcement.title}
+                </CardTitle>
+              </CardContent>
+            </Card>
           ))}
         </div>
       </div>

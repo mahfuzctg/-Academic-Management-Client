@@ -1,122 +1,142 @@
 import { baseApi } from "@/redux/api/baseApi";
 import type { Course } from "@/types/academic";
-import type { CourseOffering, Enrollment, TEnrollment } from "@/types/course";
-import type { TQueryParam, TResponseRedux } from "@/types/global";
-import type { Student, TStudent } from "@/types/student";
+import type { CourseOffering } from "@/types/course";
+import type { TEnrollment } from "@/types/enrollment.type";
+import type { TResponseRedux } from "@/types/global";
+import type { TStudent } from "@/types/student";
+import type { IUserProfile } from "@/types/user";
 
 export const studentApi = baseApi.injectEndpoints({
-  endpoints: (build) => ({
-    createStudent: build.mutation({
-      query: (data) => ({
-        url: "/students/create-student",
+  endpoints: (builder) => ({
+    // Create Student
+    createStudent: builder.mutation({
+      query: (data: Partial<TStudent>) => ({
+        url: "/users/create-student",
         method: "POST",
-        data,
+        body: data,
       }),
-      invalidatesTags: ["Student"],
+      invalidatesTags: ["student"],
     }),
 
-    getSingleStudent: build.query({
+    // Get a single student
+    getSingleStudent: builder.query<TStudent, string>({
       query: (id) => ({
         url: `/students/${id}`,
         method: "GET",
       }),
-      providesTags: ["Student"],
+      providesTags: ["student"],
     }),
 
-    updateStudent: build.mutation({
-      query: ({ id, data }) => ({
+    // Update any student by ID
+    updateStudent: builder.mutation({
+      query: ({
+        id,
+        updatedData,
+      }: {
+        id: string;
+        updatedData: Partial<TStudent>;
+      }) => ({
         url: `/students/${id}`,
         method: "PATCH",
-        data,
+        body: updatedData,
       }),
-      invalidatesTags: ["Student"],
+      invalidatesTags: ["student"],
     }),
 
-    getAllStudents: build.query({
-      query: (arg: Record<string, any>) => ({
+    // Get all students with query filters
+    getAllStudents: builder.query<
+      TResponseRedux<TStudent[]>,
+      Record<string, any>
+    >({
+      query: (params) => ({
         url: "/students",
         method: "GET",
-        params: arg,
+        params,
       }),
-      transformResponse: (baseQueryReturnValue: any) => {
-        return {
-          data: baseQueryReturnValue.data,
-          meta: baseQueryReturnValue.meta,
-        };
-      },
-      providesTags: ["Student"],
+      transformResponse: (response: TResponseRedux<TStudent[]>) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
+      providesTags: ["student"],
     }),
 
-    getStudentCourses: build.query({
+    // Get student courses (enrolled + available)
+    getStudentCourses: builder.query<
+      TResponseRedux<{
+        enrolledCourses: CourseOffering[];
+        availableCourses: Course[];
+      }>,
+      string
+    >({
       query: (studentId) => ({
         url: `/students/${studentId}/courses`,
         method: "GET",
       }),
       providesTags: ["student-courses"],
-      transformResponse: (
-        response: TResponseRedux<{
-          enrolledCourses: CourseOffering[];
-          availableCourses: Course[];
-        }>
-      ) => ({
-        data: response.data,
-        meta: response.meta,
-      }),
     }),
 
-    enrollInCourse: build.mutation({
-      query: ({ studentId, courseId }) => ({
+    // Enroll in a course
+    enrollInCourse: builder.mutation({
+      query: ({
+        studentId,
+        courseId,
+      }: {
+        studentId: string;
+        courseId: string;
+      }) => ({
         url: `/students/${studentId}/courses/${courseId}/enroll`,
         method: "POST",
       }),
       invalidatesTags: ["student-courses"],
     }),
 
-    dropCourse: build.mutation({
-      query: ({ studentId, courseId }) => ({
+    // Drop a course
+    dropCourse: builder.mutation({
+      query: ({
+        studentId,
+        courseId,
+      }: {
+        studentId: string;
+        courseId: string;
+      }) => ({
         url: `/students/${studentId}/courses/${courseId}/drop`,
         method: "DELETE",
       }),
       invalidatesTags: ["student-courses"],
     }),
 
-    getStudentEnrollments: build.query({
-      query: (studentId) => ({
-        url: `/students/${studentId}/enrollments`,
+    // Get student enrollments
+    getStudentEnrollments: builder.query<TResponseRedux<TEnrollment[]>, string>(
+      {
+        query: (studentId) => ({
+          url: `/students/${studentId}/enrollments`,
+          method: "GET",
+        }),
+        providesTags: ["student-enrollments"],
+      }
+    ),
+
+    // Get my student profile
+    getMyStudentProfile: builder.query<TResponseRedux<TStudent>, void>({
+      query: () => ({
+        url: "/students/my-profile",
         method: "GET",
       }),
-      providesTags: ["student-enrollments"],
-      transformResponse: (response: TResponseRedux<TEnrollment[]>) => ({
-        data: response.data,
-        meta: response.meta,
-      }),
+      providesTags: ["student-profile"],
     }),
 
-    getStudentProfile: build.query({
+    // Get any student's profile
+    getStudentProfile: builder.query<TStudent, string>({
       query: (studentId) => ({
         url: `/students/${studentId}`,
         method: "GET",
       }),
       providesTags: ["student-profile"],
-      transformResponse: (response: TResponseRedux<TStudent>) => ({
-        data: response.data,
-        meta: response.meta,
-      }),
     }),
 
-    //  Add Student
-    addStudent: build.mutation({
-      query: (studentData: Partial<TStudent>) => ({
-        url: "/users/create-student",
-        method: "POST",
-        body: studentData,
-      }),
-      invalidatesTags: ["student"],
-    }),
-
-    //  Update Student
-    updateOwnProfile: build.mutation({
-      query: ({ id, body }) => ({
+    // Update own profile
+    updateOwnProfile: builder.mutation({
+      query: ({ id, body }: { id: string; body: Partial<TStudent> }) => ({
         url: `/students/${id}`,
         method: "PATCH",
         body,
@@ -124,12 +144,22 @@ export const studentApi = baseApi.injectEndpoints({
       invalidatesTags: ["student-profile"],
     }),
 
-    deleteStudent: build.mutation({
+    // Delete student
+    deleteStudent: builder.mutation({
       query: (id: string) => ({
         url: `/students/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["student"],
+    }),
+
+    // Get currently logged-in user info
+    getMe: builder.query<TResponseRedux<IUserProfile>, void>({
+      query: () => ({
+        url: "/users/me",
+        method: "GET",
+      }),
+      providesTags: ["user-profile"],
     }),
   }),
 });
@@ -143,8 +173,10 @@ export const {
   useEnrollInCourseMutation,
   useDropCourseMutation,
   useGetStudentEnrollmentsQuery,
+  useGetMyStudentProfileQuery,
   useGetStudentProfileQuery,
-  useAddStudentMutation,
+
   useUpdateOwnProfileMutation,
   useDeleteStudentMutation,
+  useGetMeQuery,
 } = studentApi;
