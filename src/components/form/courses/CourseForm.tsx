@@ -87,7 +87,10 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
       if (course) {
         await updateCourse({
           id: course.id,
-          data: formattedData,
+          data: {
+            ...formattedData,
+            code: formattedData.code.toString(),
+          },
         }).unwrap();
         toast({
           title: "Success",
@@ -125,7 +128,9 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>
+                    Title <span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input placeholder="Enter course title" {...field} />
                   </FormControl>
@@ -140,7 +145,9 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
                 name="prefix"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Prefix</FormLabel>
+                    <FormLabel>
+                      Prefix <span className="text-red-500">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input placeholder="Enter course prefix" {...field} />
                     </FormControl>
@@ -154,7 +161,9 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
                 name="code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Code</FormLabel>
+                    <FormLabel>
+                      Code <span className="text-red-500">*</span>
+                    </FormLabel>
                     <FormControl>
                       <Input
                         type="number"
@@ -173,7 +182,9 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
               name="credits"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Credits</FormLabel>
+                  <FormLabel>
+                    Credits <span className="text-red-500">*</span>
+                  </FormLabel>
                   <FormControl>
                     <Input
                       type="number"

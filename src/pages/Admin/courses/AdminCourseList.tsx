@@ -343,7 +343,7 @@ const AdminCourseList = () => {
                 <SelectContent>
                   {faculties?.data?.map((faculty) => (
                     <SelectItem key={faculty.id} value={faculty.id}>
-                      {faculty.firstName} {faculty.lastName}
+                      {faculty?.firstName} {faculty?.lastName}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -393,10 +393,20 @@ const AdminCourseList = () => {
         onOpenChange={setCourseFormDialogOpen}
       >
         <AlertDialogContent className="max-w-4xl">
-          <AlertDialogHeader>
+          <AlertDialogHeader className="flex flex-row items-center justify-between">
             <AlertDialogTitle>
               {selectedCourse ? "Edit Course" : "Add New Course"}
             </AlertDialogTitle>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => {
+                setCourseFormDialogOpen(false);
+                setSelectedCourse(null);
+              }}
+            >
+              <X className="h-4 w-4" />
+            </Button>
           </AlertDialogHeader>
           <div className="py-4">
             <CourseForm
