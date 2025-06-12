@@ -1,6 +1,6 @@
 import { baseApi } from "@/redux/api/baseApi";
+import type { TFaculty } from "@/types/faculty";
 import type { TQueryParam, TResponseRedux } from "@/types/global";
-import type { Faculty } from "@/types/academic";
 
 const facultyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -13,37 +13,33 @@ const facultyApi = baseApi.injectEndpoints({
           });
         }
         return {
-          url: "/faculty",
+          url: "/faculties",
           method: "GET",
           params: params,
         };
       },
       providesTags: ["Faculty"],
-      transformResponse: (response: TResponseRedux<Faculty[]>) => {
-        return {
-          data: response.data,
-          meta: response.meta,
-        };
-      },
+      transformResponse: (response: TResponseRedux<TFaculty[]>) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
     }),
 
     getSingleFaculty: builder.query({
       query: (id) => ({
-        url: `/faculty/${id}`,
+        url: `/faculties/${id}`,
         method: "GET",
       }),
       providesTags: ["Faculty"],
-      transformResponse: (response: TResponseRedux<Faculty>) => {
-        return {
-          data: response.data,
-          meta: response.meta,
-        };
-      },
+      transformResponse: (response: TResponseRedux<TFaculty>) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
     }),
 
     updateFaculty: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/faculty/${id}`,
+        url: `/faculties/${id}`,
         method: "PATCH",
         body: data,
       }),
@@ -52,7 +48,7 @@ const facultyApi = baseApi.injectEndpoints({
 
     deleteFaculty: builder.mutation({
       query: (id) => ({
-        url: `/faculty/${id}`,
+        url: `/faculties/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Faculty"],
