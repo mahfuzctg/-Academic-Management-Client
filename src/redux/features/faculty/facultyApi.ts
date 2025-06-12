@@ -1,5 +1,5 @@
 import { baseApi } from "@/redux/api/baseApi";
-import type { Faculty } from "@/types/academic";
+import type { TFaculty } from "@/types/faculty";
 import type { TQueryParam, TResponseRedux } from "@/types/global";
 
 const facultyApi = baseApi.injectEndpoints({
@@ -13,18 +13,16 @@ const facultyApi = baseApi.injectEndpoints({
           });
         }
         return {
-          url: "/faculties",
+          url: "/faculty", // ✅ correct backend route
           method: "GET",
           params: params,
         };
       },
       providesTags: ["Faculty"],
-      transformResponse: (response: TResponseRedux<Faculty[]>) => {
-        return {
-          data: response.data,
-          meta: response.meta,
-        };
-      },
+      transformResponse: (response: TResponseRedux<TFaculty[]>) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
     }),
 
     getSingleFaculty: builder.query({
@@ -33,12 +31,10 @@ const facultyApi = baseApi.injectEndpoints({
         method: "GET",
       }),
       providesTags: ["Faculty"],
-      transformResponse: (response: TResponseRedux<Faculty>) => {
-        return {
-          data: response.data,
-          meta: response.meta,
-        };
-      },
+      transformResponse: (response: TResponseRedux<TFaculty>) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
     }),
 
     updateFaculty: builder.mutation({

@@ -1,5 +1,6 @@
 import FacultyCard from "@/components/cards/FacultyCard";
 import { useGetAllFacultiesQuery } from "@/redux/features/faculty/facultyApi";
+import type { TFaculty } from "@/types/faculty";
 
 const FacultySection = () => {
   const { data, isLoading, isError } = useGetAllFacultiesQuery(undefined);
@@ -11,7 +12,7 @@ const FacultySection = () => {
     <section className="w-9/12 mx-auto px-4 py-12">
       <h1 className="text-3xl font-bold mb-8">Faculty & Staff Directory</h1>
       <div className="grid gap-6 md:grid-cols-2">
-        {data?.data?.map((faculty) => (
+        {data?.data?.map((faculty: TFaculty) => (
           <FacultyCard
             key={faculty.id}
             name={`${faculty.name.firstName} ${faculty.name.middleName ?? ""} ${
