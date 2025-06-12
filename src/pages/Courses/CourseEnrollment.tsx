@@ -11,6 +11,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useGetAllCoursesQuery } from "@/redux/features/course/courseApi";
 import type { ICourse } from "@/types/course";
 import { useState } from "react";
+import OfferedCourseSection from "./OfferedCourseSection";
 
 export default function CourseEnrollment() {
   const { toast } = useToast();
@@ -64,7 +65,7 @@ export default function CourseEnrollment() {
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Course Enrollment</h1>
       </div>
-
+      <OfferedCourseSection />
       <div className="flex items-center space-x-2">
         <Input
           placeholder="Search courses..."

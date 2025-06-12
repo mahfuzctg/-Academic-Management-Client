@@ -1,4 +1,4 @@
-export interface IOfferedCourse {
+export interface TOfferedCourse {
   _id: string;
   semesterRegistration: string;
   academicSemester: string;
