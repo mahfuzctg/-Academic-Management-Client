@@ -13,7 +13,7 @@ const facultyApi = baseApi.injectEndpoints({
           });
         }
         return {
-          url: "/faculty", // ✅ correct backend route
+          url: "/faculties",
           method: "GET",
           params: params,
         };
@@ -27,7 +27,7 @@ const facultyApi = baseApi.injectEndpoints({
 
     getSingleFaculty: builder.query({
       query: (id) => ({
-        url: `/faculty/${id}`,
+        url: `/faculties/${id}`,
         method: "GET",
       }),
       providesTags: ["Faculty"],
@@ -39,7 +39,7 @@ const facultyApi = baseApi.injectEndpoints({
 
     updateFaculty: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/faculty/${id}`,
+        url: `/faculties/${id}`,
         method: "PATCH",
         body: data,
       }),
@@ -48,7 +48,7 @@ const facultyApi = baseApi.injectEndpoints({
 
     deleteFaculty: builder.mutation({
       query: (id) => ({
-        url: `/faculty/${id}`,
+        url: `/faculties/${id}`,
         method: "DELETE",
       }),
       invalidatesTags: ["Faculty"],
