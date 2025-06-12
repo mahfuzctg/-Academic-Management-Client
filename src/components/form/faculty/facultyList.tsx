@@ -36,12 +36,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Pencil, Trash2, BookOpen } from "lucide-react";
-import {
-  useGetAllFacultiesQuery,
-  useDeleteFacultyMutation,
-} from "@/redux/features/facultys/facultyApi";
+
 import type { TFaculty } from "@/types/faculty";
 import { useState } from "react";
+import {
+  useDeleteFacultyMutation,
+  useGetAllFacultiesQuery,
+} from "@/redux/features/faculty/facultyApi";
 
 interface FacultyListProps {
   onEdit: (faculty: TFaculty) => void;

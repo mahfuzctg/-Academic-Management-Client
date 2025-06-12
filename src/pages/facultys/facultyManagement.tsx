@@ -3,13 +3,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
-import { mockInstructors } from "@/mock/instructorData";
-import type { Instructor } from "@/types/instructor";
-import InstructorForm from "@/components/form/faculty/facultyForm";
-import {
-  useGetAllFacultiesQuery,
-  useDeleteFacultyMutation,
-} from "@/redux/features/facultys/facultyApi";
+
+import type { TFaculty } from "@/types/faculty";
+
 import type { TQueryParam } from "@/types/global";
 import { Pagination } from "@/components/ui/pagination";
 import { useToast } from "@/components/ui/use-toast";
@@ -46,17 +42,22 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import FacultyForm from "@/components/form/faculty/facultyForm";
+import {
+  useDeleteFacultyMutation,
+  useGetAllFacultiesQuery,
+} from "@/redux/features/faculty/facultyApi";
 
 export default function FacultyManagement() {
   const { toast } = useToast();
-  const [faculties, setFaculties] = useState<Instructor[]>(mockInstructors);
+  const [faculties, setFaculties] = useState<TFaculty[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [selectedFaculty, setSelectedFaculty] = useState<
-    Instructor | undefined
+    TFaculty | undefined
   >();
   const [isSubjectsDialogOpen, setIsSubjectsDialogOpen] = useState(false);
   const [selectedFacultyForSubjects, setSelectedFacultyForSubjects] = useState<
-    Instructor | undefined
+    TFaculty | undefined
   >();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [facultyToDelete, setFacultyToDelete] = useState<any | null>(null);
@@ -112,7 +113,7 @@ export default function FacultyManagement() {
     setPage(1);
   };
 
-  const handleFormSuccess = (updatedFaculty?: Instructor) => {
+  const handleFormSuccess = (updatedFaculty?: TFaculty) => {
     if (updatedFaculty) {
       setFaculties((prev) =>
         prev.map((faculty) =>
@@ -130,12 +131,12 @@ export default function FacultyManagement() {
     });
   };
 
-  const handleEdit = (faculty: Instructor) => {
+  const handleEdit = (faculty: TFaculty) => {
     setSelectedFaculty(faculty);
     setIsFormOpen(true);
   };
 
-  const handleViewSubjects = (faculty: Instructor) => {
+  const handleViewSubjects = (faculty: TFaculty) => {
     setSelectedFacultyForSubjects(faculty);
     setIsSubjectsDialogOpen(true);
   };
@@ -182,8 +183,8 @@ export default function FacultyManagement() {
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <InstructorForm
-              instructor={selectedFaculty}
+            <FacultyForm
+              faculty={selectedFaculty}
               onSuccess={handleFormSuccess}
             />
           </DialogContent>

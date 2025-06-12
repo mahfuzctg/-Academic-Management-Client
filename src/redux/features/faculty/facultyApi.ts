@@ -37,6 +37,15 @@ const facultyApi = baseApi.injectEndpoints({
       }),
     }),
 
+    createFaculty: builder.mutation({
+      query: (data) => ({
+        url: "/users/create-faculty",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Faculty"],
+    }),
+
     updateFaculty: builder.mutation({
       query: ({ id, data }) => ({
         url: `/faculties/${id}`,
@@ -59,6 +68,7 @@ const facultyApi = baseApi.injectEndpoints({
 export const {
   useGetAllFacultiesQuery,
   useGetSingleFacultyQuery,
+  useCreateFacultyMutation,
   useUpdateFacultyMutation,
   useDeleteFacultyMutation,
 } = facultyApi;

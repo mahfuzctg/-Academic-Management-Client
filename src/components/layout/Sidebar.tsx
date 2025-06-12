@@ -31,7 +31,7 @@ const Sidebar: React.FC = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="w-64 h-screen border-r bg-white text-primary sticky top-0 hidden lg:flex flex-col justify-between">
+      <aside className="w-64 h-screen border-r text-primary sticky top-0 hidden lg:flex flex-col justify-between">
         <div>
           <div className="p-4 text-xl font-bold text-primary border-b">
             AcademicMS
