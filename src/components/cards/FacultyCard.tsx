@@ -19,7 +19,7 @@ const FacultyCard: FC<Faculty> = ({
   image,
 }) => {
   return (
-    <div className="group mx-auto bg-white dark:bg-gray-900 rounded-3xl overflow-hidden shadow-md hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700 hover:border-transparent hover:ring-2 hover:ring-blue-400/50 hover:ring-offset-2 dark:hover:ring-blue-500/40">
+    <div className="group mx-auto bg-white dark:bg-gray-900 rounded-3xl overflow-hidden  hover:shadow-lg transition-shadow duration-300 border border-gray-200 dark:border-gray-700 hover:border-transparent hover:ring-2 hover:ring-blue-400/50 hover:ring-offset-2 dark:hover:ring-blue-500/40       ">
       <div className="grid md:grid-cols-[1fr_2fr] gap-6 p-6">
         <div className="overflow-hidden rounded-2xl">
           <img
