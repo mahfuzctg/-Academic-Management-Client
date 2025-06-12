@@ -1,6 +1,6 @@
 import { baseApi } from "@/redux/api/baseApi";
-import type { TQueryParam, TResponseRedux } from "@/types/global";
 import type { Faculty } from "@/types/academic";
+import type { TQueryParam, TResponseRedux } from "@/types/global";
 
 const facultyApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -13,7 +13,7 @@ const facultyApi = baseApi.injectEndpoints({
           });
         }
         return {
-          url: "/faculty",
+          url: "/faculties",
           method: "GET",
           params: params,
         };
