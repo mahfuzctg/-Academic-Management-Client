@@ -8,43 +8,53 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { useGetAllCoursesQuery } from "@/redux/features/course/courseApi";
+import {
+  useGetAllCoursesQuery,
+  useAssignFacultiesMutation,
+  useGetFacultiesWithCourseQuery,
+} from "@/redux/features/course/courseApi";
 import type { ICourse } from "@/types/course";
 import { useState } from "react";
 
 export default function CourseEnrollment() {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const [enrolledIds, setEnrolledIds] = useState<string[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
 
-  const { data, isLoading, isError } = useGetAllCoursesQuery();
-  const courses: ICourse[] = data ?? [];
+  const { data: courses, isLoading, isError } = useGetAllCoursesQuery();
+  const [assignFaculties] = useAssignFacultiesMutation();
+  const { data: courseFaculties } = useGetFacultiesWithCourseQuery(
+    selectedCourse?.id || ""
+  );
 
-  const filteredCourses = courses.filter((course: ICourse) => {
-    const name = String(course?.name ?? "").toLowerCase();
+  const filteredCourses = courses?.filter((course: ICourse) => {
+    const title = String(course?.title ?? "").toLowerCase();
+    const prefix = String(course?.prefix ?? "").toLowerCase();
     const code = String(course?.code ?? "").toLowerCase();
-    const department = String(course?.department ?? "").toLowerCase();
     const query = searchQuery.toLowerCase();
 
     return (
-      name.includes(query) || code.includes(query) || department.includes(query)
+      title.includes(query) || prefix.includes(query) || code.includes(query)
     );
   });
 
-  const handleEnrollment = (course: ICourse) => {
-    const isAlreadyEnrolled = enrolledIds.includes(course.id);
-    const updatedEnrolledIds = isAlreadyEnrolled
-      ? enrolledIds.filter((id) => id !== course.id)
-      : [...enrolledIds, course.id];
-
-    setEnrolledIds(updatedEnrolledIds);
-
-    toast({
-      title: isAlreadyEnrolled ? "Course Dropped" : "Course Enrolled",
-      description: `You have ${isAlreadyEnrolled ? "dropped" : "enrolled in"} ${
-        course.name
-      }`,
-    });
+  const handleAssignFaculty = async (courseId: string, facultyId: string) => {
+    try {
+      await assignFaculties({
+        courseId,
+        faculties: [facultyId],
+      }).unwrap();
+      toast({
+        title: "Success",
+        description: "Faculty assigned successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to assign faculty",
+        variant: "destructive",
+      });
+    }
   };
 
   if (isLoading) {
@@ -62,7 +72,7 @@ export default function CourseEnrollment() {
   return (
     <div className="space-y-6 w-9/12 my-20 mx-auto">
       <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Course Enrollment</h1>
+        <h1 className="text-3xl font-bold">Course Management</h1>
       </div>
 
       <div className="flex items-center space-x-2">
@@ -75,46 +85,38 @@ export default function CourseEnrollment() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {filteredCourses.map((course: ICourse) => {
-          const isEnrolled = enrolledIds.includes(course.id);
-          return (
-            <Card key={course.id}>
-              <CardHeader>
-                <CardTitle>{course.name}</CardTitle>
-                <CardDescription>
-                  {course.code} • {course.department}
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
+        {filteredCourses?.map((course: ICourse) => (
+          <Card key={course.id}>
+            <CardHeader>
+              <CardTitle>{course.title}</CardTitle>
+              <CardDescription>
+                {course.prefix} {course.code}
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                <p className="text-sm">
+                  <span className="font-medium">Credits:</span> {course.credits}
+                </p>
+                {course?.preRequisiteCourses?.length > 0 && (
                   <p className="text-sm">
-                    <span className="font-medium">Title:</span> {course?.title}
+                    <span className="font-medium">Prerequisites:</span>{" "}
+                    {course.preRequisiteCourses
+                      .map((prereq) => prereq.course)
+                      .join(", ")}
                   </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Prefix:</span> {course.prefix}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Credits:</span>{" "}
-                    {course.credits}
-                  </p>
-                  {course?.prerequisites?.length > 0 && (
-                    <p className="text-sm">
-                      <span className="font-medium">Prerequisites:</span>{" "}
-                      {course.prerequisites.join(", ")}
-                    </p>
-                  )}
-                  <Button
-                    variant={isEnrolled ? "destructive" : "default"}
-                    className="w-full"
-                    onClick={() => handleEnrollment(course)}
-                  >
-                    {isEnrolled ? "Drop Course" : "Enroll"}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
+                )}
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => setSelectedCourse(course)}
+                >
+                  Manage Course
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
       </div>
     </div>
   );

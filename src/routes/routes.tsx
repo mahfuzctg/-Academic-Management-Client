@@ -18,6 +18,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { adminPaths } from "./admin.routes";
 import { instructorPaths } from "./instructor.routes";
 import { studentPaths } from "./student.routes";
+import StudentCourseList from "@/pages/student/courses/StudentCourseList";
 
 const router = createBrowserRouter([
   {
@@ -34,7 +35,7 @@ const router = createBrowserRouter([
       },
       {
         path: "courses",
-        element: <CourseEnrollment />,
+        element: <StudentCourseList />,
       },
       {
         path: "instructors",

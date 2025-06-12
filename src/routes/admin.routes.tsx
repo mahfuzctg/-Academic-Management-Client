@@ -2,6 +2,7 @@ import AcademicManagement from "@/pages/Academic/AcademicManagement";
 import AcademicDepartment from "@/pages/Admin/academic/AcademicDepartment";
 import AcademicFacultyPage from "@/pages/Admin/academic/AcademicFaculty";
 import AcademicSemester from "@/pages/Admin/academic/AdmissionSemester";
+import AdminCourseList from "@/pages/Admin/courses/AdminCourseList";
 
 import { AdminDashboard } from "@/pages/Dashboard/AdminDashboard";
 import InstructorManagement from "@/pages/facultys/facultyManagement";
@@ -65,5 +66,11 @@ export const adminPaths = [
     path: "jobsmanagement",
     element: <JobManagement />,
     icon: <Briefcase className="w-5 h-5" />,
+  },
+  {
+    name: "Course Management",
+    path: "course-management",
+    element: <AdminCourseList />,
+    icon: <BookOpen className="w-5 h-5" />,
   },
 ];

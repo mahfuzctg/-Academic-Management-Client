@@ -30,32 +30,23 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import {
   useGetAllCoursesQuery,
-  useDeleteCourseMutation,
-  useUpdateCourseMutation,
-  useAssignFacultiesMutation,
-  useGetFacultiesWithCourseQuery,
-  useRemoveFacultiesMutation,
+  useEnrollInCourseMutation,
+  useGetEnrolledCoursesQuery,
 } from "@/redux/features/course/courseApi";
 import type { ICourse } from "@/types/course";
 import { motion } from "framer-motion";
 import { Info } from "lucide-react";
 import { useState } from "react";
-import CourseForm from "@/components/form/courses/CourseForm";
 
-const CourseList = () => {
+const StudentCourseList = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [enrollDialogOpen, setEnrollDialogOpen] = useState(false);
 
   const { data: courses, isLoading, isError } = useGetAllCoursesQuery();
-  const [deleteCourse] = useDeleteCourseMutation();
-  const [updateCourse] = useUpdateCourseMutation();
-  const [assignFaculties] = useAssignFacultiesMutation();
-  const [removeFaculties] = useRemoveFacultiesMutation();
-  const { data: courseFaculties } = useGetFacultiesWithCourseQuery(
-    selectedCourse?.id || ""
-  );
+  const { data: enrolledCourses } = useGetEnrolledCoursesQuery();
+  const [enrollInCourse] = useEnrollInCourseMutation();
 
   const filteredCourses = courses?.filter((course: ICourse) => {
     const title = String(course?.title ?? "").toLowerCase();
@@ -68,61 +59,29 @@ const CourseList = () => {
     );
   });
 
-  const handleDelete = async () => {
+  const isEnrolled = (courseId: string) => {
+    return enrolledCourses?.some(
+      (enrollment) => enrollment.courseId === courseId
+    );
+  };
+
+  const handleEnroll = async () => {
     if (selectedCourse) {
       try {
-        await deleteCourse(selectedCourse.id).unwrap();
+        await enrollInCourse(selectedCourse.id).unwrap();
         toast({
           title: "Success",
-          description: "Course deleted successfully",
+          description: "Successfully enrolled in the course",
         });
-        setDeleteDialogOpen(false);
+        setEnrollDialogOpen(false);
         setSelectedCourse(null);
       } catch (error) {
         toast({
           title: "Error",
-          description: "Failed to delete course",
+          description: "Failed to enroll in the course",
           variant: "destructive",
         });
       }
-    }
-  };
-
-  const handleAssignFaculty = async (courseId: string, facultyId: string) => {
-    try {
-      await assignFaculties({
-        courseId,
-        faculties: [facultyId],
-      }).unwrap();
-      toast({
-        title: "Success",
-        description: "Faculty assigned successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to assign faculty",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleRemoveFaculty = async (courseId: string, facultyId: string) => {
-    try {
-      await removeFaculties({
-        courseId,
-        faculties: [facultyId],
-      }).unwrap();
-      toast({
-        title: "Success",
-        description: "Faculty removed successfully",
-      });
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to remove faculty",
-        variant: "destructive",
-      });
     }
   };
 
@@ -150,7 +109,7 @@ const CourseList = () => {
     >
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Course Management</CardTitle>
+          <CardTitle>Available Courses</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 mb-6">
@@ -161,6 +120,17 @@ const CourseList = () => {
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="max-w-sm"
               />
+              <Select>
+                <SelectTrigger className="w-[180px]">
+                  <SelectValue placeholder="Filter by semester" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="1">Semester 1</SelectItem>
+                  <SelectItem value="2">Semester 2</SelectItem>
+                  <SelectItem value="3">Semester 3</SelectItem>
+                  <SelectItem value="4">Semester 4</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
@@ -173,8 +143,9 @@ const CourseList = () => {
                   <TableHead>Prefix</TableHead>
                   <TableHead>Credits</TableHead>
                   <TableHead>Prerequisites</TableHead>
-                  <TableHead>Faculties</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
+                  <TableHead>Instructor</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead className="w-[100px]">Action</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -185,7 +156,7 @@ const CourseList = () => {
                     <TableCell>{course.prefix}</TableCell>
                     <TableCell>{course.credits}</TableCell>
                     <TableCell>
-                      {course.preRequisiteCourses?.length > 0 ? (
+                      {course?.preRequisiteCourses?.length > 0 ? (
                         <div className="flex items-center gap-1">
                           <Info className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm">
@@ -199,28 +170,31 @@ const CourseList = () => {
                       )}
                     </TableCell>
                     <TableCell>
-                      {courseFaculties?.faculties?.length || 0} assigned
+                      {course.faculty?.firstName} {course.faculty?.lastName}
                     </TableCell>
                     <TableCell>
-                      <div className="flex gap-2">
+                      <Badge
+                        variant={course.isActive ? "default" : "secondary"}
+                      >
+                        {course.isActive ? "Available" : "Unavailable"}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {isEnrolled(course.id) ? (
+                        <Badge variant="secondary">Enrolled</Badge>
+                      ) : (
                         <Button
-                          variant="destructive"
+                          variant="default"
                           size="sm"
                           onClick={() => {
                             setSelectedCourse(course);
-                            setDeleteDialogOpen(true);
+                            setEnrollDialogOpen(true);
                           }}
+                          disabled={!course.isActive}
                         >
-                          Delete
+                          Enroll
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedCourse(course)}
-                        >
-                          Manage
-                        </Button>
-                      </div>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}
@@ -230,35 +204,23 @@ const CourseList = () => {
         </CardContent>
       </Card>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+      <AlertDialog open={enrollDialogOpen} onOpenChange={setEnrollDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
+            <AlertDialogTitle>Confirm Enrollment</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete {selectedCourse?.title}? This
+              Are you sure you want to enroll in {selectedCourse?.title}? This
               action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Delete
-            </AlertDialogAction>
+            <AlertDialogAction onClick={handleEnroll}>Enroll</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-
-      <CourseForm
-        course={selectedCourse}
-        onSuccess={() => {
-          // Handle success
-        }}
-      />
     </motion.div>
   );
 };
 
-export default CourseList;
+export default StudentCourseList;
