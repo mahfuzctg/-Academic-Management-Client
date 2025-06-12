@@ -6,10 +6,8 @@ import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import { ThemeProvider } from "@/components/theme-provider";
 import CourseEnrollment from "@/pages/Courses/CourseEnrollment";
 import Home from "@/pages/Home";
-import InstructorManagement from "@/pages/Instructors/InstructorManagement";
+import InstructorManagement from "@/pages/facultys/facultyManagement";
 import JobManagement from "@/pages/Jobs/JobManagement";
-
-
 
 import LoginForm from "@/pages/Login";
 

@@ -5,11 +5,11 @@ import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { mockInstructors } from "@/mock/instructorData";
 import type { Instructor } from "@/types/instructor";
-import InstructorForm from "@/components/form/instructors/InstructorForm";
+import InstructorForm from "@/components/form/faculty/facultyForm";
 import {
-  useGetAllInstructorsQuery,
-  useDeleteInstructorMutation,
-} from "@/redux/features/instructor/instructorApi";
+  useGetAllFacultiesQuery,
+  useDeleteFacultyMutation,
+} from "@/redux/features/facultys/facultyApi";
 import type { TQueryParam } from "@/types/global";
 import { Pagination } from "@/components/ui/pagination";
 import { useToast } from "@/components/ui/use-toast";
@@ -47,20 +47,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-export default function InstructorManagement() {
+export default function FacultyManagement() {
   const { toast } = useToast();
-  const [instructors, setInstructors] = useState<Instructor[]>(mockInstructors);
+  const [faculties, setFaculties] = useState<Instructor[]>(mockInstructors);
   const [isFormOpen, setIsFormOpen] = useState(false);
-  const [selectedInstructor, setSelectedInstructor] = useState<
+  const [selectedFaculty, setSelectedFaculty] = useState<
     Instructor | undefined
   >();
   const [isSubjectsDialogOpen, setIsSubjectsDialogOpen] = useState(false);
-  const [selectedInstructorForSubjects, setSelectedInstructorForSubjects] =
-    useState<Instructor | undefined>();
+  const [selectedFacultyForSubjects, setSelectedFacultyForSubjects] = useState<
+    Instructor | undefined
+  >();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [instructorToDelete, setInstructorToDelete] = useState<any | null>(
-    null
-  );
+  const [facultyToDelete, setFacultyToDelete] = useState<any | null>(null);
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [filters, setFilters] = useState({
@@ -69,7 +68,7 @@ export default function InstructorManagement() {
     status: "",
   });
 
-  const [deleteInstructor] = useDeleteInstructorMutation();
+  const [deleteFaculty] = useDeleteFacultyMutation();
 
   // Prepare query params
   const queryParams: TQueryParam[] = [
@@ -87,8 +86,7 @@ export default function InstructorManagement() {
     queryParams.push({ name: "status", value: filters.status });
   }
 
-  const { data: instructorData, isLoading } =
-    useGetAllInstructorsQuery(queryParams);
+  const { data: facultyData, isLoading } = useGetAllFacultiesQuery(queryParams);
 
   const handleSearch = (value: string) => {
     setFilters((prev) => ({ ...prev, search: value }));
@@ -114,56 +112,54 @@ export default function InstructorManagement() {
     setPage(1);
   };
 
-  const handleFormSuccess = (updatedInstructor?: Instructor) => {
-    if (updatedInstructor) {
-      setInstructors((prev) =>
-        prev.map((instructor) =>
-          instructor.id === updatedInstructor.id
-            ? updatedInstructor
-            : instructor
+  const handleFormSuccess = (updatedFaculty?: Instructor) => {
+    if (updatedFaculty) {
+      setFaculties((prev) =>
+        prev.map((faculty) =>
+          faculty.id === updatedFaculty.id ? updatedFaculty : faculty
         )
       );
     }
     setIsFormOpen(false);
-    setSelectedInstructor(undefined);
+    setSelectedFaculty(undefined);
     toast({
       title: "Success",
-      description: updatedInstructor
-        ? "Instructor updated successfully"
-        : "Instructor added successfully",
+      description: updatedFaculty
+        ? "Faculty updated successfully"
+        : "Faculty added successfully",
     });
   };
 
-  const handleEdit = (instructor: Instructor) => {
-    setSelectedInstructor(instructor);
+  const handleEdit = (faculty: Instructor) => {
+    setSelectedFaculty(faculty);
     setIsFormOpen(true);
   };
 
-  const handleViewSubjects = (instructor: Instructor) => {
-    setSelectedInstructorForSubjects(instructor);
+  const handleViewSubjects = (faculty: Instructor) => {
+    setSelectedFacultyForSubjects(faculty);
     setIsSubjectsDialogOpen(true);
   };
 
-  const handleDelete = (instructor: any) => {
-    setInstructorToDelete(instructor);
+  const handleDelete = (faculty: any) => {
+    setFacultyToDelete(faculty);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
     try {
-      if (instructorToDelete) {
-        await deleteInstructor(instructorToDelete._id).unwrap();
+      if (facultyToDelete) {
+        await deleteFaculty(facultyToDelete._id).unwrap();
         toast({
           title: "Success",
-          description: "Instructor deleted successfully",
+          description: "Faculty deleted successfully",
         });
         setDeleteDialogOpen(false);
-        setInstructorToDelete(null);
+        setFacultyToDelete(null);
       }
     } catch (error) {
       toast({
         title: "Error",
-        description: "Failed to delete instructor",
+        description: "Failed to delete faculty",
         variant: "destructive",
       });
     }
@@ -173,21 +169,21 @@ export default function InstructorManagement() {
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold">Instructor Management</h1>
+          <h1 className="text-3xl font-bold">Faculty Management</h1>
           <p className="text-muted-foreground mt-1">
-            Manage instructor profiles, assigned subjects, and academic records
+            Manage faculty profiles, assigned subjects, and academic records
           </p>
         </div>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button>
               <Plus className="mr-2 h-4 w-4" />
-              Add New Instructor
+              Add New Faculty
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <InstructorForm
-              instructor={selectedInstructor}
+              instructor={selectedFaculty}
               onSuccess={handleFormSuccess}
             />
           </DialogContent>
@@ -196,12 +192,12 @@ export default function InstructorManagement() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Instructor List</CardTitle>
+          <CardTitle>Faculty List</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-wrap gap-4 mb-6">
             <Input
-              placeholder="Search instructors..."
+              placeholder="Search faculties..."
               value={filters.search}
               onChange={(e) => handleSearch(e.target.value)}
               className="max-w-sm"
@@ -256,35 +252,33 @@ export default function InstructorManagement() {
                       Loading...
                     </TableCell>
                   </TableRow>
-                ) : instructorData?.data?.length === 0 ? (
+                ) : facultyData?.data?.length === 0 ? (
                   <TableRow>
                     <TableCell colSpan={6} className="text-center">
-                      No instructors found
+                      No faculties found
                     </TableCell>
                   </TableRow>
                 ) : (
-                  instructorData?.data?.map((instructor: any) => (
-                    <TableRow key={instructor._id}>
-                      <TableCell>{instructor.fullName}</TableCell>
-                      <TableCell>
-                        {instructor.academicDepartment?.name}
-                      </TableCell>
-                      <TableCell>{instructor.email}</TableCell>
+                  facultyData?.data?.map((faculty: any) => (
+                    <TableRow key={faculty._id}>
+                      <TableCell>{faculty.fullName}</TableCell>
+                      <TableCell>{faculty.academicDepartment?.name}</TableCell>
+                      <TableCell>{faculty.email}</TableCell>
                       <TableCell>
                         <span
                           className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            instructor.status === "active"
+                            faculty.status === "active"
                               ? "bg-green-100 text-green-800"
-                              : instructor.status === "inactive"
+                              : faculty.status === "inactive"
                               ? "bg-red-100 text-red-800"
                               : "bg-yellow-100 text-yellow-800"
                           }`}
                         >
-                          {instructor.status}
+                          {faculty.status}
                         </span>
                       </TableCell>
                       <TableCell>
-                        {instructor.assignedSubjects?.length || 0} subjects
+                        {faculty.assignedSubjects?.length || 0} subjects
                       </TableCell>
                       <TableCell>
                         <DropdownMenu>
@@ -296,13 +290,13 @@ export default function InstructorManagement() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => handleEdit(instructor)}
+                              onClick={() => handleEdit(faculty)}
                             >
                               <Pencil className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => handleDelete(instructor)}
+                              onClick={() => handleDelete(faculty)}
                               className="text-red-600"
                             >
                               <Trash2 className="mr-2 h-4 w-4" />
@@ -319,11 +313,11 @@ export default function InstructorManagement() {
           </div>
 
           {/* Pagination */}
-          {instructorData?.meta && (
+          {facultyData?.meta && (
             <div className="mt-4 flex justify-center">
               <Pagination
                 currentPage={page}
-                totalPages={Math.ceil(instructorData.meta.total / limit)}
+                totalPages={Math.ceil(facultyData.meta.total / limit)}
                 onPageChange={setPage}
               />
             </div>
@@ -333,42 +327,39 @@ export default function InstructorManagement() {
 
       <AnimatePresence mode="wait">
         <motion.div
-          key="instructor-list"
+          key="faculty-list"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.2 }}
         >
           <div className="grid gap-4">
-            {instructors.map((instructor: any) => (
-              <div
-                key={instructor.id}
-                className="p-6 border rounded-lg space-y-4"
-              >
+            {faculties.map((faculty: any) => (
+              <div key={faculty.id} className="p-6 border rounded-lg space-y-4">
                 <div className="flex justify-between items-start">
                   <div>
                     <h3 className="text-xl font-semibold">
-                      {instructor.firstName} {instructor.lastName}
+                      {faculty.firstName} {faculty.lastName}
                     </h3>
                     <p className="text-muted-foreground">
-                      {instructor?.academicDepartment?.name}
+                      {faculty?.academicDepartment?.name}
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {instructor.email}
+                      {faculty.email}
                     </p>
                   </div>
                   <div className="flex gap-2">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleViewSubjects(instructor)}
+                      onClick={() => handleViewSubjects(faculty)}
                     >
                       View Subjects
                     </Button>
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleEdit(instructor)}
+                      onClick={() => handleEdit(faculty)}
                     >
                       Edit
                     </Button>
@@ -380,7 +371,7 @@ export default function InstructorManagement() {
                       Assigned Subjects
                     </h4>
                     <div className="space-y-2">
-                      {instructor.assignedSubjects.map((subject: any) => (
+                      {faculty.assignedSubjects.map((subject: any) => (
                         <div
                           key={subject.id}
                           className="text-sm p-2 bg-muted rounded"
@@ -402,96 +393,91 @@ export default function InstructorManagement() {
         onOpenChange={setIsSubjectsDialogOpen}
       >
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          {selectedInstructorForSubjects && (
+          {selectedFacultyForSubjects && (
             <div className="space-y-6">
               <div>
                 <h2 className="text-2xl font-bold">
-                  {selectedInstructorForSubjects.firstName}{" "}
-                  {selectedInstructorForSubjects.lastName}'s Subjects
+                  {selectedFacultyForSubjects.firstName}{" "}
+                  {selectedFacultyForSubjects.lastName}'s Subjects
                 </h2>
                 <p className="text-muted-foreground">
-                  Department: {selectedInstructorForSubjects.department}
+                  Department: {selectedFacultyForSubjects.department}
                 </p>
               </div>
 
               <div className="space-y-4">
-                {selectedInstructorForSubjects.assignedSubjects.map(
-                  (subject) => (
-                    <div
-                      key={subject.id}
-                      className="p-4 border rounded-lg space-y-4"
-                    >
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-semibold">{subject.name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Code: {subject.code} | Semester: {subject.semester}
-                          </p>
-                        </div>
-                        <Button variant="outline" size="sm">
-                          View Students
-                        </Button>
+                {selectedFacultyForSubjects.assignedSubjects.map((subject) => (
+                  <div
+                    key={subject.id}
+                    className="p-4 border rounded-lg space-y-4"
+                  >
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="font-semibold">{subject.name}</h3>
+                        <p className="text-sm text-muted-foreground">
+                          Code: {subject.code} | Semester: {subject.semester}
+                        </p>
                       </div>
+                      <Button variant="outline" size="sm">
+                        View Students
+                      </Button>
+                    </div>
 
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">Student List</h4>
-                        <div className="border rounded-md">
-                          <table className="w-full">
-                            <thead>
-                              <tr className="border-b">
-                                <th className="text-left p-2">Student ID</th>
-                                <th className="text-left p-2">Name</th>
-                                <th className="text-left p-2">Grade</th>
-                                <th className="text-left p-2">Attendance</th>
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Student List</h4>
+                      <div className="border rounded-md">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left p-2">Student ID</th>
+                              <th className="text-left p-2">Name</th>
+                              <th className="text-left p-2">Grade</th>
+                              <th className="text-left p-2">Attendance</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {subject.students.map((student) => (
+                              <tr key={student.studentId} className="border-b">
+                                <td className="p-2">{student.studentId}</td>
+                                <td className="p-2">{student.name}</td>
+                                <td className="p-2">
+                                  {student.grade || "N/A"}
+                                </td>
+                                <td className="p-2">{student.attendance}%</td>
                               </tr>
-                            </thead>
-                            <tbody>
-                              {subject.students.map((student) => (
-                                <tr
-                                  key={student.studentId}
-                                  className="border-b"
-                                >
-                                  <td className="p-2">{student.studentId}</td>
-                                  <td className="p-2">{student.name}</td>
-                                  <td className="p-2">
-                                    {student.grade || "N/A"}
-                                  </td>
-                                  <td className="p-2">{student.attendance}%</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-medium">Grading History</h4>
-                        <div className="border rounded-md">
-                          <table className="w-full">
-                            <thead>
-                              <tr className="border-b">
-                                <th className="text-left p-2">Date</th>
-                                <th className="text-left p-2">Student ID</th>
-                                <th className="text-left p-2">Grade</th>
-                                <th className="text-left p-2">Semester</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {subject.gradingHistory.map((record, index) => (
-                                <tr key={index} className="border-b">
-                                  <td className="p-2">{record.date}</td>
-                                  <td className="p-2">{record.studentId}</td>
-                                  <td className="p-2">{record.grade}</td>
-                                  <td className="p-2">{record.semester}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
+                            ))}
+                          </tbody>
+                        </table>
                       </div>
                     </div>
-                  )
-                )}
+
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium">Grading History</h4>
+                      <div className="border rounded-md">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left p-2">Date</th>
+                              <th className="text-left p-2">Student ID</th>
+                              <th className="text-left p-2">Grade</th>
+                              <th className="text-left p-2">Semester</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {subject.gradingHistory.map((record, index) => (
+                              <tr key={index} className="border-b">
+                                <td className="p-2">{record.date}</td>
+                                <td className="p-2">{record.studentId}</td>
+                                <td className="p-2">{record.grade}</td>
+                                <td className="p-2">{record.semester}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             </div>
           )}
@@ -504,7 +490,7 @@ export default function InstructorManagement() {
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              instructor record.
+              faculty record.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

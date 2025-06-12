@@ -77,7 +77,7 @@ export const baseApi = createApi({
     "courses",
     "offeredCourse",
     "student",
-    "instructor",
+    "faculty",
     "job",
     "academic",
     "Department",

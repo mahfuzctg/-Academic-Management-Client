@@ -37,84 +37,70 @@ import {
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Pencil, Trash2, BookOpen } from "lucide-react";
 import {
-  fetchInstructors,
-  setFilters,
-  clearFilters,
-  deleteInstructor,
-  setSelectedInstructor,
-} from "@/redux/features/instructorSlice";
-import type { RootState } from "@/redux/store";
-import type { Instructor } from "@/types/instructor";
+  useGetAllFacultiesQuery,
+  useDeleteFacultyMutation,
+} from "@/redux/features/facultys/facultyApi";
+import type { TFaculty } from "@/types/faculty";
 import { useState } from "react";
 
-interface InstructorListProps {
-  onEdit: (instructor: Instructor) => void;
-  onViewSubjects: (instructor: Instructor) => void;
+interface FacultyListProps {
+  onEdit: (faculty: TFaculty) => void;
+  onViewSubjects: (faculty: TFaculty) => void;
 }
 
-const InstructorList = ({ onEdit, onViewSubjects }: InstructorListProps) => {
-  const dispatch = useDispatch();
-  const { instructors, loading, error, filters } = useSelector(
-    (state: RootState) => state.instructors
-  );
+const FacultyList = ({ onEdit, onViewSubjects }: FacultyListProps) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [instructorToDelete, setInstructorToDelete] =
-    useState<Instructor | null>(null);
+  const [facultyToDelete, setFacultyToDelete] = useState<TFaculty | null>(null);
+  const [filters, setFilters] = useState({
+    search: "",
+    department: "",
+    faculty: "",
+  });
 
-  useEffect(() => {
-    dispatch(fetchInstructors(filters));
-  }, [dispatch, filters]);
+  const { data: facultyData, isLoading } = useGetAllFacultiesQuery(filters);
+  const [deleteFaculty] = useDeleteFacultyMutation();
 
   const handleSearch = (value: string) => {
-    dispatch(setFilters({ search: value }));
+    setFilters((prev) => ({ ...prev, search: value }));
   };
 
   const handleDepartmentChange = (value: string) => {
-    dispatch(setFilters({ department: value }));
+    setFilters((prev) => ({ ...prev, department: value }));
   };
 
-  const handleStatusChange = (value: string) => {
-    dispatch(setFilters({ status: value as Instructor["status"] }));
-  };
-
-  const handleRoleChange = (value: string) => {
-    dispatch(setFilters({ role: value as Instructor["role"] }));
+  const handleFacultyChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, faculty: value }));
   };
 
   const handleClearFilters = () => {
-    dispatch(clearFilters());
+    setFilters({
+      search: "",
+      department: "",
+      faculty: "",
+    });
   };
 
-  const handleEdit = (instructor: Instructor) => {
-    dispatch(setSelectedInstructor(instructor));
-    onEdit(instructor);
-  };
-
-  const handleDelete = (instructor: Instructor) => {
-    setInstructorToDelete(instructor);
+  const handleDelete = (faculty: TFaculty) => {
+    setFacultyToDelete(faculty);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
-    if (instructorToDelete) {
-      await dispatch(deleteInstructor(instructorToDelete.id));
-      setDeleteDialogOpen(false);
-      setInstructorToDelete(null);
+    if (facultyToDelete) {
+      try {
+        await deleteFaculty(facultyToDelete.id).unwrap();
+        setDeleteDialogOpen(false);
+        setFacultyToDelete(null);
+      } catch (error) {
+        console.error("Failed to delete faculty:", error);
+      }
     }
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64 text-red-500">
-        Error: {error}
       </div>
     );
   }
@@ -127,14 +113,14 @@ const InstructorList = ({ onEdit, onViewSubjects }: InstructorListProps) => {
     >
       <Card className="w-full">
         <CardHeader>
-          <CardTitle>Instructor Management</CardTitle>
+          <CardTitle>Faculty Management</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex flex-wrap gap-4">
               <Input
-                placeholder="Search instructors..."
-                value={filters.search || ""}
+                placeholder="Search faculties..."
+                value={filters.search}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="max-w-sm"
               />
@@ -154,24 +140,18 @@ const InstructorList = ({ onEdit, onViewSubjects }: InstructorListProps) => {
                   <SelectItem value="arts">Arts</SelectItem>
                 </SelectContent>
               </Select>
-              <Select value={filters.status} onValueChange={handleStatusChange}>
+              <Select
+                value={filters.faculty}
+                onValueChange={handleFacultyChange}
+              >
                 <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder="Faculty" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="active">Active</SelectItem>
-                  <SelectItem value="inactive">Inactive</SelectItem>
-                  <SelectItem value="on_leave">On Leave</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select value={filters.role} onValueChange={handleRoleChange}>
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="instructor">Instructor</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="head">Department Head</SelectItem>
+                  <SelectItem value="science">Science</SelectItem>
+                  <SelectItem value="engineering">Engineering</SelectItem>
+                  <SelectItem value="business">Business</SelectItem>
+                  <SelectItem value="arts">Arts</SelectItem>
                 </SelectContent>
               </Select>
               <Button variant="outline" onClick={handleClearFilters}>
@@ -187,47 +167,23 @@ const InstructorList = ({ onEdit, onViewSubjects }: InstructorListProps) => {
                   <TableHead>Name</TableHead>
                   <TableHead>Department</TableHead>
                   <TableHead>Designation</TableHead>
-                  <TableHead>Role</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Experience</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Contact</TableHead>
                   <TableHead className="w-[100px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {instructors.map((instructor) => (
-                  <TableRow key={instructor.id}>
-                    <TableCell>{`${instructor.firstName} ${instructor.lastName}`}</TableCell>
-                    <TableCell>{instructor.department}</TableCell>
-                    <TableCell>{instructor.designation}</TableCell>
+                {facultyData?.data?.map((faculty: TFaculty) => (
+                  <TableRow key={faculty.id}>
                     <TableCell>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          instructor.role === "head"
-                            ? "bg-purple-100 text-purple-800"
-                            : instructor.role === "admin"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-green-100 text-green-800"
-                        }`}
-                      >
-                        {instructor.role}
-                      </span>
+                      {`${faculty.name.firstName} ${
+                        faculty.name.middleName || ""
+                      } ${faculty.name.lastName}`}
                     </TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                          instructor.status === "active"
-                            ? "bg-green-100 text-green-800"
-                            : instructor.status === "inactive"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {instructor.status}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      {instructor.academicDetails.experience} years
-                    </TableCell>
+                    <TableCell>{faculty.academicDepartment}</TableCell>
+                    <TableCell>{faculty.designation}</TableCell>
+                    <TableCell>{faculty.email}</TableCell>
+                    <TableCell>{faculty.contactNo}</TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -238,21 +194,21 @@ const InstructorList = ({ onEdit, onViewSubjects }: InstructorListProps) => {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem
-                            onClick={() => onViewSubjects(instructor)}
+                            onClick={() => onViewSubjects(faculty)}
                             className="cursor-pointer"
                           >
                             <BookOpen className="mr-2 h-4 w-4" />
                             View Subjects
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleEdit(instructor)}
+                            onClick={() => onEdit(faculty)}
                             className="cursor-pointer"
                           >
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
-                            onClick={() => handleDelete(instructor)}
+                            onClick={() => handleDelete(faculty)}
                             className="cursor-pointer text-red-600"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
@@ -275,7 +231,7 @@ const InstructorList = ({ onEdit, onViewSubjects }: InstructorListProps) => {
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
               This action cannot be undone. This will permanently delete the
-              instructor record.
+              faculty record.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -293,4 +249,4 @@ const InstructorList = ({ onEdit, onViewSubjects }: InstructorListProps) => {
   );
 };
 
-export default InstructorList;
+export default FacultyList;

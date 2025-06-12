@@ -4,7 +4,7 @@ import AcademicFacultyPage from "@/pages/Admin/academic/AcademicFaculty";
 import AcademicSemester from "@/pages/Admin/academic/AdmissionSemester";
 
 import { AdminDashboard } from "@/pages/Dashboard/AdminDashboard";
-import InstructorManagement from "@/pages/Instructors/InstructorManagement";
+import InstructorManagement from "@/pages/facultys/facultyManagement";
 import JobManagement from "@/pages/Jobs/JobManagement";
 import StudentManagement from "@/pages/Students/StudentManagement";
 import {
