@@ -11,13 +11,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import { useToast } from "@/components/ui/use-toast";
 import {
   useCreateOfferedCourseMutation,
@@ -25,8 +19,7 @@ import {
 } from "@/redux/features/course/offerCourseApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Days } from "@/types/offeredCourse";
-import { X } from "lucide-react";
+import type { Days } from "@/types/offeredCourse";
 
 // Validation Schema
 const timeStringSchema = z.string().refine(
@@ -51,7 +44,17 @@ const createOfferedCourseValidationSchema = z
     section: z.string().min(1, "Section is required"),
     maxCapacity: z.string().min(1, "Max capacity is required"),
     image: z.string().url().optional(),
-    days: z.array(z.enum([...Days] as [string, ...string[]])),
+    days: z.array(
+      z.enum([
+        "MONDAY",
+        "TUESDAY",
+        "WEDNESDAY",
+        "THURSDAY",
+        "FRIDAY",
+        "SATURDAY",
+        "SUNDAY",
+      ])
+    ),
     startTime: timeStringSchema,
     endTime: timeStringSchema,
   })

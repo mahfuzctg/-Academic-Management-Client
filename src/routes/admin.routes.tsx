@@ -3,10 +3,12 @@ import AcademicDepartment from "@/pages/Admin/academic/AcademicDepartment";
 import AcademicFacultyPage from "@/pages/Admin/academic/AcademicFaculty";
 import AcademicSemester from "@/pages/Admin/academic/AdmissionSemester";
 import AdminCourseList from "@/pages/Admin/courses/AdminCourseList";
+import AdminOfferedCourseSection from "@/pages/Admin/offeredCourses/AdminOfferedCourseSection";
 
 import { AdminDashboard } from "@/pages/Dashboard/AdminDashboard";
 import InstructorManagement from "@/pages/facultys/facultyManagement";
 import JobManagement from "@/pages/Jobs/JobManagement";
+import OfferedCourseSection from "@/pages/offerCourses/OfferedCourseSection";
 import StudentManagement from "@/pages/Students/StudentManagement";
 import {
   LayoutDashboard,
@@ -71,6 +73,12 @@ export const adminPaths = [
     name: "Course Management",
     path: "course-management",
     element: <AdminCourseList />,
+    icon: <BookOpen className="w-5 h-5" />,
+  },
+  {
+    name: "OfferCourse Management",
+    path: "offered-course-management",
+    element: <AdminOfferedCourseSection />,
     icon: <BookOpen className="w-5 h-5" />,
   },
 ];

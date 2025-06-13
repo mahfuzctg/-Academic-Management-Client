@@ -37,12 +37,12 @@ import {
   useRemoveFacultiesMutation,
 } from "@/redux/features/course/courseApi";
 import { useGetAllFacultiesQuery } from "@/redux/features/faculty/facultyApi";
-// import { useGetAllFacultiesQuery } from "@/redux/features/admin/academicManagement.api";
+
 import type { ICourse } from "@/types/course";
 import { motion } from "framer-motion";
 import { Info, Plus, X } from "lucide-react";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+
 import CourseForm from "@/components/form/courses/CourseForm";
 
 const AdminCourseList = () => {

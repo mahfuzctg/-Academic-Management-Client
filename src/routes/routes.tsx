@@ -4,7 +4,7 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import HomeLayout from "@/components/layout/HomeLayout";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import { ThemeProvider } from "@/components/theme-provider";
-import CourseEnrollment from "@/pages/Courses/CourseEnrollment";
+import CourseEnrollment from "@/pages/offerCourses/CourseEnrollment";
 import Home from "@/pages/Home";
 import InstructorManagement from "@/pages/facultys/facultyManagement";
 import JobManagement from "@/pages/Jobs/JobManagement";
@@ -19,6 +19,7 @@ import { adminPaths } from "./admin.routes";
 import { instructorPaths } from "./instructor.routes";
 import { studentPaths } from "./student.routes";
 import StudentCourseList from "@/pages/student/courses/StudentCourseList";
+// import StudentCourseList from "@/pages/student/courses/StudentCourseList";
 
 const router = createBrowserRouter([
   {
