@@ -64,12 +64,13 @@ const semesterRegistrationSchema = z
         const parsedDate = new Date(date);
         return !isNaN(parsedDate.getTime());
       }, "Invalid end date")
-      .refine((endDate, ctx) => {
-        const startDate = ctx.parent.startDate;
+      .refine((data: any) => {
+        const startDate = data?.startDate;
         if (!startDate) return true;
-        return new Date(endDate) > new Date(startDate);
+        return new Date(data?.endDate) > new Date(startDate);
       }, "End date must be after start date"),
     minCredit: z.number().min(0, "Min Credit must be a positive number"),
+
     maxCredit: z.number().min(0, "Max Credit must be a positive number"),
   })
   .refine((data) => data.maxCredit >= data.minCredit, {
