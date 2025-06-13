@@ -46,14 +46,36 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 
-const semesterRegistrationSchema = z.object({
-  academicSemester: z.string().min(1, "Academic Semester is required"),
-  status: z.enum(["UPCOMING", "ONGOING", "ENDED"]),
-  startDate: z.string().min(1, "Start Date is required"),
-  endDate: z.string().min(1, "End Date is required"),
-  minCredit: z.number().min(0, "Min Credit must be a positive number"),
-  maxCredit: z.number().min(0, "Max Credit must be a positive number"),
-});
+const semesterRegistrationSchema = z
+  .object({
+    academicSemester: z.string().min(1, "Academic Semester is required"),
+    status: z.enum(["UPCOMING", "ONGOING", "ENDED"]),
+    startDate: z
+      .string()
+      .min(1, "Start Date is required")
+      .refine((date) => {
+        const parsedDate = new Date(date);
+        return !isNaN(parsedDate.getTime());
+      }, "Invalid start date"),
+    endDate: z
+      .string()
+      .min(1, "End Date is required")
+      .refine((date) => {
+        const parsedDate = new Date(date);
+        return !isNaN(parsedDate.getTime());
+      }, "Invalid end date")
+      .refine((endDate, ctx) => {
+        const startDate = ctx.parent.startDate;
+        if (!startDate) return true;
+        return new Date(endDate) > new Date(startDate);
+      }, "End date must be after start date"),
+    minCredit: z.number().min(0, "Min Credit must be a positive number"),
+    maxCredit: z.number().min(0, "Max Credit must be a positive number"),
+  })
+  .refine((data) => data.maxCredit >= data.minCredit, {
+    message: "Max credit must be greater than or equal to min credit",
+    path: ["maxCredit"],
+  });
 
 type TSemesterRegistration = z.infer<typeof semesterRegistrationSchema>;
 
@@ -88,10 +110,17 @@ const SemesterRegistrationFrom = ({
 
   const onSubmit = async (data: TSemesterRegistration) => {
     try {
+      // Format dates to ISO string
+      const formattedData = {
+        ...data,
+        startDate: new Date(data.startDate).toISOString(),
+        endDate: new Date(data.endDate).toISOString(),
+      };
+
       if (selectedId) {
         const res = await updateSemesterRegistration({
           id: selectedId,
-          data,
+          data: formattedData,
         }).unwrap();
         if (res?.success) {
           toast.success("Semester Registration updated successfully!");
@@ -100,7 +129,7 @@ const SemesterRegistrationFrom = ({
           setSelectedId(null);
         }
       } else {
-        const res = await createSemesterRegistration(data).unwrap();
+        const res = await createSemesterRegistration(formattedData).unwrap();
         if (res?.success) {
           toast.success("Semester Registration created successfully!");
           setIsOpen(false);
@@ -109,6 +138,7 @@ const SemesterRegistrationFrom = ({
       }
     } catch (err: any) {
       toast.error(err.data?.message || "Something went wrong!");
+      console.log(err.data);
     }
   };
 
@@ -260,7 +290,11 @@ const SemesterRegistrationFrom = ({
                       <FormItem>
                         <FormLabel>Start Date</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input
+                            type="date"
+                            {...field}
+                            min={new Date().toISOString().split("T")[0]}
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
@@ -274,7 +308,14 @@ const SemesterRegistrationFrom = ({
                       <FormItem>
                         <FormLabel>End Date</FormLabel>
                         <FormControl>
-                          <Input type="date" {...field} />
+                          <Input
+                            type="date"
+                            {...field}
+                            min={
+                              form.watch("startDate") ||
+                              new Date().toISOString().split("T")[0]
+                            }
+                          />
                         </FormControl>
                         <FormMessage />
                       </FormItem>

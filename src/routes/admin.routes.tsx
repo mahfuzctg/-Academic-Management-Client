@@ -78,15 +78,15 @@ export const adminPaths = [
     icon: <BookOpen className="w-5 h-5" />,
   },
   {
-    name: "OfferCourse Management",
-    path: "offered-course-management",
-    element: <AdminOfferedCourseSection />,
-    icon: <BookOpen className="w-5 h-5" />,
-  },
-  {
     name: "Semester Registration",
     path: "semester-registration",
     element: <SemesterRegistrationPage />,
     icon: <Calendar className="w-5 h-5" />,
+  },
+  {
+    name: "OfferCourse Management",
+    path: "offered-course-management",
+    element: <AdminOfferedCourseSection />,
+    icon: <BookOpen className="w-5 h-5" />,
   },
 ];
