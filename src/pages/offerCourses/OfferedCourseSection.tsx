@@ -1,43 +1,40 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import { useGetAllOfferedCoursesQuery } from "@/redux/features/offeredCourse/offeredCourseApi";
-import type { Days } from "@/types/offeredCourse";
+import { useState, useEffect } from "react";
+import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useGetAllOfferedCoursesQuery } from "@/redux/features/course/offerCourseApi";
+import type { TQueryParam } from "@/types/global";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const OfferedCourseSection = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const { data, isLoading, isError } = useGetAllOfferedCoursesQuery();
+  const [queryParams, setQueryParams] = useState<TQueryParam[]>([]);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  if (isError) {
-    toast({
-      title: "Error",
-      description: "Failed to load offered courses",
-      variant: "destructive",
-    });
-  }
+  const { data, isLoading, isError } =
+    useGetAllOfferedCoursesQuery(queryParams);
 
-  const filteredCourses = data?.filter((course) => {
-    const courseTitle = String(course?.course?.title ?? "").toLowerCase();
-    const faculty = String(course?.faculty?.fullName ?? "").toLowerCase();
-    const department = String(
-      course?.academicDepartment?.name ?? ""
-    ).toLowerCase();
-    const query = searchQuery.toLowerCase();
-
-    return (
-      courseTitle.includes(query) ||
-      faculty.includes(query) ||
-      department.includes(query)
-    );
-  });
+  useEffect(() => {
+    if (debouncedSearchQuery) {
+      setQueryParams([
+        {
+          name: "searchTerm",
+          value: debouncedSearchQuery,
+        },
+      ]);
+    } else {
+      setQueryParams([]);
+    }
+  }, [debouncedSearchQuery]);
 
   const handleEnroll = async (courseId: string) => {
     try {
+      // TODO: Implement enrollment mutation
       toast({
         title: "Success",
         description: "Successfully enrolled in the course",
@@ -59,49 +56,56 @@ const OfferedCourseSection = () => {
     );
   }
 
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-red-500">
+          Failed to load courses. Please try again later.
+        </p>
+      </div>
+    );
+  }
+
   return (
-    <div className="max-w-screen-xl mx-auto px-4 py-10 space-y-8">
-      <div className="text-center">
-        <h2 className="text-4xl font-bold text-gray-800 mb-2">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="space-y-6"
+    >
+      <div className="flex flex-col gap-4">
+        <h2 className="text-3xl font-bold text-center text-gray-800">
           Available Courses
         </h2>
-        <p className="text-gray-500">
-          Browse and enroll in the courses offered this semester.
-        </p>
-        <div className="relative mt-6 max-w-md mx-auto">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+        <div className="relative max-w-sm mx-auto w-full">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
           <Input
-            placeholder="Search by course, faculty or department..."
+            placeholder="Search courses..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 py-2.5 text-base rounded-xl shadow-sm"
+            className="pl-10"
           />
         </div>
       </div>
 
-      {filteredCourses?.length === 0 ? (
+      {data?.data?.length === 0 ? (
         <p className="text-center text-gray-500">
           No courses available matching your search.
         </p>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredCourses.map((course) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {data?.data?.map((course) => (
             <Card
               key={course._id}
-              className="transition-shadow border rounded-xl hover:shadow-md"
+              className="hover:shadow-lg transition-shadow duration-200"
             >
               {course.image && (
-                <div className="relative h-48 overflow-hidden rounded-t-xl">
+                <div className="relative h-48">
                   <img
                     src={course.image}
                     alt={course.course?.title || "Course Image"}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover rounded-t-lg"
                   />
-                  <div className="absolute top-2 right-2">
-                    <Badge variant="secondary">
-                      {course.academicSemester?.name}
-                    </Badge>
-                  </div>
                 </div>
               )}
               <CardHeader className="pb-2">
@@ -114,26 +118,28 @@ const OfferedCourseSection = () => {
                 <div className="space-y-1">
                   <p>
                     <span className="font-medium">Faculty:</span>{" "}
-                    {course.faculty?.fullName}
+                    {course.faculty?.fullName || "Not Assigned"}
                   </p>
                   <p>
                     <span className="font-medium">Department:</span>{" "}
-                    {course.academicDepartment?.name}
+                    {course.academicDepartment?.name || "Not Assigned"}
                   </p>
                   <p>
                     <span className="font-medium">Section:</span>{" "}
-                    {course.section}
+                    {course.section || "N/A"}
                   </p>
                   <p>
                     <span className="font-medium">Capacity:</span>{" "}
-                    {course.maxCapacity}
+                    {course.maxCapacity || "N/A"}
                   </p>
                   <p>
                     <span className="font-medium">Time:</span>{" "}
-                    {course.startTime} - {course.endTime}
+                    {course.startTime && course.endTime
+                      ? `${course.startTime} - ${course.endTime}`
+                      : "N/A"}
                   </p>
                   <div className="flex flex-wrap gap-2 pt-1">
-                    {course.days.map((day: Days) => (
+                    {course.days?.map((day) => (
                       <Badge key={day} variant="outline">
                         {day}
                       </Badge>
@@ -151,7 +157,7 @@ const OfferedCourseSection = () => {
           ))}
         </div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

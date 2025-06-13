@@ -2,12 +2,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
-import {
-  useGetAllOfferedCoursesQuery,
-  // useDeleteOfferedCourseMutation,
-} from "@/redux/features/offeredCourse/offeredCourseApi";
+
 import type { Days } from "@/types/offeredCourse";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import { motion } from "framer-motion";
 import { Plus, Search, X } from "lucide-react";
@@ -22,7 +19,14 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import OfferedCourseForm from "@/components/form/offerCourses/OfferedCourseForm";
-import { useDeleteOfferedCourseMutation } from "@/redux/features/course/offerCourseApi";
+import {
+  useDeleteOfferedCourseMutation,
+  useGetAllOfferedCoursesQuery,
+} from "@/redux/features/course/offerCourseApi";
+
+import OfferedCourseList from "@/components/form/offerCourses/OfferedCourseList";
+import type { TQueryParam } from "@/types/global";
+import { useDebounce } from "@/hooks/useDebounce";
 
 const AdminOfferedCourseSection = () => {
   const { toast } = useToast();
@@ -30,24 +34,25 @@ const AdminOfferedCourseSection = () => {
   const [selectedCourse, setSelectedCourse] = useState<any>(null);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [formDialogOpen, setFormDialogOpen] = useState(false);
+  const [queryParams, setQueryParams] = useState<TQueryParam[]>([]);
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  const { data, isLoading, isError } = useGetAllOfferedCoursesQuery();
+  const { data, isLoading, isError } =
+    useGetAllOfferedCoursesQuery(queryParams);
   const [deleteOfferedCourse] = useDeleteOfferedCourseMutation();
 
-  const filteredCourses = data?.data?.filter((course) => {
-    const courseTitle = String(course?.course?.title ?? "").toLowerCase();
-    const faculty = String(course?.faculty?.fullName ?? "").toLowerCase();
-    const department = String(
-      course?.academicDepartment?.name ?? ""
-    ).toLowerCase();
-    const query = searchQuery.toLowerCase();
-
-    return (
-      courseTitle.includes(query) ||
-      faculty.includes(query) ||
-      department.includes(query)
-    );
-  });
+  useEffect(() => {
+    if (debouncedSearchQuery) {
+      setQueryParams([
+        {
+          name: "searchTerm",
+          value: debouncedSearchQuery,
+        },
+      ]);
+    } else {
+      setQueryParams([]);
+    }
+  }, [debouncedSearchQuery]);
 
   const handleDelete = async () => {
     if (selectedCourse) {
@@ -73,6 +78,16 @@ const AdminOfferedCourseSection = () => {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <p className="text-red-500">
+          Failed to load courses. Please try again later.
+        </p>
       </div>
     );
   }
@@ -106,7 +121,7 @@ const AdminOfferedCourseSection = () => {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCourses?.map((course) => (
+            {data?.data?.map((course) => (
               <Card
                 key={course._id}
                 className="hover:shadow-lg transition-shadow duration-200"
@@ -135,22 +150,22 @@ const AdminOfferedCourseSection = () => {
                   <div className="space-y-2 text-sm">
                     <p className="flex items-center gap-2">
                       <span className="font-medium">Faculty:</span>
-                      {course.faculty?.fullName}
+                      {course.faculty?.fullName || "Not Assigned"}
                     </p>
                     <p className="flex items-center gap-2">
                       <span className="font-medium">Department:</span>
-                      {course.academicDepartment?.name}
+                      {course.academicDepartment?.name || "Not Assigned"}
                     </p>
                     <p className="flex items-center gap-2">
                       <span className="font-medium">Section:</span>
-                      {course.section}
+                      {course.section || "N/A"}
                     </p>
                     <p className="flex items-center gap-2">
                       <span className="font-medium">Capacity:</span>
-                      {course.maxCapacity}
+                      {course.maxCapacity || "N/A"}
                     </p>
                     <div className="flex flex-wrap gap-1">
-                      {course.days.map((day: Days) => (
+                      {course.days?.map((day: Days) => (
                         <Badge key={day} variant="outline">
                           {day}
                         </Badge>
@@ -158,7 +173,9 @@ const AdminOfferedCourseSection = () => {
                     </div>
                     <p className="flex items-center gap-2">
                       <span className="font-medium">Time:</span>
-                      {course.startTime} - {course.endTime}
+                      {course.startTime && course.endTime
+                        ? `${course.startTime} - ${course.endTime}`
+                        : "N/A"}
                     </p>
                   </div>
                   <div className="flex gap-2">
@@ -241,6 +258,8 @@ const AdminOfferedCourseSection = () => {
           </div>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* <OfferedCourseList /> */}
     </motion.div>
   );
 };

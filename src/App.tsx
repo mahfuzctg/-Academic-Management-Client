@@ -1,16 +1,16 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { AcademicPerformance } from "./pages/AcademicPerformance";
+import { BrowserRouter } from "react-router-dom";
+import AppRoutes from "./routes/AppRoutes";
 import { Toaster } from "@/components/ui/toaster";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route path="/academic-performance" element={<AcademicPerformance />} />
-        {/* Add other routes as needed */}
-      </Routes>
-      <Toaster />
-    </Router>
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AppRoutes />
+        <Toaster />
+      </BrowserRouter>
+    </ErrorBoundary>
   );
 }
 

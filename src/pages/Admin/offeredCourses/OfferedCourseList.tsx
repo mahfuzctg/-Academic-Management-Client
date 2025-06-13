@@ -1,25 +1,16 @@
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import {
   useGetAllOfferedCoursesQuery,
   useDeleteOfferedCourseMutation,
 } from "@/redux/features/course/offerCourseApi";
 import type { IOfferedCourse } from "@/types/offeredCourse";
-import { motion } from "framer-motion";
-import { Plus, X } from "lucide-react";
 import { useState, useEffect } from "react";
-import OfferedCourseForm from "./OfferedCourseForm";
+import { Badge } from "@/components/ui/badge";
+import { motion } from "framer-motion";
+import { Plus, Search, Pencil, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,8 +21,56 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import OfferedCourseForm from "@/components/form/offerCourses/OfferedCourseForm";
 import type { TQueryParam } from "@/types/global";
 import { useDebounce } from "@/hooks/useDebounce";
+
+interface Faculty {
+  _id: string;
+  fullName: string;
+  designation: string;
+  email: string;
+  contactNo: string;
+  academicDepartment: {
+    _id: string;
+    name: string;
+  };
+  academicFaculty: {
+    _id: string;
+    name: string;
+  };
+}
+
+interface Course {
+  _id: string;
+  title: string;
+  code: string;
+}
+
+interface Department {
+  _id: string;
+  name: string;
+}
+
+interface OfferedCourse {
+  _id: string;
+  course: Course;
+  faculty: Faculty;
+  academicDepartment: Department;
+  section: string;
+  maxCapacity: number;
+  days: string[];
+  startTime: string;
+  endTime: string;
+}
 
 const OfferedCourseList = () => {
   const { toast } = useToast();
@@ -88,6 +127,13 @@ const OfferedCourseList = () => {
     return faculty.fullName || "No Name";
   };
 
+  const renderDepartmentInfo = (
+    department: IOfferedCourse["academicDepartment"] | null | undefined
+  ) => {
+    if (!department) return "Not Assigned";
+    return department.name || "No Department";
+  };
+
   const renderCourseInfo = (
     course: IOfferedCourse["course"] | null | undefined
   ) => {
@@ -100,18 +146,12 @@ const OfferedCourseList = () => {
     );
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-64 text-red-500">
-        Error loading offered courses
+      <div className="flex items-center justify-center h-64">
+        <p className="text-red-500">
+          Failed to load courses. Please try again later.
+        </p>
       </div>
     );
   }
@@ -121,8 +161,9 @@ const OfferedCourseList = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
+      className="space-y-6"
     >
-      <Card className="w-full">
+      <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Offered Course Management</CardTitle>
           <Button onClick={() => setFormDialogOpen(true)}>
@@ -132,12 +173,15 @@ const OfferedCourseList = () => {
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-4 mb-6">
-            <Input
-              placeholder="Search offered courses..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="max-w-sm"
-            />
+            <div className="relative max-w-sm">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+              <Input
+                placeholder="Search courses..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-10"
+              />
+            </div>
           </div>
 
           <div className="rounded-md border">
@@ -146,17 +190,24 @@ const OfferedCourseList = () => {
                 <TableRow>
                   <TableHead>Course</TableHead>
                   <TableHead>Faculty</TableHead>
+                  <TableHead>Department</TableHead>
                   <TableHead>Section</TableHead>
-                  <TableHead>Max Capacity</TableHead>
+                  <TableHead>Capacity</TableHead>
                   <TableHead>Days</TableHead>
                   <TableHead>Time</TableHead>
-                  <TableHead className="w-[150px]">Actions</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data?.data?.length === 0 ? (
+                {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={7} className="text-center">
+                    <TableCell colSpan={8} className="text-center">
+                      Loading...
+                    </TableCell>
+                  </TableRow>
+                ) : data?.data?.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center">
                       No offered courses found
                     </TableCell>
                   </TableRow>
@@ -165,6 +216,9 @@ const OfferedCourseList = () => {
                     <TableRow key={course._id}>
                       <TableCell>{renderCourseInfo(course.course)}</TableCell>
                       <TableCell>{renderFacultyInfo(course.faculty)}</TableCell>
+                      <TableCell>
+                        {renderDepartmentInfo(course.academicDepartment)}
+                      </TableCell>
                       <TableCell>{course.section || "N/A"}</TableCell>
                       <TableCell>{course.maxCapacity || "N/A"}</TableCell>
                       <TableCell>
@@ -181,27 +235,27 @@ const OfferedCourseList = () => {
                           ? `${course.startTime} - ${course.endTime}`
                           : "N/A"}
                       </TableCell>
-                      <TableCell>
-                        <div className="flex gap-2">
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-2">
                           <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => {
-                              setSelectedCourse(course);
-                              setDeleteDialogOpen(true);
-                            }}
-                          >
-                            Delete
-                          </Button>
-                          <Button
-                            variant="default"
-                            size="sm"
+                            variant="ghost"
+                            size="icon"
                             onClick={() => {
                               setSelectedCourse(course);
                               setFormDialogOpen(true);
                             }}
                           >
-                            Edit
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => {
+                              setSelectedCourse(course);
+                              setDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </TableCell>
@@ -237,22 +291,12 @@ const OfferedCourseList = () => {
 
       <AlertDialog open={formDialogOpen} onOpenChange={setFormDialogOpen}>
         <AlertDialogContent className="max-w-4xl">
-          <AlertDialogHeader className="flex flex-row items-center justify-between">
+          <AlertDialogHeader>
             <AlertDialogTitle>
               {selectedCourse
                 ? "Edit Offered Course"
                 : "Add New Offered Course"}
             </AlertDialogTitle>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => {
-                setFormDialogOpen(false);
-                setSelectedCourse(null);
-              }}
-            >
-              <X className="h-4 w-4" />
-            </Button>
           </AlertDialogHeader>
           <div className="py-4">
             <OfferedCourseForm

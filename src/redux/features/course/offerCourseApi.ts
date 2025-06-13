@@ -1,48 +1,64 @@
 import { baseApi } from "@/redux/api/baseApi";
 import type { IOfferedCourse } from "@/types/offeredCourse";
+import type { TQueryParam, TResponseRedux } from "@/types/global";
 
 export const offerCourseApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllOfferedCourses: builder.query<IOfferedCourse[], void>({
-      query: () => ({
-        url: "/offered-courses",
-        method: "GET",
-      }),
-      transformResponse: (response: unknown) => {
-        const res = response as { data: IOfferedCourse[] };
-        return res.data;
+    getAllOfferedCourses: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((item: TQueryParam) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+        return {
+          url: "/offered-courses",
+          method: "GET",
+          params: params,
+        };
       },
       providesTags: ["offeredCourses"],
+      transformResponse: (response: TResponseRedux<IOfferedCourse[]>) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
     }),
 
-    getMyOfferedCourses: builder.query<IOfferedCourse[], void>({
-      query: () => ({
-        url: "/offered-courses/my-offered-courses",
-        method: "GET",
-      }),
-      transformResponse: (response: unknown) => {
-        const res = response as { data: IOfferedCourse[] };
-        return res.data;
+    getMyOfferedCourses: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((item: TQueryParam) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+        return {
+          url: "/offered-courses/my-offered-courses",
+          method: "GET",
+          params: params,
+        };
       },
       providesTags: ["offeredCourses"],
+      transformResponse: (response: TResponseRedux<IOfferedCourse[]>) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
     }),
 
-    getSingleOfferedCourse: builder.query<IOfferedCourse, string>({
+    getSingleOfferedCourse: builder.query({
       query: (id) => ({
         url: `/offered-courses/${id}`,
         method: "GET",
       }),
-      transformResponse: (response: unknown) => {
-        const res = response as { data: IOfferedCourse };
-        return res.data;
-      },
       providesTags: ["offeredCourses"],
+      transformResponse: (response: TResponseRedux<IOfferedCourse>) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
     }),
 
-    createOfferedCourse: builder.mutation<
-      IOfferedCourse,
-      Partial<IOfferedCourse>
-    >({
+    createOfferedCourse: builder.mutation({
       query: (data) => ({
         url: "/offered-courses/create-offered-course",
         method: "POST",
@@ -51,10 +67,7 @@ export const offerCourseApi = baseApi.injectEndpoints({
       invalidatesTags: ["offeredCourses"],
     }),
 
-    updateOfferedCourse: builder.mutation<
-      IOfferedCourse,
-      { id: string; data: Partial<IOfferedCourse> }
-    >({
+    updateOfferedCourse: builder.mutation({
       query: ({ id, data }) => ({
         url: `/offered-courses/${id}`,
         method: "PATCH",
@@ -63,7 +76,7 @@ export const offerCourseApi = baseApi.injectEndpoints({
       invalidatesTags: ["offeredCourses"],
     }),
 
-    deleteOfferedCourse: builder.mutation<void, string>({
+    deleteOfferedCourse: builder.mutation({
       query: (id) => ({
         url: `/offered-courses/${id}`,
         method: "DELETE",
