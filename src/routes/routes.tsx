@@ -16,9 +16,11 @@ import RegisterForm from "@/pages/Register";
 import { routeGenerator } from "@/utils/routesGenerator";
 import { createBrowserRouter } from "react-router-dom";
 import { adminPaths } from "./admin.routes";
-import { instructorPaths } from "./instructor.routes";
+// import { instructorPaths } from "./faculty.routes";
 import { studentPaths } from "./student.routes";
 import StudentCourseList from "@/pages/student/courses/StudentCourseList";
+import { facultyPaths } from "./faculty.routes";
+import { NotFoundPage } from "@/pages/NotFound";
 // import StudentCourseList from "@/pages/student/courses/StudentCourseList";
 
 const router = createBrowserRouter([
@@ -56,7 +58,7 @@ const router = createBrowserRouter([
       },
       {
         path: "*",
-        element: <NotFound />,
+        element: <NotFoundPage />,
       },
     ],
   },
@@ -71,7 +73,7 @@ const router = createBrowserRouter([
     ),
     children: [
       ...routeGenerator(adminPaths),
-      { path: "*", element: <NotFound /> },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
   {
@@ -85,30 +87,26 @@ const router = createBrowserRouter([
     ),
     children: [
       ...routeGenerator(studentPaths),
-      { path: "*", element: <NotFound /> },
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
   {
-    path: "/instructor",
+    path: "/faculty",
     element: (
-      <ProtectedRoute role="instructor">
+      <ProtectedRoute role="faculty">
         <ThemeProvider>
           <DashboardLayout />
         </ThemeProvider>
       </ProtectedRoute>
     ),
     children: [
-      ...routeGenerator(instructorPaths),
-      { path: "*", element: <NotFound /> },
+      ...routeGenerator(facultyPaths),
+      { path: "*", element: <NotFoundPage /> },
     ],
   },
   {
     path: "*",
-    element: <NotFound />, // ✅ Global catch-all route for any unknown paths
-  },
-  {
-    path: "*",
-    element: <NotFound />,
+    element: <NotFoundPage />,
   },
 ]);
 

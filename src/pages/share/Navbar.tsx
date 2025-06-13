@@ -28,12 +28,12 @@ const getNavLinks = (role?: string) => {
         { label: "My Courses", to: "/student/courses" },
         { label: "Grades", to: "/student/grades" },
       ];
-    case "instructor":
+    case "faculty":
       return [
         ...commonLinks,
-        { label: "Dashboard", to: "/instructor/dashboard" },
-        { label: "My Classes", to: "/instructor/classes" },
-        { label: "Grade Management", to: "/instructor/grades" },
+        { label: "Dashboard", to: "/faculty/dashboard" },
+        { label: "My Classes", to: "/faculty/classes" },
+        { label: "Grade Management", to: "/faculty/grades" },
       ];
     case "admin":
     case "superAdmin":

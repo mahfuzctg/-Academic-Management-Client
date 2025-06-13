@@ -2,7 +2,7 @@ import { InstructorDashboard } from "@/pages/Dashboard/InstructorDashboard";
 import StudentManagement from "@/pages/Students/StudentManagement";
 import { LayoutDashboard, GraduationCap } from "lucide-react";
 
-export const instructorPaths = [
+export const facultyPaths = [
   {
     name: "Dashboard",
     path: "dashboard",

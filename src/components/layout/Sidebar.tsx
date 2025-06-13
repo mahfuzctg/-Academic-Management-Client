@@ -9,13 +9,12 @@ import { Home } from "lucide-react";
 
 import { adminPaths } from "@/routes/admin.routes";
 import { studentPaths } from "@/routes/student.routes";
-import { instructorPaths } from "@/routes/instructor.routes";
-
+import { facultyPaths } from "@/routes/faculty.routes";
 const roleBasedPaths = {
   admin: adminPaths,
   superAdmin: adminPaths,
   student: studentPaths,
-  instructor: instructorPaths,
+  faculty: facultyPaths,
 };
 
 const Sidebar: React.FC = () => {
