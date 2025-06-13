@@ -30,6 +30,7 @@ import { useGetAllAcademicFacultiesQuery } from "@/redux/features/academic/acade
 import { useGetAllCoursesQuery } from "@/redux/features/course/courseApi";
 import { useGetAllFacultiesQuery } from "@/redux/features/faculty/facultyApi";
 import { useGetDepartmentsQuery } from "@/redux/features/academic/academicApi";
+import { useGetAllSemesterRegistrationsQuery } from "@/redux/features/semesterRegistration/semesterRegistrationApi";
 // -;
 
 // Validation Schema
@@ -55,17 +56,7 @@ const createOfferedCourseValidationSchema = z
     section: z.number().min(1, "Section is required"),
     maxCapacity: z.number().min(1, "Max capacity is required"),
     image: z.string().url().optional(),
-    days: z.array(
-      z.enum([
-        "MONDAY",
-        "TUESDAY",
-        "WEDNESDAY",
-        "THURSDAY",
-        "FRIDAY",
-        "SATURDAY",
-        "SUNDAY",
-      ])
-    ),
+    days: z.array(z.enum(["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"])),
     startTime: timeStringSchema,
     endTime: timeStringSchema,
   })
@@ -112,10 +103,12 @@ const OfferedCourseForm = ({
   const [updateOfferedCourse] = useUpdateOfferedCourseMutation();
 
   // Fetch data for select inputs
-  const { data: semesterRegistrations } = useGetAllSemesterRegistrationsQuery();
+  const { data: semesterRegistrations } =
+    useGetAllSemesterRegistrationsQuery(undefined);
   const { data: academicFaculties } =
     useGetAllAcademicFacultiesQuery(undefined);
   const { data: academicDepartments } = useGetDepartmentsQuery(undefined);
+
   const { data: courses } = useGetAllCoursesQuery();
   const { data: faculties } = useGetAllFacultiesQuery(undefined);
 
@@ -158,6 +151,7 @@ const OfferedCourseForm = ({
       form.reset();
       onSuccess?.();
     } catch (error) {
+      console.log(error);
       toast({
         title: "Error",
         description: "Something went wrong",
@@ -292,7 +286,7 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {courses?.data?.map((course) => (
+                        {courses?.map((course) => (
                           <SelectItem key={course._id} value={course._id}>
                             {course.title} ({course.code})
                           </SelectItem>
@@ -438,32 +432,26 @@ const OfferedCourseForm = ({
                     Days <span className="text-red-500">*</span>
                   </FormLabel>
                   <div className="grid grid-cols-4 gap-2">
-                    {[
-                      "MONDAY",
-                      "TUESDAY",
-                      "WEDNESDAY",
-                      "THURSDAY",
-                      "FRIDAY",
-                      "SATURDAY",
-                      "SUNDAY",
-                    ].map((day) => (
-                      <div key={day} className="flex items-center space-x-2">
-                        <Checkbox
-                          checked={field.value?.includes(day as Days)}
-                          onCheckedChange={(checked) => {
-                            const currentDays = field.value || [];
-                            if (checked) {
-                              field.onChange([...currentDays, day as Days]);
-                            } else {
-                              field.onChange(
-                                currentDays.filter((d) => d !== day)
-                              );
-                            }
-                          }}
-                        />
-                        <label className="text-sm">{day}</label>
-                      </div>
-                    ))}
+                    {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map(
+                      (day) => (
+                        <div key={day} className="flex items-center space-x-2">
+                          <Checkbox
+                            checked={field.value?.includes(day as Days)}
+                            onCheckedChange={(checked) => {
+                              const currentDays = field.value || [];
+                              if (checked) {
+                                field.onChange([...currentDays, day as Days]);
+                              } else {
+                                field.onChange(
+                                  currentDays.filter((d) => d !== day)
+                                );
+                              }
+                            }}
+                          />
+                          <label className="text-sm">{day}</label>
+                        </div>
+                      )
+                    )}
                   </div>
                   <FormMessage />
                 </FormItem>
