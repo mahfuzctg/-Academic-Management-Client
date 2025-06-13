@@ -31,14 +31,7 @@ export interface TSemesterRegistration {
   status: string;
 }
 
-export type Days =
-  | "SATURDAY"
-  | "SUNDAY"
-  | "MONDAY"
-  | "TUESDAY"
-  | "WEDNESDAY"
-  | "THURSDAY"
-  | "FRIDAY";
+export type Days = "Sat" | "Sun" | "Mon" | "Tue" | "Wed" | "Thu" | "Fri";
 
 export interface IOfferedCourse {
   id: string;
