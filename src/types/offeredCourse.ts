@@ -1,3 +1,4 @@
+// Base Types (already correct)
 export interface TCourse {
   _id: string;
   title: string;
@@ -33,13 +34,14 @@ export interface TSemesterRegistration {
 
 export type Days = "Sat" | "Sun" | "Mon" | "Tue" | "Wed" | "Thu" | "Fri";
 
+// Populated Offered Course type
 export interface IOfferedCourse {
-  id: string;
-  semesterRegistration: string;
-  academicFaculty: string;
-  academicDepartment: string;
-  course: string;
-  faculty: string;
+  _id: string;
+  semesterRegistration: TSemesterRegistration;
+  academicFaculty: TAcademicFaculty;
+  academicDepartment: TAcademicDepartment;
+  course: TCourse;
+  faculty: TFaculty;
   section: number;
   maxCapacity: number;
   image?: string;
@@ -50,6 +52,7 @@ export interface IOfferedCourse {
   updatedAt: string;
 }
 
+// Create type (ID-based only)
 export interface ICreateOfferedCourse {
   semesterRegistration: string;
   academicFaculty: string;
@@ -64,6 +67,7 @@ export interface ICreateOfferedCourse {
   endTime: string;
 }
 
+// Update type (partial, ID-based)
 export interface IUpdateOfferedCourse {
   faculty?: string;
   maxCapacity?: number;

@@ -29,8 +29,8 @@ import {
 } from "@/components/ui/table";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  useGetAllCoursesQuery,
   useEnrollInCourseMutation,
+  useGetAllCoursesQuery,
   useGetEnrolledCoursesQuery,
 } from "@/redux/features/course/courseApi";
 import type { ICourse } from "@/types/course";
@@ -111,6 +111,7 @@ const StudentCourseList = () => {
         <CardHeader>
           <CardTitle>Available Courses</CardTitle>
         </CardHeader>
+
         <CardContent>
           <div className="flex flex-col gap-4 mb-6">
             <div className="flex flex-wrap gap-4">

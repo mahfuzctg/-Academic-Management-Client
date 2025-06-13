@@ -1,3 +1,4 @@
+import OfferedCourseSection from "../offerCourses/OfferedCourseSection";
 import Announcements from "./Announcements";
 import Contact from "./Contact";
 import FacultySection from "./FacultySection";
@@ -12,7 +13,9 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <main className="flex-grow">
         <Hero />
+        <OfferedCourseSection />
         <FacultySection />
+
         <Features />
         <Announcements />
         <JobBoard />

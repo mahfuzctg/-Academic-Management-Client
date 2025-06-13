@@ -9,8 +9,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import {
-  useGetAllCoursesQuery,
   useAssignFacultiesMutation,
+  useGetAllCoursesQuery,
   useGetFacultiesWithCourseQuery,
 } from "@/redux/features/course/courseApi";
 import type { ICourse } from "@/types/course";
