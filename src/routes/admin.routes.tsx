@@ -4,6 +4,7 @@ import AcademicFacultyPage from "@/pages/Admin/academic/AcademicFaculty";
 import AcademicSemester from "@/pages/Admin/academic/AdmissionSemester";
 import AdminCourseList from "@/pages/Admin/courses/AdminCourseList";
 import AdminOfferedCourseSection from "@/pages/Admin/offeredCourses/AdminOfferedCourseSection";
+import SemesterRegistrationPage from "@/pages/Admin/SemesterRegistration/SemesterRegistrationPage";
 
 import { AdminDashboard } from "@/pages/Dashboard/AdminDashboard";
 import InstructorManagement from "@/pages/facultys/facultyManagement";
@@ -18,6 +19,7 @@ import {
   CalendarDays,
   BookOpen,
   Briefcase,
+  Calendar,
 } from "lucide-react";
 
 export const adminPaths = [
@@ -80,5 +82,11 @@ export const adminPaths = [
     path: "offered-course-management",
     element: <AdminOfferedCourseSection />,
     icon: <BookOpen className="w-5 h-5" />,
+  },
+  {
+    name: "Semester Registration",
+    path: "semester-registration",
+    element: <SemesterRegistrationPage />,
+    icon: <Calendar className="w-5 h-5" />,
   },
 ];
