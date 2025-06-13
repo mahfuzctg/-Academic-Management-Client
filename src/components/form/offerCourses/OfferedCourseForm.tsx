@@ -11,7 +11,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
 import {
   useCreateOfferedCourseMutation,
@@ -20,6 +26,11 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import type { Days } from "@/types/offeredCourse";
+import { useGetAllAcademicFacultiesQuery } from "@/redux/features/academic/academicFacultyApi";
+import { useGetAllCoursesQuery } from "@/redux/features/course/courseApi";
+import { useGetAllFacultiesQuery } from "@/redux/features/faculty/facultyApi";
+import { useGetDepartmentsQuery } from "@/redux/features/academic/academicApi";
+// -;
 
 // Validation Schema
 const timeStringSchema = z.string().refine(
@@ -41,8 +52,8 @@ const createOfferedCourseValidationSchema = z
     academicDepartment: z.string().min(1, "Academic department is required"),
     course: z.string().min(1, "Course is required"),
     faculty: z.string().min(1, "Faculty is required"),
-    section: z.string().min(1, "Section is required"),
-    maxCapacity: z.string().min(1, "Max capacity is required"),
+    section: z.number().min(1, "Section is required"),
+    maxCapacity: z.number().min(1, "Max capacity is required"),
     image: z.string().url().optional(),
     days: z.array(
       z.enum([
@@ -100,6 +111,14 @@ const OfferedCourseForm = ({
   const [createOfferedCourse] = useCreateOfferedCourseMutation();
   const [updateOfferedCourse] = useUpdateOfferedCourseMutation();
 
+  // Fetch data for select inputs
+  const { data: semesterRegistrations } = useGetAllSemesterRegistrationsQuery();
+  const { data: academicFaculties } =
+    useGetAllAcademicFacultiesQuery(undefined);
+  const { data: academicDepartments } = useGetDepartmentsQuery(undefined);
+  const { data: courses } = useGetAllCoursesQuery();
+  const { data: faculties } = useGetAllFacultiesQuery(undefined);
+
   const form = useForm<TOfferedCourseFormValues>({
     resolver: zodResolver(createOfferedCourseValidationSchema),
     defaultValues: {
@@ -108,8 +127,8 @@ const OfferedCourseForm = ({
       academicDepartment: offeredCourse?.academicDepartment || "",
       course: offeredCourse?.course || "",
       faculty: offeredCourse?.faculty || "",
-      section: offeredCourse?.section?.toString() || "",
-      maxCapacity: offeredCourse?.maxCapacity?.toString() || "",
+      section: offeredCourse?.section || 1,
+      maxCapacity: offeredCourse?.maxCapacity || 30,
       image: offeredCourse?.image || "",
       days: offeredCourse?.days || [],
       startTime: offeredCourse?.startTime || "",
@@ -119,23 +138,17 @@ const OfferedCourseForm = ({
 
   const onSubmit = async (data: TOfferedCourseFormValues) => {
     try {
-      const formattedData = {
-        ...data,
-        section: parseInt(data.section),
-        maxCapacity: parseInt(data.maxCapacity),
-      };
-
       if (offeredCourse) {
         await updateOfferedCourse({
           id: offeredCourse.id,
-          data: formattedData,
+          data,
         }).unwrap();
         toast({
           title: "Success",
           description: "Offered course updated successfully",
         });
       } else {
-        await createOfferedCourse(formattedData).unwrap();
+        await createOfferedCourse(data).unwrap();
         toast({
           title: "Success",
           description: "Offered course created successfully",
@@ -173,12 +186,23 @@ const OfferedCourseForm = ({
                       Semester Registration{" "}
                       <span className="text-red-500">*</span>
                     </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter semester registration"
-                        {...field}
-                      />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select semester registration" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {semesterRegistrations?.data?.map((semester) => (
+                          <SelectItem key={semester._id} value={semester._id}>
+                            {semester.academicSemester.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -192,9 +216,23 @@ const OfferedCourseForm = ({
                     <FormLabel>
                       Academic Faculty <span className="text-red-500">*</span>
                     </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter academic faculty" {...field} />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select academic faculty" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {academicFaculties?.data?.map((faculty) => (
+                          <SelectItem key={faculty._id} value={faculty._id}>
+                            {faculty.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -211,12 +249,26 @@ const OfferedCourseForm = ({
                       Academic Department{" "}
                       <span className="text-red-500">*</span>
                     </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter academic department"
-                        {...field}
-                      />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select academic department" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {academicDepartments?.data?.map((department) => (
+                          <SelectItem
+                            key={department._id}
+                            value={department._id}
+                          >
+                            {department.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -230,9 +282,23 @@ const OfferedCourseForm = ({
                     <FormLabel>
                       Course <span className="text-red-500">*</span>
                     </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter course" {...field} />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select course" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {courses?.data?.map((course) => (
+                          <SelectItem key={course._id} value={course._id}>
+                            {course.title} ({course.code})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -248,9 +314,23 @@ const OfferedCourseForm = ({
                     <FormLabel>
                       Faculty <span className="text-red-500">*</span>
                     </FormLabel>
-                    <FormControl>
-                      <Input placeholder="Enter faculty" {...field} />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select faculty" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {faculties?.data?.map((faculty) => (
+                          <SelectItem key={faculty._id} value={faculty._id}>
+                            {faculty.fullName}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -269,6 +349,7 @@ const OfferedCourseForm = ({
                         type="number"
                         placeholder="Enter section"
                         {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -291,6 +372,7 @@ const OfferedCourseForm = ({
                         type="number"
                         placeholder="Enter max capacity"
                         {...field}
+                        onChange={(e) => field.onChange(Number(e.target.value))}
                       />
                     </FormControl>
                     <FormMessage />
@@ -356,14 +438,22 @@ const OfferedCourseForm = ({
                     Days <span className="text-red-500">*</span>
                   </FormLabel>
                   <div className="grid grid-cols-4 gap-2">
-                    {Days.map((day) => (
+                    {[
+                      "MONDAY",
+                      "TUESDAY",
+                      "WEDNESDAY",
+                      "THURSDAY",
+                      "FRIDAY",
+                      "SATURDAY",
+                      "SUNDAY",
+                    ].map((day) => (
                       <div key={day} className="flex items-center space-x-2">
                         <Checkbox
-                          checked={field.value?.includes(day)}
+                          checked={field.value?.includes(day as Days)}
                           onCheckedChange={(checked) => {
                             const currentDays = field.value || [];
                             if (checked) {
-                              field.onChange([...currentDays, day]);
+                              field.onChange([...currentDays, day as Days]);
                             } else {
                               field.onChange(
                                 currentDays.filter((d) => d !== day)
