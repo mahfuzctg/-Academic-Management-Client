@@ -30,3 +30,51 @@ export interface TSemesterRegistration {
   _id: string;
   status: string;
 }
+
+export type Days =
+  | "SATURDAY"
+  | "SUNDAY"
+  | "MONDAY"
+  | "TUESDAY"
+  | "WEDNESDAY"
+  | "THURSDAY"
+  | "FRIDAY";
+
+export interface IOfferedCourse {
+  id: string;
+  semesterRegistration: string;
+  academicFaculty: string;
+  academicDepartment: string;
+  course: string;
+  faculty: string;
+  section: number;
+  maxCapacity: number;
+  image?: string;
+  days: Days[];
+  startTime: string;
+  endTime: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ICreateOfferedCourse {
+  semesterRegistration: string;
+  academicFaculty: string;
+  academicDepartment: string;
+  course: string;
+  faculty: string;
+  section: number;
+  maxCapacity: number;
+  image?: string;
+  days: Days[];
+  startTime: string;
+  endTime: string;
+}
+
+export interface IUpdateOfferedCourse {
+  faculty?: string;
+  maxCapacity?: number;
+  days?: Days[];
+  startTime?: string;
+  endTime?: string;
+}
