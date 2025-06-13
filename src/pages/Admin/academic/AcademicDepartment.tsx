@@ -30,7 +30,7 @@ import {
   useDeleteDepartmentMutation,
 } from "@/redux/features/academic/academicApi";
 import { FormFields } from "@/components/ui/form-field";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { Pencil, Trash2, Plus, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   AlertDialog,
@@ -43,10 +43,13 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useGetAllAcademicFacultiesQuery } from "@/redux/features/academic/academicFacultyApi";
+import { Input } from "@/components/ui/input";
 
 const departmentSchema = z.object({
   name: z.string().min(1, "Department name is required"),
   academicFaculty: z.string().min(1, "Academic faculty is required"),
+  description: z.string().optional(),
+  headOfDepartment: z.string().optional(),
 });
 
 type DepartmentFormData = z.infer<typeof departmentSchema>;
@@ -56,6 +59,7 @@ const AcademicDepartment = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: departments, isLoading } = useGetDepartmentsQuery(undefined);
   const { data: faculties } = useGetAllAcademicFacultiesQuery({});
@@ -68,8 +72,14 @@ const AcademicDepartment = () => {
     defaultValues: {
       name: "",
       academicFaculty: "",
+      description: "",
+      headOfDepartment: "",
     },
   });
+
+  const filteredDepartments = departments?.data?.filter((department) =>
+    department.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const onSubmit = async (data: DepartmentFormData) => {
     try {
@@ -106,6 +116,8 @@ const AcademicDepartment = () => {
     form.reset({
       name: department.name,
       academicFaculty: department.academicFaculty._id,
+      description: department.description || "",
+      headOfDepartment: department.headOfDepartment || "",
     });
     setIsOpen(true);
   };
@@ -138,10 +150,15 @@ const AcademicDepartment = () => {
       className="p-6"
     >
       <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl font-bold">
-            Academic Departments
-          </CardTitle>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div className="space-y-1">
+            <CardTitle className="text-2xl font-bold">
+              Academic Departments
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Manage academic departments and their details
+            </p>
+          </div>
           <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
               <Button>
@@ -187,6 +204,18 @@ const AcademicDepartment = () => {
                     }
                     required
                   />
+                  <FormFields.TextWithIcon
+                    form={form}
+                    name="description"
+                    label="Description"
+                    placeholder="Enter department description"
+                  />
+                  <FormFields.TextWithIcon
+                    form={form}
+                    name="headOfDepartment"
+                    label="Head of Department"
+                    placeholder="Enter head of department name"
+                  />
                   <DialogFooter>
                     <Button type="submit" className="w-full">
                       {selectedDepartment
@@ -200,6 +229,16 @@ const AcademicDepartment = () => {
           </Dialog>
         </CardHeader>
         <CardContent>
+          <div className="relative w-full max-w-sm mb-4">
+            <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="Search departments..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-8"
+            />
+          </div>
+
           {isLoading ? (
             <div className="flex items-center justify-center h-32">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
@@ -210,16 +249,22 @@ const AcademicDepartment = () => {
                 <TableRow>
                   <TableHead>Department Name</TableHead>
                   <TableHead>Academic Faculty</TableHead>
+                  <TableHead>Head of Department</TableHead>
+                  <TableHead>Description</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {departments?.data?.map((department: any) => (
+                {filteredDepartments?.map((department: any) => (
                   <TableRow key={department._id}>
                     <TableCell className="font-medium">
                       {department.name}
                     </TableCell>
                     <TableCell>{department.academicFaculty?.name}</TableCell>
+                    <TableCell>{department.headOfDepartment || "-"}</TableCell>
+                    <TableCell className="max-w-xs truncate">
+                      {department.description || "-"}
+                    </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
@@ -245,6 +290,12 @@ const AcademicDepartment = () => {
                 ))}
               </TableBody>
             </Table>
+          )}
+
+          {!isLoading && filteredDepartments?.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No departments found matching your search.
+            </div>
           )}
         </CardContent>
       </Card>

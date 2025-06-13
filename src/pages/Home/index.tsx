@@ -16,7 +16,6 @@ export default function Home() {
         <OfferedCourseSection />
         <Features />
         <FacultySection />
-
         <Announcements />
         <JobBoard />
         <Testimonials />
