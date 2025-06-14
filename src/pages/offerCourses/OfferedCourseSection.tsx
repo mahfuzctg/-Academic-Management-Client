@@ -49,7 +49,8 @@ const OfferedCourseSection = () => {
 
   const { data, isLoading, isError } =
     useGetAllOfferedCoursesQuery(queryParams);
-  const { data: enrolledCoursesData } = useGetMyEnrolledCoursesQuery();
+  const { data: enrolledCoursesData } = useGetMyEnrolledCoursesQuery(undefined);
+
   const [createEnrolledCourse] = useCreateEnrolledCourseMutation();
 
   const enrolledCourses = enrolledCoursesData?.data || [];
@@ -66,10 +67,11 @@ const OfferedCourseSection = () => {
       setQueryParams([]);
     }
   }, [debouncedSearchQuery]);
-
   const isAlreadyEnrolled = (courseId: string) => {
-    return enrolledCourses.some(
-      (enrollment) => enrollment.offeredCourse === courseId
+    return (
+      enrolledCourses?.some(
+        (enrollment) => enrollment?.offeredCourse?._id === courseId
+      ) || false
     );
   };
 

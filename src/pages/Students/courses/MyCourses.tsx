@@ -26,7 +26,7 @@ const MyCourses = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  const { data, isLoading, isError } = useGetMyEnrolledCoursesQuery();
+  const { data, isLoading, isError } = useGetMyEnrolledCoursesQuery(undefined);
 
   const enrolledCourses = data?.data || [];
 

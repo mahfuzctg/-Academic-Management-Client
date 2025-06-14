@@ -16,6 +16,7 @@ import { studentPaths } from "./student.routes";
 import StudentCourseList from "@/pages/Students/courses/StudentCourseList";
 import { facultyPaths } from "./faculty.routes";
 import { NotFoundPage } from "@/pages/NotFound";
+import OfferedCourseSection from "@/pages/offerCourses/OfferedCourseSection";
 
 const router = createBrowserRouter([
   {
@@ -32,7 +33,7 @@ const router = createBrowserRouter([
       },
       {
         path: "courses",
-        element: <StudentCourseList />,
+        element: <OfferedCourseSection />,
       },
       {
         path: "instructors",
