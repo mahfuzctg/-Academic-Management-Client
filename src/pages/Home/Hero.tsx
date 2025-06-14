@@ -2,138 +2,133 @@ import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { Search } from "lucide-react";
 
-export default function Hero() {
-  const shapes = [
-    {
-      top: "10%",
-      left: "5%",
-      size: "w-10 h-10",
-      delay: 0,
-      src: "https://randomuser.me/api/portraits/men/11.jpg",
-    },
-    {
-      top: "20%",
-      right: "10%",
-      size: "w-8 h-8",
-      delay: 1,
-      src: "https://randomuser.me/api/portraits/women/22.jpg",
-    },
-    {
-      bottom: "15%",
-      left: "10%",
-      size: "w-12 h-12",
-      delay: 0.5,
-      src: "https://randomuser.me/api/portraits/men/33.jpg",
-    },
-    {
-      bottom: "25%",
-      right: "5%",
-      size: "w-9 h-9",
-      delay: 1.2,
-      src: "https://randomuser.me/api/portraits/women/44.jpg",
-    },
-    {
-      top: "30%",
-      left: "50%",
-      size: "w-6 h-6",
-      delay: 0.8,
-      src: "https://randomuser.me/api/portraits/men/55.jpg",
-    },
-    {
-      top: "40%",
-      left: "40%",
-      size: "w-7 h-7",
-      delay: 0.3,
-      src: "https://randomuser.me/api/portraits/women/66.jpg",
-    },
-    {
-      bottom: "35%",
-      right: "15%",
-      size: "w-5 h-5",
-      delay: 0.9,
-      src: "https://randomuser.me/api/portraits/men/77.jpg",
-    },
-    {
-      top: "50%",
-      right: "20%",
-      size: "w-11 h-11",
-      delay: 1.5,
-      src: "https://randomuser.me/api/portraits/women/88.jpg",
-    },
-    {
-      bottom: "5%",
-      left: "20%",
-      size: "w-6 h-6",
-      delay: 0.7,
-      src: "https://randomuser.me/api/portraits/men/99.jpg",
-    },
-    {
-      top: "60%",
-      left: "15%",
-      size: "w-4 h-4",
-      delay: 1.1,
-      src: "https://i.postimg.cc/qM8gzy7Y/education-concept-vector-5127163.jpg",
-    },
-    {
-      bottom: "10%",
-      right: "30%",
-      size: "w-9 h-9",
-      delay: 0.6,
-      src: "https://i.postimg.cc/qM8gzy7Y/education-concept-vector-5127163.jpg",
-    },
-    {
-      top: "5%",
-      right: "25%",
-      size: "w-7 h-7",
-      delay: 1.3,
-      src: "https://i.postimg.cc/qM8gzy7Y/education-concept-vector-5127163.jpg",
-    },
-  ];
+const reviews = [
+  {
+    top: "10%",
+    left: "5%",
+    size: "text-xs",
+    delay: 0,
+    text: "Time Saver",
+    img: "https://randomuser.me/api/portraits/men/11.jpg",
+  },
+  {
+    top: "15%",
+    right: "5%",
+    size: "text-xs",
+    delay: 0.5,
+    text: "Well Organized",
+    img: "https://randomuser.me/api/portraits/women/12.jpg",
+  },
+  {
+    top: "28%",
+    left: "8%",
+    size: "text-xs",
+    delay: 0.8,
+    text: "Great UI",
+    img: "https://randomuser.me/api/portraits/men/13.jpg",
+  },
+  {
+    top: "35%",
+    right: "8%",
+    size: "text-xs",
+    delay: 0.6,
+    text: "Super Fast",
+    img: "https://randomuser.me/api/portraits/women/14.jpg",
+  },
+  {
+    bottom: "32%",
+    left: "6%",
+    size: "text-xs",
+    delay: 1.1,
+    text: "Easy Access",
+    img: "https://randomuser.me/api/portraits/men/15.jpg",
+  },
+  {
+    bottom: "25%",
+    right: "6%",
+    size: "text-xs",
+    delay: 1.3,
+    text: "Best Support",
+    img: "https://randomuser.me/api/portraits/women/16.jpg",
+  },
+  {
+    bottom: "15%",
+    left: "10%",
+    size: "text-xs",
+    delay: 0.9,
+    text: "Bug Free",
+    img: "https://randomuser.me/api/portraits/men/17.jpg",
+  },
+  {
+    bottom: "10%",
+    right: "10%",
+    size: "text-xs",
+    delay: 1.4,
+    text: "Efficient",
+    img: "https://randomuser.me/api/portraits/women/18.jpg",
+  },
+  {
+    top: "55%",
+    left: "5%",
+    size: "text-xs",
+    delay: 0.7,
+    text: "CSE Friendly",
+    img: "https://randomuser.me/api/portraits/men/19.jpg",
+  },
+  {
+    top: "60%",
+    right: "5%",
+    size: "text-xs",
+    delay: 1.5,
+    text: "Highly Recommended",
+    img: "https://randomuser.me/api/portraits/women/20.jpg",
+  },
+];
 
+export default function Hero() {
   return (
     <section className="relative w-full overflow-hidden h-[100vh] bg-background font-roboto py-20 transition-colors">
-      {/* Animated Background Shapes */}
-      {shapes.map((shape, index) => (
-        <motion.img
+      {/* Floating Reviews with profile image and English text */}
+      {reviews.map((review, index) => (
+        <motion.div
           key={index}
-          src={shape.src}
-          alt={`shape-${index}`}
-          className={`absolute rounded-full object-cover ${shape.size}`}
+          className={`absolute select-none rounded-full bg-white/90 dark:bg-gray-800/90 shadow-md px-3 py-1 flex items-center gap-2 ${review.size} font-semibold text-gray-800 dark:text-gray-200`}
           style={{
-            top: shape.top,
-            left: shape.left,
-            right: shape.right,
-            bottom: shape.bottom,
+            top: review.top,
+            left: review.left,
+            right: review.right,
+            bottom: review.bottom,
+            userSelect: "none",
+            pointerEvents: "none",
+            whiteSpace: "nowrap",
           }}
-          initial={{ y: 0, opacity: 0.4 }}
-          animate={{ y: -20, opacity: 1 }}
+          initial={{ y: 0, opacity: 0.3 }}
+          animate={{ y: -10, opacity: 0.7 }}
           transition={{
             duration: 4,
             repeat: Infinity,
             repeatType: "reverse",
             ease: "easeInOut",
-            delay: shape.delay,
+            delay: review.delay,
           }}
-        />
+        >
+          <img
+            src={review.img}
+            alt="Student"
+            className="w-6 h-6 rounded-full object-cover border border-gray-300 dark:border-gray-600"
+            loading="lazy"
+          />
+          {review.text}
+        </motion.div>
       ))}
 
-      {/* Content */}
+      {/* Main Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 text-center">
-        <motion.h1
-          className="text-xl md:text-4xl font-extrabold text-card-foreground mb-4"
-          initial={{ y: 30, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8 }}
-        >
+        <motion.h1 className="text-xl md:text-3xl font-extrabold text-card-foreground mb-4">
           Streamline Academic Management <br /> with Confidence
         </motion.h1>
 
-        <motion.p
-          className="text-lg md:text-xl text-muted-foreground mb-10"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.2 }}
-        >
+        <motion.p className="text-lg md:text-xl text-muted-foreground mb-10 max-w-3xl mx-auto">
           Simplify course administration, monitor student progress, and enhance
           collaboration — all in one powerful platform.
         </motion.p>
@@ -160,7 +155,6 @@ export default function Hero() {
       </div>
 
       {/* Bottom Illustration and Curve */}
-
       <div className="absolute bottom-0 left-0 w-full">
         <svg
           className="w-full h-32 md:h-60"
