@@ -185,11 +185,11 @@ const CourseList = () => {
                     <TableCell>{course.prefix}</TableCell>
                     <TableCell>{course.credits}</TableCell>
                     <TableCell>
-                      {course.preRequisiteCourses?.length > 0 ? (
+                      {course?.preRequisiteCourses?.length > 0 ? (
                         <div className="flex items-center gap-1">
                           <Info className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm">
-                            {course.preRequisiteCourses
+                            {course?.preRequisiteCourses
                               .map((prereq) => prereq.course)
                               .join(", ")}
                           </span>

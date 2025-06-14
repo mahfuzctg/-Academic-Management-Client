@@ -6,7 +6,9 @@ import type {
   Announcement,
   ChatMessage,
   ChatRoom,
+  TAdmin,
 } from "@/types/admin";
+import type { TQueryParam } from "@/types/global";
 
 const adminApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -95,6 +97,53 @@ const adminApi = baseApi.injectEndpoints({
       invalidatesTags: ["academic"],
       transformResponse: (response: TResponseRedux<ChatRoom>) => response,
     }),
+
+    getAllAdmins: builder.query({
+      query: (args) => {
+        const params = new URLSearchParams();
+        if (args) {
+          args.forEach((item: TQueryParam) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+        return {
+          url: "/admins",
+          method: "GET",
+          params: params,
+        };
+      },
+      providesTags: ["academic"],
+      transformResponse: (response: TResponseRedux<TAdmin[]>) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
+    }),
+
+    createAdmin: builder.mutation({
+      query: (data) => ({
+        url: "/admins",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["academic"],
+    }),
+
+    updateAdmin: builder.mutation({
+      query: ({ id, updatedData }) => ({
+        url: `/admins/${id}`,
+        method: "PATCH",
+        body: updatedData,
+      }),
+      invalidatesTags: ["academic"],
+    }),
+
+    deleteAdmin: builder.mutation({
+      query: (id) => ({
+        url: `/admins/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["academic"],
+    }),
   }),
 });
 
@@ -107,4 +156,8 @@ export const {
   useGetChatMessagesQuery,
   useSendMessageMutation,
   useCreateChatRoomMutation,
+  useGetAllAdminsQuery,
+  useCreateAdminMutation,
+  useUpdateAdminMutation,
+  useDeleteAdminMutation,
 } = adminApi;

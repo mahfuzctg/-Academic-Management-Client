@@ -44,3 +44,26 @@ export interface ChatRoom {
   createdAt: string;
   updatedAt: string;
 }
+
+export type TUserName = {
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+};
+
+export type TAdmin = {
+  id: string;
+  user: string;
+  designation: string;
+  name: TUserName;
+  gender: "male" | "female" | "other";
+  dateOfBirth: string;
+  email: string;
+  contactNo: string;
+  emergencyContactNo: string;
+  bloogGroup: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+  presentAddress: string;
+  permanentAddress: string;
+  profileImg?: string;
+  isDeleted?: boolean;
+};

@@ -2,6 +2,7 @@ import AcademicManagement from "@/pages/Academic/AcademicManagement";
 import AcademicDepartment from "@/pages/Admin/academic/AcademicDepartment";
 import AcademicFacultyPage from "@/pages/Admin/academic/AcademicFaculty";
 import AcademicSemester from "@/pages/Admin/academic/AdmissionSemester";
+import AdminManagement from "@/pages/Admin/AdminManagement";
 import AdminCourseList from "@/pages/Admin/courses/AdminCourseList";
 import AdminOfferedCourseSection from "@/pages/Admin/offeredCourses/AdminOfferedCourseSection";
 import SemesterRegistrationPage from "@/pages/Admin/SemesterRegistration/SemesterRegistrationPage";
@@ -52,6 +53,12 @@ export const adminPaths = [
     path: "academic-semester",
     element: <AcademicSemester />,
     icon: <CalendarDays className="w-5 h-5" />,
+  },
+  {
+    name: "Admin Management",
+    path: "adminmanagement",
+    element: <AdminManagement />,
+    icon: <Users className="w-5 h-5" />,
   },
   {
     name: "Student Management",

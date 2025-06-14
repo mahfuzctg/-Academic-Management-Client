@@ -4,24 +4,18 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import HomeLayout from "@/components/layout/HomeLayout";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import { ThemeProvider } from "@/components/theme-provider";
-import CourseEnrollment from "@/pages/offerCourses/CourseEnrollment";
 import Home from "@/pages/Home";
 import InstructorManagement from "@/pages/facultys/facultyManagement";
 import JobManagement from "@/pages/Jobs/JobManagement";
-
 import LoginForm from "@/pages/Login";
-
-import NotFound from "@/pages/NotFound/NotFound";
 import RegisterForm from "@/pages/Register";
 import { routeGenerator } from "@/utils/routesGenerator";
 import { createBrowserRouter } from "react-router-dom";
 import { adminPaths } from "./admin.routes";
-// import { instructorPaths } from "./faculty.routes";
 import { studentPaths } from "./student.routes";
-import StudentCourseList from "@/pages/student/courses/StudentCourseList";
+import StudentCourseList from "@/pages/Students/courses/StudentCourseList";
 import { facultyPaths } from "./faculty.routes";
 import { NotFoundPage } from "@/pages/NotFound";
-// import StudentCourseList from "@/pages/student/courses/StudentCourseList";
 
 const router = createBrowserRouter([
   {

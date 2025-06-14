@@ -1,6 +1,4 @@
-import { useState } from "react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -9,178 +7,48 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { useToast } from "@/components/ui/use-toast";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Form } from "@/components/ui/form";
-import {
-  useGetAllAcademicFacultiesQuery,
-  useUpdateAcademicFacultyMutation,
-  useCreateAcademicFacultyMutation,
-  useDeleteAcademicFacultyMutation,
-} from "@/redux/features/academic/academicFacultyApi";
-import { FormFields } from "@/components/ui/form-field";
-import { Pencil, Trash2, Plus } from "lucide-react";
+import { useGetDepartmentsQuery } from "@/redux/features/academic/academicApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Building2, Users, GraduationCap } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
+import { useState } from "react";
 
-const academicFacultyValidationSchema = z.object({
-  name: z.string().min(1, "Academic faculty name is required"),
-});
+const AcademicDepartment = () => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const { data: departments, isLoading } = useGetDepartmentsQuery(undefined);
 
-type AcademicFacultyFormData = z.infer<typeof academicFacultyValidationSchema>;
-
-const AcademicFacultyPage = () => {
-  const { toast } = useToast();
-  const [isOpen, setIsOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [selectedFaculty, setSelectedFaculty] = useState<any>(null);
-
-  const { data: faculties, isLoading } = useGetAllAcademicFacultiesQuery({
-    page: 1,
-    limit: 10,
-  });
-  const [createAcademicFaculty] = useCreateAcademicFacultyMutation();
-  const [updateAcademicFaculty] = useUpdateAcademicFacultyMutation();
-  const [deleteAcademicFaculty] = useDeleteAcademicFacultyMutation();
-
-  const form = useForm<AcademicFacultyFormData>({
-    resolver: zodResolver(academicFacultyValidationSchema),
-    defaultValues: {
-      name: "",
-    },
-  });
-
-  const onSubmit = async (facultyData: AcademicFacultyFormData) => {
-    try {
-      if (selectedFaculty) {
-        await updateAcademicFaculty({
-          id: selectedFaculty._id,
-          data: { name: facultyData.name },
-        }).unwrap();
-        toast({
-          title: "Success",
-          description: "Academic faculty updated successfully",
-        });
-      } else {
-        await createAcademicFaculty({ name: facultyData.name }).unwrap();
-        toast({
-          title: "Success",
-          description: "Academic faculty created successfully",
-        });
-      }
-      setIsOpen(false);
-      form.reset();
-      setSelectedFaculty(null);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to save academic faculty",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleEdit = (faculty: any) => {
-    setSelectedFaculty(faculty);
-    form.reset({
-      name: faculty.name,
-    });
-    setIsOpen(true);
-  };
-
-  const handleDelete = async () => {
-    if (!selectedFaculty) return;
-
-    try {
-      await deleteAcademicFaculty(selectedFaculty._id).unwrap();
-      toast({
-        title: "Success",
-        description: "Academic faculty deleted successfully",
-      });
-      setIsDeleteDialogOpen(false);
-      setSelectedFaculty(null);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete academic faculty",
-        variant: "destructive",
-      });
-    }
-  };
+  const filteredDepartments = departments?.data?.filter((department) =>
+    department.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="p-6"
+      className="p-6 max-w-7xl mx-auto"
     >
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-2xl font-bold">
-            Academic Faculty Management
-          </CardTitle>
-          <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-              <Button>
-                <Plus className="w-4 h-4 mr-2" />
-                Add New Faculty
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>
-                  {selectedFaculty
-                    ? "Edit Academic Faculty"
-                    : "Add New Academic Faculty"}
-                </DialogTitle>
-                <DialogDescription>
-                  {selectedFaculty
-                    ? "Update the academic faculty information below."
-                    : "Fill in the academic faculty information below."}
-                </DialogDescription>
-              </DialogHeader>
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(onSubmit)}
-                  className="space-y-4"
-                >
-                  <FormFields.TextWithIcon
-                    form={form}
-                    name="name"
-                    label="Academic Faculty Name"
-                    placeholder="Enter academic faculty name"
-                    required
-                  />
-                  <DialogFooter>
-                    <Button type="submit" className="w-full">
-                      {selectedFaculty ? "Update Faculty" : "Add Faculty"}
-                    </Button>
-                  </DialogFooter>
-                </form>
-              </Form>
-            </DialogContent>
-          </Dialog>
+      <Card className="border-border/50">
+        <CardHeader className="space-y-4">
+          <div className="flex flex-col gap-2">
+            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+              Academic Departments
+            </CardTitle>
+            <p className="text-muted-foreground">
+              Explore our academic departments and their programs
+            </p>
+          </div>
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+            <Input
+              placeholder="Search departments..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10"
+            />
+          </div>
         </CardHeader>
         <CardContent>
           {isLoading ? (
@@ -188,74 +56,79 @@ const AcademicFacultyPage = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {faculties?.data?.map((faculty: any) => (
-                  <TableRow key={faculty._id}>
-                    <TableCell className="font-medium">
-                      {faculty.name}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => handleEdit(faculty)}
-                        >
-                          <Pencil className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedFaculty(faculty);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredDepartments?.map((department: any) => (
+                <motion.div
+                  key={department._id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  whileHover={{ y: -5 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                >
+                  <Card className="h-full hover:shadow-lg transition-all duration-200 border-border/50 hover:border-primary/30">
+                    <CardContent className="p-6 space-y-4">
+                      <div className="flex items-start justify-between">
+                        <div className="space-y-1">
+                          <h3 className="text-xl font-semibold">
+                            {department.name}
+                          </h3>
+                          <p className="text-sm text-muted-foreground">
+                            {department.academicFaculty?.name}
+                          </p>
+                        </div>
+                        <div className="bg-primary/10 p-2 rounded-lg">
+                          <Building2 className="h-6 w-6 text-primary" />
+                        </div>
                       </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+
+                      <div className="space-y-3 pt-2">
+                        {department.description && (
+                          <p className="text-sm text-muted-foreground">
+                            {department.description}
+                          </p>
+                        )}
+                        
+                        <div className="flex flex-wrap gap-2">
+                          {department.headOfDepartment && (
+                            <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100">
+                              <Users className="w-3 h-3 mr-1" />
+                              Head: {department.headOfDepartment}
+                            </Badge>
+                          )}
+                          {department.totalStudents && (
+                            <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100">
+                              <GraduationCap className="w-3 h-3 mr-1" />
+                              {department.totalStudents} Students
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          )}
+
+          {!isLoading && filteredDepartments?.length === 0 && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col items-center justify-center py-12 gap-4"
+            >
+              <div className="bg-blue-100 p-6 rounded-full">
+                <Building2 className="h-10 w-10 text-blue-600" />
+              </div>
+              <p className="text-center text-lg text-muted-foreground">
+                No departments found matching your search.
+              </p>
+            </motion.div>
           )}
         </CardContent>
       </Card>
-
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              academic faculty
-              {selectedFaculty && ` "${selectedFaculty.name}"`}.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </motion.div>
   );
 };
 
-export default AcademicFacultyPage;
+export default AcademicDepartment;
+
