@@ -35,7 +35,6 @@ import {
   CheckCircle2,
   Clock,
   GraduationCap,
-  Library,
   Search,
   Users,
 } from "lucide-react";
@@ -143,9 +142,9 @@ const OfferedCourseSection = () => {
           transition={{ delay: 0.2 }}
         >
           <SectionHeader
-            icon={<Library />}
             title="Our Offered Courses"
-            subtitle="Stay in the loop with exclusive offers and updates. Subscribe to our newsletter for the latest trends and promotions delivered straight to your inbox."
+            subtitle="Discover a curated selection of academic and skill-based courses tailored to your goals.
+Enroll in the right course and take a step closer to your career aspirations."
           />
         </motion.div>
 
@@ -166,7 +165,7 @@ const OfferedCourseSection = () => {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
           {[...Array(6)].map((_, index) => (
             <Card key={index} className="overflow-hidden border-border/50">
               <Skeleton className="h-48 w-full rounded-t-lg" />
@@ -299,7 +298,7 @@ const OfferedCourseSection = () => {
                     </div>
                     {isAlreadyEnrolled(course._id) ? (
                       <Button
-                        className="w-full mt-2 bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                        className="w-full mt-2 bg-[#E5E5F7] text-[#06061a] hover:bg-green-200 transition-colors"
                         size="sm"
                         disabled
                       >

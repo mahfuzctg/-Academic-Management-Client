@@ -15,9 +15,9 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
 
   return (
     <section
-      className={`w-full max-w-7xl mx-auto px-4 text-center py-14 ${className}`}
+      className={`w-full max-w-7xl mx-auto px-4 text-center pt-16 pb-10 ${className}`}
     >
-      <div className="space-y-6">
+      <div>
         {/* Animated Shape */}
         <div className="flex justify-center gap-4 items-center">
           <div className="animate-pulse">

@@ -1,3 +1,4 @@
+import SectionHeader from "@/components/resuable/SectionHeader";
 import { motion } from "framer-motion";
 import {
   Bell,
@@ -71,22 +72,13 @@ const itemVariants = {
 
 export default function Features() {
   return (
-    <section className="py-20 bg-gray-50 dark:bg-gray-900 transition-colors duration-500">
+    <section className=" my-5 bg-[#F2F2FB] dark:bg-gray-900 transition-colors duration-500">
       <div className="container mx-auto px-4">
-        <motion.div
-          className="text-center mb-16"
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 dark:text-white mb-4">
-            Empowering Academic Excellence
-          </h2>
-          <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-            Explore a suite of intelligent tools designed to streamline and
-            elevate your academic environment.
-          </p>
-        </motion.div>
+        <SectionHeader
+          title=" Empowering Academic Excellence"
+          subtitle=" Explore a suite of intelligent tools designed to streamline and
+            elevate your academic environment."
+        />
 
         <motion.div
           className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10"
@@ -100,10 +92,10 @@ export default function Features() {
               key={index}
               variants={itemVariants}
               whileHover={{ y: -6 }}
-              className="relative group p-6 rounded-2xl bg-white dark:bg-gray-800 shadow-md border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:border-blue-500"
+              className="relative group  p-6 my-5 rounded-2xl bg-white dark:bg-gray-800  border border-gray-200 dark:border-gray-700 transition-all duration-300 hover:shadow-xl hover:border-blue-500 shadow-[inset_0px_30px_40px_0px_rgba(255,255,255,0.1),inset_0px_0px_20px_0px_rgba(0,0,0,0.1),0px_-5px_10px_0px_rgba(63,63,63,0.2)] "
             >
-              <motion.div className="flex items-center justify-center w-14 h-14 rounded-xl bg-gradient-to-tr from-blue-100 to-blue-200 dark:from-blue-600/20 dark:to-blue-500/20 mb-5 transition-transform duration-500 group-hover:rotate-6">
-                <feature.icon className="w-6 h-6 text-blue-600 dark:text-blue-400 transition-colors duration-300" />
+              <motion.div className="flex items-center justify-center w-14 h-14 rounded-xl  dark:from-blue-600/20 dark:to-blue-500/20 mb-5 transition-transform duration-500 group-hover:rotate-6">
+                <feature.icon className="w-6 h-6 text-gray-600 dark:text-blue-400 transition-colors duration-300" />
               </motion.div>
               <h3 className="text-xl font-semibold text-gray-800 dark:text-white mb-2 transition-colors duration-300">
                 {feature.title}

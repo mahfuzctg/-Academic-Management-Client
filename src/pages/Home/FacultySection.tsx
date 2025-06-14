@@ -31,7 +31,7 @@ const FacultySection = () => {
           animate={{ opacity: 1 }}
           className="flex flex-col items-center justify-center py-12 gap-4"
         >
-          <div className="bg-red-100 p-6 rounded-full">
+          <div className="bg-[#E5E5F7] p-6 rounded-full">
             <GraduationCap className="h-10 w-10 text-red-500" />
           </div>
           <p className="text-red-500 text-center text-lg">
