@@ -15,11 +15,11 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({
 
   return (
     <section
-      className={`w-full max-w-7xl mx-auto px-4 text-center pt-16 pb-10 ${className}`}
+      className={`w-full max-w-7xl mx-auto px-4  text-center pt-16 pb-10 ${className}`}
     >
       <div>
         {/* Animated Shape */}
-        <div className="flex justify-center gap-4 items-center">
+        <div className="flex justify-center gap-4 items-center mb-4">
           <div className="animate-pulse">
             <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
               <circle

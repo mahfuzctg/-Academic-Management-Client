@@ -1,3 +1,4 @@
+import SectionHeader from "@/components/resuable/SectionHeader";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -20,6 +21,36 @@ const announcements = [
     date: "2024-03-13",
     type: "job",
   },
+  {
+    id: 4,
+    title: "Midterm Exam Schedule Released",
+    date: "2024-03-12",
+    type: "academic",
+  },
+  {
+    id: 5,
+    title: "Campus Hiring Drive This April",
+    date: "2024-03-11",
+    type: "job",
+  },
+  {
+    id: 6,
+    title: "Course Registration Deadline Approaching",
+    date: "2024-03-10",
+    type: "enrollment",
+  },
+  {
+    id: 7,
+    title: "Portfolio Submission Guidelines Updated",
+    date: "2024-03-09",
+    type: "academic",
+  },
+  {
+    id: 8,
+    title: "Freelance Platform Launching Soon",
+    date: "2024-03-08",
+    type: "job",
+  },
 ];
 
 const typeToVariant = (type: string) => {
@@ -37,32 +68,31 @@ const typeToVariant = (type: string) => {
 
 const Announcements = () => {
   return (
-    <section className="py-16 bg-gray-50 dark:bg-gray-900 transition-colors duration-500">
+    <section className="py-20 bg-gray-50 dark:bg-[#0F172A] transition-colors duration-500">
       <div className="container mx-auto px-4">
-        <h2 className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-800 dark:text-white">
-          Latest Announcements
-        </h2>
-
-        <div className="grid gap-8 sm:grid-cols-2 md:grid-cols-3">
+        <SectionHeader
+          title="Latest Announcements"
+          subtitle="Stay updated with the most recent academic and career-related information"
+        />
+        <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-10">
           {announcements.map((announcement) => (
             <Card
               key={announcement.id}
-              className="h-full rounded-xl shadow-md border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all duration-300 hover:shadow-xl hover:scale-[1.02]"
+              className="h-full rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 transition-all duration-300 hover:shadow-lg hover:scale-[1.015]"
             >
               <CardHeader className="flex flex-row items-center justify-between pb-3">
                 <Badge
                   variant={typeToVariant(announcement.type)}
-                  className="text-xs px-3 py-1"
+                  className="text-xs px-3 py-1 capitalize"
                 >
-                  {announcement.type.charAt(0).toUpperCase() +
-                    announcement.type.slice(1)}
+                  {announcement.type}
                 </Badge>
                 <span className="text-sm text-gray-500 dark:text-gray-400">
                   {announcement.date}
                 </span>
               </CardHeader>
               <CardContent>
-                <CardTitle className="text-lg font-semibold text-gray-800 dark:text-white">
+                <CardTitle className="text-base font-medium text-gray-800 dark:text-white leading-snug">
                   {announcement.title}
                 </CardTitle>
               </CardContent>

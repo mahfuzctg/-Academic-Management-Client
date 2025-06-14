@@ -1,4 +1,5 @@
 import FacultyCard from "@/components/cards/FacultyCard";
+import SectionHeader from "@/components/resuable/SectionHeader";
 import FacultyCardSkeleton from "@/components/skeleton/Home/FacultyCardSkeleton";
 import { useGetAllFacultiesQuery } from "@/redux/features/faculty/facultyApi";
 import type { TFaculty } from "@/types/faculty";
@@ -16,13 +17,11 @@ const FacultySection = () => {
         transition={{ duration: 0.5 }}
         className="text-center space-y-4 mb-12"
       >
-        <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-          Faculty & Staff Directory
-        </h1>
-        <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-          Meet our distinguished faculty members who are dedicated to academic
-          excellence and student success
-        </p>
+        <SectionHeader
+          title="  Faculty & Staff Directory"
+          subtitle="   Meet our distinguished faculty members who are dedicated to academic
+          excellence and student success"
+        />
       </motion.div>
 
       {isError && (
