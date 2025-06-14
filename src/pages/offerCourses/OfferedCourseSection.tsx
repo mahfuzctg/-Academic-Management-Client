@@ -18,20 +18,41 @@ import {
   CalendarDays,
   BookOpen,
   GraduationCap,
+  CheckCircle2,
 } from "lucide-react";
 import { useGetAllOfferedCoursesQuery } from "@/redux/features/course/offerCourseApi";
+import {
+  useCreateEnrolledCourseMutation,
+  useGetMyEnrolledCoursesQuery,
+} from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
 import type { TQueryParam } from "@/types/global";
 import { useDebounce } from "@/hooks/useDebounce";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const OfferedCourseSection = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [queryParams, setQueryParams] = useState<TQueryParam[]>([]);
+  const [selectedCourse, setSelectedCourse] = useState<any>(null);
+  const [enrollDialogOpen, setEnrollDialogOpen] = useState(false);
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
   const { data, isLoading, isError } =
     useGetAllOfferedCoursesQuery(queryParams);
+  const { data: enrolledCoursesData } = useGetMyEnrolledCoursesQuery();
+  const [createEnrolledCourse] = useCreateEnrolledCourseMutation();
+
+  const enrolledCourses = enrolledCoursesData?.data || [];
 
   useEffect(() => {
     if (debouncedSearchQuery) {
@@ -46,20 +67,40 @@ const OfferedCourseSection = () => {
     }
   }, [debouncedSearchQuery]);
 
-  const handleEnroll = async (courseId: string) => {
+  const isAlreadyEnrolled = (courseId: string) => {
+    return enrolledCourses.some(
+      (enrollment) => enrollment.offeredCourse === courseId
+    );
+  };
+
+  const handleEnroll = async () => {
+    if (!selectedCourse) return;
+
     try {
-      // TODO: Implement enrollment mutation
+      await createEnrolledCourse({
+        course: selectedCourse.course._id,
+        semesterRegistration: selectedCourse.semesterRegistration._id,
+        academicSemester: selectedCourse.academicSemester._id,
+        academicFaculty: selectedCourse.academicFaculty._id,
+        academicDepartment: selectedCourse.academicDepartment._id,
+        offeredCourse: selectedCourse._id,
+        faculty: selectedCourse.faculty._id,
+      }).unwrap();
+
       toast({
         title: "🎉 Enrollment Successful",
         description: "You've been successfully enrolled in the course",
         className: "bg-green-50 border-green-200",
       });
+      setEnrollDialogOpen(false);
+      setSelectedCourse(null);
     } catch (error) {
       toast({
         title: "⚠️ Enrollment Failed",
         description: "Failed to enroll in the course. Please try again.",
         variant: "destructive",
       });
+      console.log(error);
     }
   };
 
@@ -234,7 +275,7 @@ const OfferedCourseSection = () => {
                   <CardFooter className="flex flex-col gap-3 pt-4">
                     <div className="w-full flex justify-between items-center">
                       <span className="text-sm text-muted-foreground">
-                        Capacity: {course.enrolled || 0}/
+                        Capacity: {course.enrolledStudents?.length || 0}/
                         {course.maxCapacity || 0}
                       </span>
                       <div className="h-2 w-1/2 bg-gray-200 rounded-full overflow-hidden">
@@ -244,7 +285,7 @@ const OfferedCourseSection = () => {
                           animate={{
                             width: `${Math.min(
                               100,
-                              ((course.enrolled || 0) /
+                              ((course.enrolledStudents?.length || 0) /
                                 (course.maxCapacity || 1)) *
                                 100
                             )}%`,
@@ -253,13 +294,32 @@ const OfferedCourseSection = () => {
                         />
                       </div>
                     </div>
-                    <Button
-                      className="w-full mt-2 bg-primary hover:bg-primary/90 transition-colors"
-                      onClick={() => handleEnroll(course._id)}
-                      size="sm"
-                    >
-                      Enroll Now
-                    </Button>
+                    {isAlreadyEnrolled(course._id) ? (
+                      <Button
+                        className="w-full mt-2 bg-green-100 text-green-700 hover:bg-green-200 transition-colors"
+                        size="sm"
+                        disabled
+                      >
+                        <CheckCircle2 className="w-4 h-4 mr-2" />
+                        Already Enrolled
+                      </Button>
+                    ) : (
+                      <Button
+                        className="w-full mt-2 bg-primary hover:bg-primary/90 transition-colors"
+                        onClick={() => {
+                          setSelectedCourse(course);
+                          setEnrollDialogOpen(true);
+                        }}
+                        size="sm"
+                        disabled={
+                          course.enrolledStudents?.length >= course.maxCapacity
+                        }
+                      >
+                        {course.enrolledStudents?.length >= course.maxCapacity
+                          ? "Course Full"
+                          : "Enroll Now"}
+                      </Button>
+                    )}
                   </CardFooter>
                 </Card>
               </motion.div>
@@ -267,6 +327,22 @@ const OfferedCourseSection = () => {
           </motion.div>
         </AnimatePresence>
       )}
+
+      <AlertDialog open={enrollDialogOpen} onOpenChange={setEnrollDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Enrollment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to enroll in {selectedCourse?.course?.title}
+              ? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleEnroll}>Enroll</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </motion.div>
   );
 };

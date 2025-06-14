@@ -5,6 +5,7 @@ import AcademicFacultyShow from "@/pages/share/facultyAndStudent/academicfaculty
 import AcademicInstructorShow from "@/pages/share/facultyAndStudent/academicInstructorShow";
 import AcademicSemesterShow from "@/pages/share/facultyAndStudent/AcademickSemesterShow";
 import AcademicOfferedCourseShow from "@/pages/share/facultyAndStudent/academicOfferedCourseShow";
+import MyCourses from "@/pages/Students/courses/MyCourses";
 import StudentProfile from "@/pages/Students/StudentProfile";
 import {
   Award,
@@ -32,7 +33,7 @@ export const studentPaths = [
   {
     name: "My Courses",
     path: "my-courses",
-    element: <StudentProfile />,
+    element: <MyCourses />,
     icon: <BookOpen className="w-5 h-5" />,
   },
   {
