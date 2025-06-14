@@ -68,7 +68,7 @@ const typeToVariant = (type: string) => {
 
 const Announcements = () => {
   return (
-    <section className="py-20 bg-gray-50 dark:bg-[#0F172A] transition-colors duration-500">
+    <section className="py-20  dark:bg-[#020817] transition-colors duration-500">
       <div className="container mx-auto px-4">
         <SectionHeader
           title="Latest Announcements"

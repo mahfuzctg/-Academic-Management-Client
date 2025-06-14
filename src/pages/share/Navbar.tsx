@@ -79,9 +79,9 @@ export default function NavBar() {
           <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
             <Link
               to="/"
-              className="text-2xl font-bold text-blue-600 dark:text-blue-400"
+              className="text-2xl font-extrabold tracking-wide text-[#3F4555] dark:text-blue-400 hover:text-blue-600 transition-colors duration-300 flex items-center gap-1"
             >
-              AcademicMS
+              <span>📚</span> AcademicMS
             </Link>
           </motion.div>
 

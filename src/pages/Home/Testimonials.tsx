@@ -49,7 +49,7 @@ const testimonials = [
 
 const Testimonials = () => {
   return (
-    <section className="py-20 bg-white dark:bg-[#0F172A] transition-colors duration-500">
+    <section className="py-20 bg-white dark:bg-[#020817] transition-colors duration-500">
       <div className="container mx-auto px-4">
         <div className="text-center mb-12">
           <SectionHeader

@@ -72,7 +72,7 @@ const itemVariants = {
 
 export default function Features() {
   return (
-    <section className=" my-5 bg-[#F2F2FB] dark:bg-gray-900 transition-colors duration-500">
+    <section className=" my-5   ">
       <div className="container mx-auto px-4">
         <SectionHeader
           title=" Empowering Academic Excellence"

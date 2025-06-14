@@ -30,12 +30,12 @@ const Contact = () => {
   };
 
   return (
-    <section className="py-20 bg-white dark:bg-[#0F172A] transition-colors duration-500">
+    <section className="py-20 bg-white dark:bg-[#020817] transition-colors duration-500">
       <div className="container mx-auto px-4">
         <div className="grid gap-12 md:grid-cols-2">
           {/* Support Section */}
           <div>
-            <Card className=" dark:bg-gray-800  dark:border-gray-700  transition-all rounded-xl p-6">
+            <Card className=" dark:bg-[#020817]  dark:border-gray-700  transition-all rounded-xl p-6">
               <CardHeader className="pb-4">
                 <CardTitle className="text-3xl font-bold text-gray-900 dark:text-white">
                   Need Help?
@@ -91,7 +91,7 @@ const Contact = () => {
                 return (
                   <Card
                     key={faq.id}
-                    className="border border-gray-200 dark:border-gray-700  dark:bg-gray-800 rounded-lg transition-shadow duration-300 hover:shadow-md cursor-pointer"
+                    className="border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-[#020817] rounded-lg transition-shadow duration-300 hover:shadow-md cursor-pointer"
                     onClick={() => toggleFaq(faq.id)}
                     aria-expanded={isOpen}
                     aria-controls={`faq-answer-${faq.id}`}
