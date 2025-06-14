@@ -10,7 +10,7 @@ const stats = [
 
 const Statistics = () => {
   return (
-    <section className="relative py-16 overflow-hidden bg-gradient-to-b from-blue-100 to-blue-300 dark:from-gray-900 dark:to-gray-800">
+    <section className="relative py-16 overflow-hidden   dark:to-gray-800">
       {/* Blurred abstract background blobs */}
       <div className="absolute top-[-100px] left-[-80px] w-[300px] h-[300px] bg-purple-300 dark:bg-purple-800 rounded-full mix-blend-multiply filter blur-3xl opacity-30 animate-pulse" />
       <div className="absolute bottom-[-120px] right-[-60px] w-[250px] h-[250px] bg-pink-300 dark:bg-pink-700 rounded-full mix-blend-multiply filter blur-2xl opacity-40 animate-pulse" />
