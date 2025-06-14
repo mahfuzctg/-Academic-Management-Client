@@ -89,3 +89,27 @@
     @apply bg-background text-foreground;
   }
 }
+
+@keyframes fadeInChar {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animated-letter {
+  display: inline-block;
+  opacity: 0;
+  animation: fadeInChar 3s infinite;
+  /* ❌ DO NOT set color here */
+}

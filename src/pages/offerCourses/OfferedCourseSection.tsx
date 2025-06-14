@@ -1,33 +1,4 @@
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardFooter,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { useState, useEffect } from "react";
-import { Badge } from "@/components/ui/badge";
-import { motion, AnimatePresence } from "framer-motion";
-import {
-  Search,
-  Clock,
-  Users,
-  CalendarDays,
-  BookOpen,
-  GraduationCap,
-  CheckCircle2,
-} from "lucide-react";
-import { useGetAllOfferedCoursesQuery } from "@/redux/features/course/offerCourseApi";
-import {
-  useCreateEnrolledCourseMutation,
-  useGetMyEnrolledCoursesQuery,
-} from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
-import type { TQueryParam } from "@/types/global";
-import { useDebounce } from "@/hooks/useDebounce";
-import { Skeleton } from "@/components/ui/skeleton";
+import SectionHeader from "@/components/resuable/SectionHeader";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +9,37 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/components/ui/use-toast";
+import { useDebounce } from "@/hooks/useDebounce";
+import { useGetAllOfferedCoursesQuery } from "@/redux/features/course/offerCourseApi";
+import {
+  useCreateEnrolledCourseMutation,
+  useGetMyEnrolledCoursesQuery,
+} from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
+import type { TQueryParam } from "@/types/global";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+  BookOpen,
+  CalendarDays,
+  CheckCircle2,
+  Clock,
+  GraduationCap,
+  Library,
+  Search,
+  Users,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 
 const OfferedCourseSection = () => {
   const { toast } = useToast();
@@ -135,17 +137,16 @@ const OfferedCourseSection = () => {
     >
       <div className="flex flex-col gap-6">
         <motion.div
-          className="text-center space-y-2"
+          className=" space-y-2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <h2 className="text-4xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-            Available Courses
-          </h2>
-          <p className="text-muted-foreground text-lg">
-            Explore and enroll in courses that match your academic goals
-          </p>
+          <SectionHeader
+            icon={<Library />}
+            title="Our Offered Courses"
+            subtitle="Stay in the loop with exclusive offers and updates. Subscribe to our newsletter for the latest trends and promotions delivered straight to your inbox."
+          />
         </motion.div>
 
         <motion.div

@@ -10,8 +10,8 @@ import Testimonials from "./Testimonials";
 
 export default function Home() {
   return (
-    <div className="min-h-screen flex flex-col">
-      <main className="flex-grow">
+    <div className="min-h-screen flex flex-col ">
+      <main className="flex-grow  ">
         <Hero />
         <OfferedCourseSection />
         <Features />

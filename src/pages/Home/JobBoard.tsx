@@ -1,7 +1,6 @@
-import React from "react";
-import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { motion } from "framer-motion";
 
 const recentJobs = [
@@ -43,7 +42,7 @@ const JobBoard = () => {
         <div className="flex justify-between items-center mb-8">
           <h2 className="text-3xl font-bold">Recent Job Opportunities</h2>
           <Button asChild>
-            <a href="/marketplace">View All Jobs</a>
+            <a href="/jobs">View All Jobs</a>
           </Button>
         </div>
         <div className="grid gap-6 md:grid-cols-3">

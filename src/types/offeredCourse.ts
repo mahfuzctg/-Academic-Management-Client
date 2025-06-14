@@ -40,6 +40,7 @@ export interface IOfferedCourse {
   semesterRegistration: TSemesterRegistration;
   academicFaculty: TAcademicFaculty;
   academicDepartment: TAcademicDepartment;
+  enrolledStudents: number | any;
   course: TCourse;
   faculty: TFaculty;
   section: number;
