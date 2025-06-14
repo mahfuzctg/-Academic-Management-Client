@@ -1,5 +1,5 @@
 import { useState } from "react";
-import StudentProfileSkeleton from "@/components/skeleton/Profile/StudentProfileSkeleton";
+import FacultyProfileSkeleton from "@/components/skeleton/Profile/FacultyProfileSkeleton";
 import { useGetMeQuery } from "@/redux/features/users/userApi";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
@@ -12,8 +12,11 @@ import {
   User,
   Shield,
   GraduationCap,
+  Briefcase,
+  BookOpen,
+  Award,
 } from "lucide-react";
-import StudentForm from "@/components/form/students/StudentForm";
+// import FacultyForm from "@/components/form/faculty/FacultyForm";
 import { useToast } from "@/components/ui/use-toast";
 import { useParams } from "react-router-dom";
 import { motion } from "framer-motion";
@@ -21,16 +24,16 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import FacultyForm from "@/components/form/faculty/facultyForm";
 
-const StudentProfile = () => {
+const FacultyProfile = () => {
   const { id } = useParams();
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { data, isLoading, error } = useGetMeQuery(undefined);
 
-  if (isLoading) return <StudentProfileSkeleton />;
+  if (isLoading) return <FacultyProfileSkeleton />;
 
   if (error)
     return (
@@ -82,12 +85,12 @@ const StudentProfile = () => {
       initial="hidden"
       animate="visible"
       variants={containerVariants}
-      className="flex justify-center  dark:bg-gray-900 p-4 min-h-screen transition-colors duration-500"
+      className="flex justify-center dark:bg-gray-900 p-4 min-h-screen transition-colors duration-500"
     >
       <div className="w-full max-w-6xl space-y-6">
         {/* Profile Header Card */}
         <Card className="overflow-hidden">
-          <div className="h-32 bg-gradient-to-r from-blue-500 to-indigo-600" />
+          <div className="h-32 bg-gradient-to-r from-purple-500 to-indigo-600" />
           <CardHeader className="relative -mt-16 space-y-4">
             <div className="flex flex-col sm:flex-row items-center sm:items-end gap-4">
               <Avatar className="h-32 w-32 border-4 border-white dark:border-gray-800">
@@ -117,7 +120,12 @@ const StudentProfile = () => {
                     {user?.user?.role}
                   </Badge>
                   {user?.user?.status === "active" && (
-                    <Badge variant="success">Active</Badge>
+                    <Badge
+                      variant="outline"
+                      className="text-green-600 dark:text-green-400 border-green-600 dark:border-green-400"
+                    >
+                      Active
+                    </Badge>
                   )}
                 </motion.div>
                 <motion.p
@@ -136,7 +144,7 @@ const StudentProfile = () => {
                     </Button>
                   </DialogTrigger>
                   <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-                    <StudentForm student={user} onSuccess={handleFormSuccess} />
+                    <FacultyForm faculty={user} onSuccess={handleFormSuccess} />
                   </DialogContent>
                 </Dialog>
               )}
@@ -153,9 +161,9 @@ const StudentProfile = () => {
                   <User className="w-4 h-4 mr-2" />
                   Personal Info
                 </TabsTrigger>
-                <TabsTrigger value="guardian">
-                  <Shield className="w-4 h-4 mr-2" />
-                  Guardian Info
+                <TabsTrigger value="professional">
+                  <Briefcase className="w-4 h-4 mr-2" />
+                  Professional Info
                 </TabsTrigger>
                 <TabsTrigger value="academic">
                   <GraduationCap className="w-4 h-4 mr-2" />
@@ -204,73 +212,50 @@ const StudentProfile = () => {
                 </motion.div>
               </TabsContent>
 
-              <TabsContent value="guardian" className="space-y-6">
+              <TabsContent value="professional" className="space-y-6">
                 <motion.div variants={itemVariants}>
-                  <Section title="Father's Information">
+                  <Section title="Employment Details">
                     <InfoGrid>
                       <InfoItem
-                        icon={<User className="w-4 h-4" />}
-                        label="Name"
-                        value={user?.guardian?.fatherName}
+                        icon={<Briefcase className="w-4 h-4" />}
+                        label="Designation"
+                        value={user?.designation}
                       />
                       <InfoItem
-                        icon={<GraduationCap className="w-4 h-4" />}
-                        label="Occupation"
-                        value={user?.guardian?.fatherOccupation}
+                        icon={<BookOpen className="w-4 h-4" />}
+                        label="Department"
+                        value={user?.department}
                       />
                       <InfoItem
-                        icon={<Phone className="w-4 h-4" />}
-                        label="Contact"
-                        value={user?.guardian?.fatherContactNo}
+                        icon={<Calendar className="w-4 h-4" />}
+                        label="Joining Date"
+                        value={
+                          user?.joiningDate
+                            ? new Date(user.joiningDate).toLocaleDateString()
+                            : "-"
+                        }
                       />
                     </InfoGrid>
                   </Section>
 
                   <Separator className="my-6" />
 
-                  <Section title="Mother's Information">
+                  <Section title="Qualifications">
                     <InfoGrid>
                       <InfoItem
-                        icon={<User className="w-4 h-4" />}
-                        label="Name"
-                        value={user?.guardian?.motherName}
+                        icon={<Award className="w-4 h-4" />}
+                        label="Highest Degree"
+                        value={user?.highestDegree}
                       />
                       <InfoItem
                         icon={<GraduationCap className="w-4 h-4" />}
-                        label="Occupation"
-                        value={user?.guardian?.motherOccupation}
+                        label="Specialization"
+                        value={user?.specialization}
                       />
                       <InfoItem
-                        icon={<Phone className="w-4 h-4" />}
-                        label="Contact"
-                        value={user?.guardian?.motherContactNo}
-                      />
-                    </InfoGrid>
-                  </Section>
-
-                  <Separator className="my-6" />
-
-                  <Section title="Local Guardian">
-                    <InfoGrid>
-                      <InfoItem
-                        icon={<User className="w-4 h-4" />}
-                        label="Name"
-                        value={user?.localGuardian?.name}
-                      />
-                      <InfoItem
-                        icon={<GraduationCap className="w-4 h-4" />}
-                        label="Occupation"
-                        value={user?.localGuardian?.occupation}
-                      />
-                      <InfoItem
-                        icon={<Phone className="w-4 h-4" />}
-                        label="Contact"
-                        value={user?.localGuardian?.contactNo}
-                      />
-                      <InfoItem
-                        icon={<MapPin className="w-4 h-4" />}
-                        label="Address"
-                        value={user?.localGuardian?.address}
+                        icon={<BookOpen className="w-4 h-4" />}
+                        label="Experience"
+                        value={`${user?.experience || 0} years`}
                       />
                     </InfoGrid>
                   </Section>
@@ -282,13 +267,18 @@ const StudentProfile = () => {
                   <InfoGrid>
                     <InfoItem
                       icon={<GraduationCap className="w-4 h-4" />}
-                      label="Student ID"
+                      label="Faculty ID"
                       value={user?.id}
                     />
                     <InfoItem
                       icon={<Shield className="w-4 h-4" />}
                       label="Academic Status"
                       value={user?.user?.status}
+                    />
+                    <InfoItem
+                      icon={<BookOpen className="w-4 h-4" />}
+                      label="Subjects"
+                      value={user?.subjects?.join(", ") || "-"}
                     />
                   </InfoGrid>
                 </motion.div>
@@ -342,4 +332,4 @@ const InfoItem = ({
   </div>
 );
 
-export default StudentProfile;
+export default FacultyProfile;
