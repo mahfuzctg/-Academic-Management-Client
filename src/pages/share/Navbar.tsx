@@ -16,7 +16,7 @@ import { toast } from "sonner";
 const getNavLinks = (role?: string) => {
   const commonLinks = [
     { label: "Home", to: "/" },
-
+    { label: "Courses", to: "/courses" },
     { label: "Jobs", to: "/jobs" },
   ];
 
@@ -25,7 +25,6 @@ const getNavLinks = (role?: string) => {
       return [
         ...commonLinks,
         { label: "Dashboard", to: "/student/dashboard" },
-        { label: "Courses", to: "/courses" },
         { label: "My Courses", to: "/student/my-courses" },
         { label: "Grades", to: "/student/grades" },
       ];

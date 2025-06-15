@@ -36,6 +36,7 @@ export enum Months {
 }
 
 export interface Semester {
+  [x: string]: any;
   id: string;
   name: AcademicSemesterName;
   year: string;
@@ -47,6 +48,7 @@ export interface Semester {
 }
 
 export interface Department {
+  [x: string]: any;
   id: string;
   name: string;
   code: string;
