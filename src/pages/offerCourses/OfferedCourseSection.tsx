@@ -68,10 +68,10 @@ const OfferedCourseSection = () => {
       setQueryParams([]);
     }
   }, [debouncedSearchQuery]);
-  const isAlreadyEnrolled = (courseId: string) => {
+  const isAlreadyEnrolled = (courseId: any) => {
     return (
       enrolledCourses?.some(
-        (enrollment) => enrollment?.offeredCourse?._id === courseId
+        (enrollment: any) => enrollment?.offeredCourse?._id === courseId
       ) || false
     );
   };

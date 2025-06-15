@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
+
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { motion, AnimatePresence } from "framer-motion";
@@ -21,7 +21,7 @@ import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 
 const MyCourses = () => {
-  const { toast } = useToast();
+  // const { toast } = useToast();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
@@ -30,7 +30,7 @@ const MyCourses = () => {
 
   const enrolledCourses = data?.data || [];
 
-  const filteredCourses = enrolledCourses.filter((course) => {
+  const filteredCourses = enrolledCourses.filter((course: any) => {
     const title = String(course.course?.title ?? "").toLowerCase();
     const code = String(course.course?.code ?? "").toLowerCase();
     const query = debouncedSearchQuery.toLowerCase();
@@ -163,7 +163,7 @@ const MyCourses = () => {
             transition={{ duration: 0.3 }}
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
-            {filteredCourses.map((course) => (
+            {filteredCourses.map((course: any) => (
               <motion.div
                 key={course._id}
                 whileHover={{ y: -5 }}

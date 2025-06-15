@@ -61,7 +61,7 @@ const StudentCourseList = () => {
 
   const isEnrolled = (courseId: string) => {
     return enrolledCourses?.some(
-      (enrollment) => enrollment.courseId === courseId
+      (enrollment: any) => enrollment.courseId === courseId
     );
   };
 
@@ -150,7 +150,7 @@ const StudentCourseList = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredCourses?.map((course: ICourse) => (
+                {filteredCourses?.map((course: any) => (
                   <TableRow key={course.id}>
                     <TableCell>{course.title}</TableCell>
                     <TableCell>{course.code}</TableCell>
@@ -162,7 +162,7 @@ const StudentCourseList = () => {
                           <Info className="h-4 w-4 text-muted-foreground" />
                           <span className="text-sm">
                             {course.preRequisiteCourses
-                              .map((prereq) => prereq.course)
+                              .map((prereq: any) => prereq.course)
                               .join(", ")}
                           </span>
                         </div>
