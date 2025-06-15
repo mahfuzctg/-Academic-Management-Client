@@ -1,27 +1,127 @@
 import { motion } from "framer-motion";
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { useGetDepartmentsQuery } from "@/redux/features/academic/academicApi";
+  useAddFacultyMutation,
+  useGetFacultiesQuery,
+  useUpdateFacultyMutation,
+} from "@/redux/features/academic/academicApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Users, GraduationCap } from "lucide-react";
+import { Building2, Users, GraduationCap, Plus, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { useGetAllAcademicFacultiesQuery } from "@/redux/features/academic/academicFacultyApi";
 
-const AcademicDepartment = () => {
+const facultySchema = z.object({
+  name: z.string().min(1, "Faculty name is required"),
+  description: z.string().optional(),
+});
+
+type FacultyFormData = z.infer<typeof facultySchema>;
+
+const AcademicFaculty = () => {
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: departments, isLoading } = useGetDepartmentsQuery(undefined);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedFaculty, setSelectedFaculty] = useState<any>(null);
 
-  const filteredDepartments = departments?.data?.filter((department) =>
-    department.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const [createFaculty] = useAddFacultyMutation();
+  const [updateFaculty] = useUpdateFacultyMutation();
+  const {
+    data: faculties,
+    isLoading,
+    isError,
+  } = useGetAllAcademicFacultiesQuery({});
+
+  const form = useForm<FacultyFormData>({
+    resolver: zodResolver(facultySchema),
+    defaultValues: {
+      name: "",
+      description: "",
+    },
+  });
+
+  const filteredFaculties = faculties?.data?.filter((faculty: any) =>
+    faculty.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+  const onSubmit = async (data: FacultyFormData) => {
+    try {
+      if (selectedFaculty) {
+        await updateFaculty({
+          id: selectedFaculty._id,
+          data,
+        }).unwrap();
+        toast({
+          title: "Success",
+          description: "Faculty updated successfully",
+        });
+      } else {
+        await createFaculty(data).unwrap();
+        toast({
+          title: "Success",
+          description: "Faculty added successfully",
+        });
+      }
+      setIsDialogOpen(false);
+      form.reset();
+      setSelectedFaculty(null);
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error?.data?.message || "Failed to save faculty data",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleEdit = (faculty: any) => {
+    setSelectedFaculty(faculty);
+    form.reset({
+      name: faculty.name || "",
+      description: faculty.description || "",
+    });
+    setIsDialogOpen(true);
+  };
+
+  if (isError) {
+    return (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="flex flex-col items-center justify-center min-h-[400px] gap-4"
+      >
+        <div className="bg-red-100 p-6 rounded-full">
+          <Building2 className="h-10 w-10 text-red-500" />
+        </div>
+        <p className="text-red-500 text-center max-w-md text-lg">
+          Failed to load faculties. Please refresh the page or try again later.
+        </p>
+        <Button variant="outline" onClick={() => window.location.reload()}>
+          Retry
+        </Button>
+      </motion.div>
+    );
+  }
 
   return (
     <motion.div
@@ -32,18 +132,82 @@ const AcademicDepartment = () => {
     >
       <Card className="border-border/50">
         <CardHeader className="space-y-4">
-          <div className="flex flex-col gap-2">
-            <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-              Academic Departments
-            </CardTitle>
-            <p className="text-muted-foreground">
-              Explore our academic departments and their programs
-            </p>
+          <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
+              <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
+                Academic Faculties
+              </CardTitle>
+              <p className="text-muted-foreground">
+                Manage academic faculties and their departments
+              </p>
+            </div>
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogTrigger asChild>
+                <Button
+                  onClick={() => {
+                    setSelectedFaculty(null);
+                    form.reset();
+                  }}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Faculty
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>
+                    {selectedFaculty ? "Edit Faculty" : "Add New Faculty"}
+                  </DialogTitle>
+                </DialogHeader>
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(onSubmit)}
+                    className="space-y-4"
+                  >
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Faculty Name</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Enter faculty name"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="description"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Description</FormLabel>
+                          <FormControl>
+                            <Input
+                              placeholder="Enter faculty description"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full">
+                      {selectedFaculty ? "Update Faculty" : "Add Faculty"}
+                    </Button>
+                  </form>
+                </Form>
+              </DialogContent>
+            </Dialog>
           </div>
           <div className="relative max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
-              placeholder="Search departments..."
+              placeholder="Search faculties..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -57,9 +221,9 @@ const AcademicDepartment = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredDepartments?.map((department: any) => (
+              {filteredFaculties?.map((faculty: any) => (
                 <motion.div
-                  key={department._id}
+                  key={faculty._id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   whileHover={{ y: -5 }}
@@ -70,35 +234,44 @@ const AcademicDepartment = () => {
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
                           <h3 className="text-xl font-semibold">
-                            {department.name}
+                            {faculty.name}
                           </h3>
                           <p className="text-sm text-muted-foreground">
-                            {department.academicFaculty?.name}
+                            {faculty.description}
                           </p>
                         </div>
-                        <div className="bg-primary/10 p-2 rounded-lg">
-                          <Building2 className="h-6 w-6 text-primary" />
+                        <div className="flex gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEdit(faculty)}
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <div className="bg-primary/10 p-2 rounded-lg">
+                            <Building2 className="h-6 w-6 text-primary" />
+                          </div>
                         </div>
                       </div>
 
                       <div className="space-y-3 pt-2">
-                        {department.description && (
-                          <p className="text-sm text-muted-foreground">
-                            {department.description}
-                          </p>
-                        )}
-                        
                         <div className="flex flex-wrap gap-2">
-                          {department.headOfDepartment && (
-                            <Badge variant="secondary" className="bg-blue-50 text-blue-700 hover:bg-blue-100">
+                          {faculty.totalDepartments > 0 && (
+                            <Badge
+                              variant="secondary"
+                              className="bg-blue-50 text-blue-700 hover:bg-blue-100"
+                            >
                               <Users className="w-3 h-3 mr-1" />
-                              Head: {department.headOfDepartment}
+                              {faculty.totalDepartments} Departments
                             </Badge>
                           )}
-                          {department.totalStudents && (
-                            <Badge variant="secondary" className="bg-green-50 text-green-700 hover:bg-green-100">
+                          {faculty.totalStudents > 0 && (
+                            <Badge
+                              variant="secondary"
+                              className="bg-green-50 text-green-700 hover:bg-green-100"
+                            >
                               <GraduationCap className="w-3 h-3 mr-1" />
-                              {department.totalStudents} Students
+                              {faculty.totalStudents} Students
                             </Badge>
                           )}
                         </div>
@@ -110,7 +283,7 @@ const AcademicDepartment = () => {
             </div>
           )}
 
-          {!isLoading && filteredDepartments?.length === 0 && (
+          {!isLoading && filteredFaculties?.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -120,7 +293,7 @@ const AcademicDepartment = () => {
                 <Building2 className="h-10 w-10 text-blue-600" />
               </div>
               <p className="text-center text-lg text-muted-foreground">
-                No departments found matching your search.
+                No faculties found matching your search.
               </p>
             </motion.div>
           )}
@@ -130,5 +303,4 @@ const AcademicDepartment = () => {
   );
 };
 
-export default AcademicDepartment;
-
+export default AcademicFaculty;

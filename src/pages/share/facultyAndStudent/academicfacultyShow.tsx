@@ -11,7 +11,7 @@ const AcademicFacultyShow = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const { data: faculties, isLoading } = useGetAllAcademicFacultiesQuery({});
 
-  const filteredFaculties = faculties?.data?.filter((faculty) =>
+  const filteredFaculties = faculties?.data?.filter((faculty: any) =>
     faculty.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
