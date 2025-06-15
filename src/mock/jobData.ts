@@ -1,6 +1,6 @@
-import type { Job } from "@/types/job";
+import type { JobFormData } from "@/types/job";
 
-export const mockJobs: Job[] = [
+export const mockJobs: JobFormData[] = [
   {
     id: "1",
     title: "Frontend Developer",

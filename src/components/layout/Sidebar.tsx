@@ -3,13 +3,13 @@ import { cn } from "@/lib/utils";
 import { type TUser, useCurrentToken } from "@/redux/features/auth/authSlice";
 import { useAppSelector } from "@/redux/hooks";
 import { verifyToken } from "@/utils/verifyToken";
+import { Home } from "lucide-react";
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home } from "lucide-react";
 
 import { adminPaths } from "@/routes/admin.routes";
-import { studentPaths } from "@/routes/student.routes";
 import { facultyPaths } from "@/routes/faculty.routes";
+import { studentPaths } from "@/routes/student.routes";
 const roleBasedPaths = {
   admin: adminPaths,
   superAdmin: adminPaths,
@@ -30,7 +30,7 @@ const Sidebar: React.FC = () => {
   return (
     <>
       {/* Desktop Sidebar */}
-      <aside className="w-64 h-screen border-r text-primary sticky top-0 hidden lg:flex flex-col justify-between">
+      <aside className="w-64 h-screen overflow-auto border-r text-primary sticky top-0 hidden lg:flex flex-col justify-between">
         <div>
           <div className="p-4 text-xl font-bold text-primary border-b">
             AcademicMS

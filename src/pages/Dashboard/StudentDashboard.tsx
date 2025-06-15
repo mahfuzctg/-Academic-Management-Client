@@ -1,8 +1,8 @@
 // import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { BookOpen, Calendar, Award, Bell } from "lucide-react";
+import { Award, Bell, BookOpen, Calendar } from "lucide-react";
 
 export function StudentDashboard() {
   // Mock data - in a real app, this would come from your API/Redux store

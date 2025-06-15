@@ -43,16 +43,19 @@ export interface JobListing {
 }
 
 export interface JobFormData {
+  id: string;
   title: string;
   description: string;
   requirements: string[];
   type: JobType;
-  location: JobLocation;
-  salary?: {
-    min: number;
-    max: number;
-    currency: string;
-  };
+  location: JobLocation | any;
+  salary?:
+    | {
+        min: number;
+        max: number;
+        currency: string;
+      }
+    | any;
   deadline: string;
   department?: string;
 }

@@ -1,24 +1,3 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { useAppSelector } from "@/redux/hooks";
-import { selectCurrentUser } from "@/redux/features/auth/authSlice";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  useGetAllJobsQuery,
-  useDeleteJobMutation,
-  useUpdateJobStatusMutation,
-} from "@/redux/features/job/jobApi";
-import type { JobListing, JobType, JobFilters } from "@/types/job";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +8,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -37,16 +18,35 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { toast } from "sonner";
-import { MoreVertical, Pencil, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { mockJobs } from "@/mock/jobData";
+import { selectCurrentUser } from "@/redux/features/auth/authSlice";
+import {
+  useDeleteJobMutation,
+  useGetAllJobsQuery,
+  useUpdateJobStatusMutation,
+} from "@/redux/features/job/jobApi";
+import { useAppSelector } from "@/redux/hooks";
+import type { JobFilters, JobListing, JobType } from "@/types/job";
+import { motion } from "framer-motion";
+import { MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 
 const JobManagement = () => {
   const user = useAppSelector(selectCurrentUser);
@@ -60,11 +60,13 @@ const JobManagement = () => {
   const [deleteJob] = useDeleteJobMutation();
   const [updateJobStatus] = useUpdateJobStatusMutation();
 
-  const jobs = jobsData?.data || [];
+  const jobs: JobListing[] = jobsData?.data?.length
+    ? jobsData.data
+    : (mockJobs as JobListing[]);
   const isAdmin = user?.role === "admin";
 
   const canManageJob = (job: JobListing) => {
-    return isAdmin || job.employer.id === user?.id;
+    return isAdmin || job.employer?.id === user?.id;
   };
 
   const filteredJobs = jobs.filter((job: JobListing) => {
@@ -228,19 +230,19 @@ const JobManagement = () => {
 
           <div className="grid gap-6">
             {filteredJobs.map((job: JobListing) => (
-              <Card key={job.id}>
+              <Card key={job?.id ?? Math.random()}>
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
-                      <CardTitle className="text-xl">{job.title}</CardTitle>
+                      <CardTitle className="text-xl">
+                        {job.title ?? "Untitled Job"}
+                      </CardTitle>
                       <p className="text-muted-foreground mt-1">
-                        {job.employer.name} • {job.location.type}
+                        {job.employer?.name ?? "Unknown Employer"} •{" "}
+                        {job.location?.type ?? "Unknown Location"}
                       </p>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className={getTypeColor(job.type)}>
-                        {job.type.charAt(0).toUpperCase() + job.type.slice(1)}
-                      </Badge>
                       {canManageJob(job) && (
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
@@ -253,7 +255,7 @@ const JobManagement = () => {
                               <>
                                 <DropdownMenuItem
                                   onClick={() =>
-                                    handleUpdateStatus(job.id, "open")
+                                    handleUpdateStatus(job?.id ?? "", "open")
                                   }
                                   disabled={job.status === "open"}
                                 >
@@ -261,7 +263,10 @@ const JobManagement = () => {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() =>
-                                    handleUpdateStatus(job.id, "in-progress")
+                                    handleUpdateStatus(
+                                      job?.id ?? "",
+                                      "in-progress"
+                                    )
                                   }
                                   disabled={job.status === "in-progress"}
                                 >
@@ -269,7 +274,7 @@ const JobManagement = () => {
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={() =>
-                                    handleUpdateStatus(job.id, "closed")
+                                    handleUpdateStatus(job?.id ?? "", "closed")
                                   }
                                   disabled={job.status === "closed"}
                                 >
@@ -303,14 +308,18 @@ const JobManagement = () => {
                   <div className="space-y-4">
                     <div>
                       <h4 className="font-medium mb-2">Description</h4>
-                      <p className="text-muted-foreground">{job.description}</p>
+                      <p className="text-muted-foreground">
+                        {job.description ?? "No description available."}
+                      </p>
                     </div>
                     <div>
                       <h4 className="font-medium mb-2">Requirements</h4>
                       <ul className="list-disc list-inside text-muted-foreground">
-                        {job.requirements.map((req: string, index: number) => (
-                          <li key={index}>{req}</li>
-                        ))}
+                        {(job.requirements ?? []).map(
+                          (req: string, index: number) => (
+                            <li key={index}>{req}</li>
+                          )
+                        )}
                       </ul>
                     </div>
                     {job.salary && (
@@ -324,8 +333,8 @@ const JobManagement = () => {
                     )}
                     <div className="flex justify-between items-center pt-4">
                       <div className="text-sm text-muted-foreground">
-                        <p>Posted: {job.postedAt}</p>
-                        <p>Deadline: {job.deadline}</p>
+                        <p>Posted: {job.postedAt ?? "N/A"}</p>
+                        <p>Deadline: {job.deadline ?? "N/A"}</p>
                       </div>
                       <div className="flex gap-2">
                         <Button variant="outline">View Details</Button>
