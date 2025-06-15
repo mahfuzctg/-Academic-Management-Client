@@ -38,6 +38,7 @@ const studentSchema = z.object({
       .min(1, "Last name is required")
       .max(20, "Name cannot be more than 20 characters"),
   }),
+  profileImg: z.any().optional(),
   gender: z.enum(["male", "female", "other"]),
   dateOfBirth: z.string(),
   email: z.string().email("Invalid email address"),
@@ -95,6 +96,7 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
       bloodGroup: "A+",
       presentAddress: "",
       permanentAddress: "",
+
       guardian: {
         fatherName: "",
         fatherOccupation: "",
@@ -128,8 +130,14 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
         permanentAddress: student.permanentAddress,
         guardian: student.guardian,
         localGuardian: student.localGuardian,
-        admissionSemester: student.admissionSemester,
-        academicDepartment: student.academicDepartment,
+        admissionSemester:
+          typeof student.admissionSemester === "string"
+            ? student.admissionSemester
+            : student.admissionSemester?.name,
+        academicDepartment:
+          typeof student.academicDepartment === "string"
+            ? student.academicDepartment
+            : student.academicDepartment?.name,
       });
     }
   }, [student, form]);

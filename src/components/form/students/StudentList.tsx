@@ -252,7 +252,8 @@ const StudentList = ({
                         : student.academicDepartment}
                     </TableCell>
                     <TableCell>
-                      {typeof student.admissionSemester === "object"
+                      {typeof student.admissionSemester === "object" &&
+                      student.admissionSemester
                         ? `${student.admissionSemester.name} ${student.admissionSemester.year}`
                         : student.admissionSemester}
                     </TableCell>

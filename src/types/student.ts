@@ -59,15 +59,30 @@ export type TStudent = {
   email: string;
   contactNo: string;
   emergencyContactNo: string;
-  bloogGroup: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+  bloodGroup: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
   presentAddress: string;
   permanentAddress: string;
   guardian: TGuardian;
   localGuardian: TLocalGuardian;
-  profileImg?: string;
-  admissionSemester: string;
-  academicDepartment: string;
-  academicFaculty?: string;
+  profileImg?: File;
+  admissionSemester:
+    | string
+    | {
+        name: string;
+        year: string;
+      };
+  academicDepartment:
+    | string
+    | {
+        name: string;
+        code: string;
+      };
+  academicFaculty?:
+    | string
+    | {
+        name: string;
+        code: string;
+      };
   isDeleted?: boolean;
 };
 
