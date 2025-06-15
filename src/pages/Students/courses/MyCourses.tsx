@@ -220,7 +220,7 @@ const MyCourses = () => {
                       <div className="flex items-center gap-2">
                         <CalendarDays className="h-4 w-4 text-primary" />
                         <div className="flex flex-wrap gap-1">
-                          {course.offeredCourse?.days?.map((day) => (
+                          {course.offeredCourse?.days?.map((day: any) => (
                             <Badge
                               key={day}
                               variant="secondary"
