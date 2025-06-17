@@ -1,5 +1,5 @@
 import { motion } from "framer-motion";
-import { useGetSemestersQuery } from "@/redux/features/academic/academicApi";
+import { useGetAllAcademicSemestersQuery } from "@/redux/features/academic/academicSemesterApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Calendar, Clock, CalendarDays } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -9,10 +9,10 @@ import { useState } from "react";
 
 const AcademicSemesterShow = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: semesters, isLoading } = useGetSemestersQuery(undefined);
+  const { data: semesters, isLoading } = useGetAllAcademicSemestersQuery([]);
 
   const filteredSemesters = semesters?.data?.filter(
-    (semester) =>
+    (semester: any) =>
       semester.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       semester.year.toString().includes(searchQuery)
   );
@@ -51,7 +51,7 @@ const AcademicSemesterShow = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredSemesters?.map((semester) => (
+              {filteredSemesters?.map((semester: any) => (
                 <motion.div
                   key={semester.id}
                   initial={{ opacity: 0, y: 20 }}

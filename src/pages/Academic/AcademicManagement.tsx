@@ -1,8 +1,6 @@
 import { useState } from "react";
 import {
   useGetAcademicYearsQuery,
-  useGetSemestersQuery,
-  useGetDepartmentsQuery,
   useGetProgramsQuery,
   useGetAcademicStatsQuery,
 } from "@/redux/features/academic/academicApi";
@@ -11,21 +9,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlusCircle, Search } from "lucide-react";
-import { format } from "date-fns";
-import { AcademicSemesterName, Months } from "@/types/academic";
+
+import { useGetAllAcademicSemestersQuery } from "@/redux/features/academic/academicSemesterApi";
+import { useGetAllAcademicDepartmentsQuery } from "@/redux/features/academic/academicDepartmentApi";
 
 const AcademicManagement = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const { data: academicYears, isLoading: isLoadingYears } =
-    useGetAcademicYearsQuery(undefined);
+    useGetAcademicYearsQuery([]);
   const { data: semesters, isLoading: isLoadingSemesters } =
-    useGetSemestersQuery(undefined);
+    useGetAllAcademicSemestersQuery([]);
   const { data: departments, isLoading: isLoadingDepartments } =
-    useGetDepartmentsQuery(undefined);
-  const { data: programs, isLoading: isLoadingPrograms } =
-    useGetProgramsQuery(undefined);
-  const { data: stats, isLoading: isLoadingStats } =
-    useGetAcademicStatsQuery(undefined);
+    useGetAllAcademicDepartmentsQuery([]);
+  const { data: programs, isLoading: isLoadingPrograms } = useGetProgramsQuery(
+    []
+  );
+  const { data: stats, isLoading: isLoadingStats } = useGetAcademicStatsQuery(
+    []
+  );
 
   const isLoading =
     isLoadingYears ||

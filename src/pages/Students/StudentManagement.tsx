@@ -16,11 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useGetSemestersQuery,
-  useGetDepartmentsQuery,
-} from "@/redux/features/academic/academicApi";
+
 import { Pagination } from "@/components/ui/pagination";
+import { useGetAllAcademicSemestersQuery } from "@/redux/features/academic/academicSemesterApi";
+import { useGetAllAcademicDepartmentsQuery } from "@/redux/features/academic/academicDepartmentApi";
 
 export default function StudentManagement() {
   const { toast } = useToast();
@@ -34,8 +33,8 @@ export default function StudentManagement() {
   const [selectedDepartment, setSelectedDepartment] = useState<string>("");
 
   // Get semesters and departments for filters
-  const { data: semestersData } = useGetSemestersQuery(undefined);
-  const { data: departmentsData } = useGetDepartmentsQuery(undefined);
+  const { data: semestersData } = useGetAllAcademicSemestersQuery([]);
+  const { data: departmentsData } = useGetAllAcademicDepartmentsQuery([]);
 
   // Prepare query parameters
   const queryParams = [
@@ -123,7 +122,7 @@ export default function StudentManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Semesters</SelectItem>
-                  {semestersData?.data?.map((semester) => (
+                  {semestersData?.data?.map((semester: any) => (
                     <SelectItem key={semester._id} value={semester._id}>
                       {semester.name} {semester.year}
                     </SelectItem>
@@ -140,7 +139,7 @@ export default function StudentManagement() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Departments</SelectItem>
-                  {departmentsData?.data?.map((department) => (
+                  {departmentsData?.data?.map((department: any) => (
                     <SelectItem key={department._id} value={department._id}>
                       {department.name}
                     </SelectItem>

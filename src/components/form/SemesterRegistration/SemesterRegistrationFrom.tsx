@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useGetSemestersQuery } from "@/redux/features/academic/academicApi";
+import { useGetAllAcademicSemestersQuery } from "@/redux/features/academic/academicSemesterApi";
 import {
   useCreateSemesterRegistrationMutation,
   useDeleteSemesterRegistrationMutation,
@@ -93,9 +93,9 @@ const SemesterRegistrationFrom = ({
   const [createSemesterRegistration] = useCreateSemesterRegistrationMutation();
   const [updateSemesterRegistration] = useUpdateSemesterRegistrationMutation();
   const [deleteSemesterRegistration] = useDeleteSemesterRegistrationMutation();
-  const { data: academicSemesters } = useGetSemestersQuery(undefined);
+  const { data: academicSemesters } = useGetAllAcademicSemestersQuery([]);
   const { data: semesterRegistrations, isLoading } =
-    useGetAllSemesterRegistrationsQuery(undefined);
+    useGetAllSemesterRegistrationsQuery([]);
 
   const form = useForm<TSemesterRegistration>({
     resolver: zodResolver(semesterRegistrationSchema),

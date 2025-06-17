@@ -20,11 +20,9 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
 import { FormFields } from "@/components/ui/form-field";
-import {
-  useGetSemestersQuery,
-  useGetDepartmentsQuery,
-} from "@/redux/features/academic/academicApi";
+import { useGetAllAcademicSemestersQuery } from "@/redux/features/academic/academicSemesterApi";
 import { Input } from "@/components/ui/input";
+import { useGetAllAcademicDepartmentsQuery } from "@/redux/features/academic/academicDepartmentApi";
 
 const studentSchema = z.object({
   name: z.object({
@@ -77,8 +75,8 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
   const [createStudent] = useCreateStudentMutation();
   const [updateStudent] = useUpdateStudentMutation();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-  const { data: semestersData } = useGetSemestersQuery(undefined);
-  const { data: departmentsData } = useGetDepartmentsQuery(undefined);
+  const { data: semestersData } = useGetAllAcademicSemestersQuery([]);
+  const { data: departmentsData } = useGetAllAcademicDepartmentsQuery([]);
 
   const form = useForm<StudentFormData>({
     resolver: zodResolver(studentSchema),
@@ -199,13 +197,13 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
 
   // Convert data to select options format
   const semesterOptions =
-    semestersData?.data?.map((semester) => ({
+    semestersData?.data?.map((semester: any) => ({
       label: `${semester.name} ${semester.year}`,
       value: semester._id,
     })) || [];
 
   const departmentOptions =
-    departmentsData?.data?.map((department) => ({
+    departmentsData?.data?.map((department: any) => ({
       label: department.name,
       value: department._id,
     })) || [];

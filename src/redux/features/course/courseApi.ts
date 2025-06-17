@@ -1,13 +1,25 @@
 import { baseApi } from "@/redux/api/baseApi";
 import type { ICourse } from "@/types/course";
+import type { TQueryParam } from "@/types/global";
 
 export const courseApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllCourses: builder.query<ICourse[], void>({
-      query: () => ({
-        url: "/courses",
-        method: "GET",
-      }),
+    getAllCourses: builder.query<ICourse[], TQueryParam[] | undefined>({
+      query: (args) => {
+        const params = new URLSearchParams();
+
+        if (args) {
+          args.forEach((item) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+
+        return {
+          url: "/courses",
+          method: "GET",
+          params,
+        };
+      },
       transformResponse: (response: unknown) => {
         const res = response as { data: ICourse[] };
         return res.data;

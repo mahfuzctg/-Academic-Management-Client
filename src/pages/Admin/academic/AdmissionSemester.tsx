@@ -22,14 +22,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form } from "@/components/ui/form";
 import {
-  useAddSemesterMutation,
-  useGetSemestersQuery,
-  useUpdateSemesterMutation,
-} from "@/redux/features/academic/academicApi";
+  useCreateAcademicSemesterMutation,
+  useGetAllAcademicSemestersQuery,
+  useUpdateAcademicSemesterMutation,
+} from "@/redux/features/academic/academicSemesterApi";
 import {
   type Semester,
   type CreateSemesterDto,
-  type UpdateSemesterDto,
   AcademicSemesterName,
   AcademicSemesterCode,
   Months,
@@ -61,9 +60,9 @@ const AdmissionSemester = () => {
     null
   );
 
-  const { data: semesters, isLoading } = useGetSemestersQuery(undefined);
-  const [addSemester] = useAddSemesterMutation();
-  const [updateSemester] = useUpdateSemesterMutation();
+  const { data: semesters, isLoading } = useGetAllAcademicSemestersQuery([]);
+  const [addSemester] = useCreateAcademicSemesterMutation();
+  const [updateSemester] = useUpdateAcademicSemesterMutation();
 
   const form = useForm<SemesterFormData>({
     resolver: zodResolver(semesterSchema),
@@ -229,7 +228,7 @@ const AdmissionSemester = () => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {semesters?.data?.map((semester) => (
+            {semesters?.data?.map((semester: any) => (
               <TableRow key={semester.id}>
                 <TableCell>{semester.name}</TableCell>
                 <TableCell>{semester.year}</TableCell>

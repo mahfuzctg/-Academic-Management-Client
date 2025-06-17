@@ -29,9 +29,8 @@ import type { Days } from "@/types/offeredCourse";
 import { useGetAllAcademicFacultiesQuery } from "@/redux/features/academic/academicFacultyApi";
 import { useGetAllCoursesQuery } from "@/redux/features/course/courseApi";
 import { useGetAllFacultiesQuery } from "@/redux/features/faculty/facultyApi";
-import { useGetDepartmentsQuery } from "@/redux/features/academic/academicApi";
+import { useGetAllAcademicDepartmentsQuery } from "@/redux/features/academic/academicDepartmentApi";
 import { useGetAllSemesterRegistrationsQuery } from "@/redux/features/semesterRegistration/semesterRegistrationApi";
-// -;
 
 // Validation Schema
 const timeStringSchema = z.string().refine(
@@ -103,14 +102,14 @@ const OfferedCourseForm = ({
   const [updateOfferedCourse] = useUpdateOfferedCourseMutation();
 
   // Fetch data for select inputs
-  const { data: semesterRegistrations } =
-    useGetAllSemesterRegistrationsQuery(undefined);
-  const { data: academicFaculties } =
-    useGetAllAcademicFacultiesQuery(undefined);
-  const { data: academicDepartments } = useGetDepartmentsQuery(undefined);
+  const { data: semesterRegistrations } = useGetAllSemesterRegistrationsQuery(
+    []
+  );
+  const { data: academicFaculties } = useGetAllAcademicFacultiesQuery([]);
+  const { data: academicDepartments } = useGetAllAcademicDepartmentsQuery([]);
 
-  const { data: courses } = useGetAllCoursesQuery();
-  const { data: faculties } = useGetAllFacultiesQuery(undefined);
+  const { data: courses } = useGetAllCoursesQuery([]);
+  const { data: faculties } = useGetAllFacultiesQuery([]);
 
   const form = useForm<TOfferedCourseFormValues>({
     resolver: zodResolver(createOfferedCourseValidationSchema),
@@ -190,7 +189,7 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {semesterRegistrations?.data?.map((semester) => (
+                        {semesterRegistrations?.data?.map((semester: any) => (
                           <SelectItem key={semester._id} value={semester._id}>
                             {semester.academicSemester.name}
                           </SelectItem>
@@ -220,7 +219,7 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {academicFaculties?.data?.map((faculty) => (
+                        {academicFaculties?.data?.map((faculty: any) => (
                           <SelectItem key={faculty._id} value={faculty._id}>
                             {faculty.name}
                           </SelectItem>
@@ -253,7 +252,7 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {academicDepartments?.data?.map((department) => (
+                        {academicDepartments?.data?.map((department: any) => (
                           <SelectItem
                             key={department._id}
                             value={department._id}
@@ -286,7 +285,7 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {courses?.map((course) => (
+                        {courses?.map((course: any) => (
                           <SelectItem key={course._id} value={course._id}>
                             {course.title} ({course.code})
                           </SelectItem>
@@ -318,7 +317,7 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {faculties?.data?.map((faculty) => (
+                        {faculties?.data?.map((faculty: any) => (
                           <SelectItem key={faculty._id} value={faculty._id}>
                             {faculty.fullName}
                           </SelectItem>
