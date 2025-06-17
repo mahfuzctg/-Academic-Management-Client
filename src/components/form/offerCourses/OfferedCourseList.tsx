@@ -52,7 +52,7 @@ const OfferedCourseList = () => {
     if (debouncedSearchQuery) {
       setQueryParams([
         {
-          name: "searchTerm",
+          name: "search",
           value: debouncedSearchQuery,
         },
       ]);

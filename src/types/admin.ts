@@ -1,4 +1,6 @@
-import type { TUser } from "./user";
+// import type { TUser } from "./user";
+
+import type { TUser } from "./userManagement.type";
 
 export interface SystemStats {
   totalStudents: number;
@@ -61,7 +63,7 @@ export type TAdmin = {
   email: string;
   contactNo: string;
   emergencyContactNo: string;
-  bloogGroup: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
+  bloodGroup: "A+" | "A-" | "B+" | "B-" | "AB+" | "AB-" | "O+" | "O-";
   presentAddress: string;
   permanentAddress: string;
   profileImg?: string;
