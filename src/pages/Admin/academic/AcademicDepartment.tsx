@@ -62,7 +62,7 @@ const AcademicDepartment = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   const { data: departments, isLoading } = useGetDepartmentsQuery(undefined);
-  const { data: faculties } = useGetAllAcademicFacultiesQuery({});
+  const { data: faculties } = useGetAllAcademicFacultiesQuery([]);
   const [addDepartment] = useAddDepartmentMutation();
   const [updateDepartment] = useUpdateDepartmentMutation();
   const [deleteDepartment] = useDeleteDepartmentMutation();

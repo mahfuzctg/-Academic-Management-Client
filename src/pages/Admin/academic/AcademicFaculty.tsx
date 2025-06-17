@@ -1,16 +1,23 @@
+"use client";
+
 import { motion } from "framer-motion";
+import { useState, useEffect } from "react";
 import {
-  useAddFacultyMutation,
-  useGetFacultiesQuery,
-  useUpdateFacultyMutation,
-} from "@/redux/features/academic/academicApi";
+  Building2,
+  Users,
+  GraduationCap,
+  Plus,
+  Pencil,
+  Search,
+} from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Users, GraduationCap, Plus, Pencil } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import {
   Dialog,
@@ -19,9 +26,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import {
   Form,
   FormControl,
@@ -30,7 +34,12 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { useGetAllAcademicFacultiesQuery } from "@/redux/features/academic/academicFacultyApi";
+
+import {
+  useCreateAcademicFacultyMutation,
+  useGetAllAcademicFacultiesQuery,
+  useUpdateAcademicFacultyMutation,
+} from "@/redux/features/academic/academicFacultyApi";
 
 const facultySchema = z.object({
   name: z.string().min(1, "Faculty name is required"),
@@ -44,14 +53,17 @@ const AcademicFaculty = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedFaculty, setSelectedFaculty] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 9;
 
-  const [createFaculty] = useAddFacultyMutation();
-  const [updateFaculty] = useUpdateFacultyMutation();
+  const [addFaculty] = useCreateAcademicFacultyMutation();
+  const [updateFaculty] = useUpdateAcademicFacultyMutation();
+
   const {
     data: faculties,
     isLoading,
     isError,
-  } = useGetAllAcademicFacultiesQuery({});
+  } = useGetAllAcademicFacultiesQuery([]);
 
   const form = useForm<FacultyFormData>({
     resolver: zodResolver(facultySchema),
@@ -61,9 +73,22 @@ const AcademicFaculty = () => {
     },
   });
 
+  // Reset to first page on search
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
   const filteredFaculties = faculties?.data?.filter((faculty: any) =>
     faculty.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const total = filteredFaculties?.length || 0;
+  const totalPages = Math.ceil(total / itemsPerPage);
+  const paginatedFaculties = filteredFaculties?.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const onSubmit = async (data: FacultyFormData) => {
     try {
       if (selectedFaculty) {
@@ -76,7 +101,8 @@ const AcademicFaculty = () => {
           description: "Faculty updated successfully",
         });
       } else {
-        await createFaculty(data).unwrap();
+        await addFaculty(data).unwrap();
+        console.log("ok");
         toast({
           title: "Success",
           description: "Faculty added successfully",
@@ -132,7 +158,7 @@ const AcademicFaculty = () => {
     >
       <Card className="border-border/50">
         <CardHeader className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex flex-col gap-2">
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
                 Academic Faculties
@@ -204,7 +230,7 @@ const AcademicFaculty = () => {
               </DialogContent>
             </Dialog>
           </div>
-          <div className="relative max-w-md">
+          <div className="relative max-w-md mt-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
               placeholder="Search faculties..."
@@ -220,67 +246,93 @@ const AcademicFaculty = () => {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredFaculties?.map((faculty: any) => (
-                <motion.div
-                  key={faculty._id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  whileHover={{ y: -5 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
-                >
-                  <Card className="h-full hover:shadow-lg transition-all duration-200 border-border/50 hover:border-primary/30">
-                    <CardContent className="p-6 space-y-4">
-                      <div className="flex items-start justify-between">
-                        <div className="space-y-1">
-                          <h3 className="text-xl font-semibold">
-                            {faculty.name}
-                          </h3>
-                          <p className="text-sm text-muted-foreground">
-                            {faculty.description}
-                          </p>
-                        </div>
-                        <div className="flex gap-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleEdit(faculty)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <div className="bg-primary/10 p-2 rounded-lg">
-                            <Building2 className="h-6 w-6 text-primary" />
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {paginatedFaculties?.map((faculty: any) => (
+                  <motion.div
+                    key={faculty._id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    whileHover={{ y: -5 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  >
+                    <Card className="h-full hover:shadow-lg transition-all duration-200 border-border/50 hover:border-primary/30">
+                      <CardContent className="p-6 space-y-4">
+                        <div className="flex items-start justify-between">
+                          <div className="space-y-1">
+                            <h3 className="text-xl font-semibold">
+                              {faculty.name}
+                            </h3>
+                            <p className="text-sm text-muted-foreground">
+                              {faculty.description}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleEdit(faculty)}
+                            >
+                              <Pencil className="h-4 w-4" />
+                            </Button>
+                            <div className="bg-primary/10 p-2 rounded-lg">
+                              <Building2 className="h-6 w-6 text-primary" />
+                            </div>
                           </div>
                         </div>
-                      </div>
-
-                      <div className="space-y-3 pt-2">
-                        <div className="flex flex-wrap gap-2">
-                          {faculty.totalDepartments > 0 && (
-                            <Badge
-                              variant="secondary"
-                              className="bg-blue-50 text-blue-700 hover:bg-blue-100"
-                            >
-                              <Users className="w-3 h-3 mr-1" />
-                              {faculty.totalDepartments} Departments
-                            </Badge>
-                          )}
-                          {faculty.totalStudents > 0 && (
-                            <Badge
-                              variant="secondary"
-                              className="bg-green-50 text-green-700 hover:bg-green-100"
-                            >
-                              <GraduationCap className="w-3 h-3 mr-1" />
-                              {faculty.totalStudents} Students
-                            </Badge>
-                          )}
+                        <div className="space-y-3 pt-2">
+                          <div className="flex flex-wrap gap-2">
+                            {faculty.totalDepartments > 0 && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-blue-50 text-blue-700 hover:bg-blue-100"
+                              >
+                                <Users className="w-3 h-3 mr-1" />
+                                {faculty.totalDepartments} Departments
+                              </Badge>
+                            )}
+                            {faculty.totalStudents > 0 && (
+                              <Badge
+                                variant="secondary"
+                                className="bg-green-50 text-green-700 hover:bg-green-100"
+                              >
+                                <GraduationCap className="w-3 h-3 mr-1" />
+                                {faculty.totalStudents} Students
+                              </Badge>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </motion.div>
-              ))}
-            </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </div>
+
+              {/* Pagination */}
+              {total > itemsPerPage && (
+                <div className="flex justify-center mt-6 gap-2 items-center">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((prev) => prev - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-muted-foreground text-sm">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={currentPage === totalPages}
+                    onClick={() => setCurrentPage((prev) => prev + 1)}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
+            </>
           )}
 
           {!isLoading && filteredFaculties?.length === 0 && (
