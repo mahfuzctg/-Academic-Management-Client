@@ -14,6 +14,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { adminPaths } from "./admin.routes";
 import { studentPaths } from "./student.routes";
 
+import BlogsSection from "@/pages/blogs/BlogsSection";
 import { NotFoundPage } from "@/pages/NotFound";
 import StudentCourseList from "@/pages/Students/courses/StudentCourseList";
 import { facultyPaths } from "./faculty.routes";
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: "jobs",
         element: <JobManagement />,
+      },
+      {
+        path: "blogs",
+        element: <BlogsSection />,
       },
       {
         path: "login",
