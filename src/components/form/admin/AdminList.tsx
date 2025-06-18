@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -43,46 +43,40 @@ import {
   useDeleteAdminMutation,
 } from "@/redux/features/admin/adminApi";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDebounce } from "@/hooks/useDebounce";
 
-interface AdminListProps {
-  onEdit: (admin: TAdmin) => void;
-  admins: TAdmin[];
-  isLoading: boolean;
-}
-
-const AdminList = ({ onEdit, admins, isLoading }: AdminListProps) => {
+const AdminList = ({ onEdit }: { onEdit: (admin: TAdmin) => void }) => {
   const dispatch = useDispatch();
-  const [filters, setFilters] = useState({
-    search: "",
-    designation: "",
-  });
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [adminToDelete, setAdminToDelete] = useState<TAdmin | null>(null);
-  const [filteredAdmins, setFilteredAdmins] = useState<TAdmin[]>([]);
 
-  const { data: adminsData, isLoading: apiLoading } =
-    useGetAllAdminsQuery(filters);
+  const [filters, setFilters] = useState({
+    searchTerm: "",
+  });
+
+  const debouncedSearchTerm = useDebounce(filters.searchTerm, 500);
+
+  // Prepare queryParams array for API
+  const queryParams = useMemo(() => {
+    const params: { name: string; value: string }[] = [];
+
+    if (debouncedSearchTerm) {
+      params.push({ name: "searchTerm", value: debouncedSearchTerm });
+    }
+
+    return params;
+  }, [debouncedSearchTerm]);
+
+  const { data: adminsData, isLoading } = useGetAllAdminsQuery(queryParams);
   const [deleteAdmin] = useDeleteAdminMutation();
 
-  useEffect(() => {
-    if (adminsData?.data) {
-      setFilteredAdmins(adminsData.data);
-    }
-  }, [adminsData]);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [adminToDelete, setAdminToDelete] = useState<TAdmin | null>(null);
 
   const handleSearch = (value: string) => {
-    setFilters((prev) => ({ ...prev, search: value }));
-  };
-
-  const handleDesignationChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, designation: value }));
+    setFilters((prev) => ({ ...prev, searchTerm: value }));
   };
 
   const handleClearFilters = () => {
-    setFilters({
-      search: "",
-      designation: "",
-    });
+    setFilters({ searchTerm: "" });
   };
 
   const handleEdit = (admin: TAdmin) => {
@@ -102,7 +96,7 @@ const AdminList = ({ onEdit, admins, isLoading }: AdminListProps) => {
         setDeleteDialogOpen(false);
         setAdminToDelete(null);
       } catch (error) {
-        console.error("Failed to delete admin:", error);
+        console.error("Delete failed", error);
       }
     }
   };
@@ -110,8 +104,6 @@ const AdminList = ({ onEdit, admins, isLoading }: AdminListProps) => {
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-10 w-full" />
         <Skeleton className="h-10 w-full" />
@@ -130,31 +122,17 @@ const AdminList = ({ onEdit, admins, isLoading }: AdminListProps) => {
           <CardTitle>Admin Management</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col gap-4 mb-6">
-            <div className="flex flex-wrap gap-4">
-              <Input
-                placeholder="Search admins..."
-                value={filters.search}
-                onChange={(e) => handleSearch(e.target.value)}
-                className="max-w-sm"
-              />
-              <Select
-                value={filters.designation}
-                onValueChange={handleDesignationChange}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Designation" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="super-admin">Super Admin</SelectItem>
-                  <SelectItem value="admin">Admin</SelectItem>
-                  <SelectItem value="moderator">Moderator</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button variant="outline" onClick={handleClearFilters}>
-                Clear Filters
-              </Button>
-            </div>
+          <div className="flex flex-wrap gap-4 mb-6">
+            <Input
+              placeholder="Search admins..."
+              value={filters.searchTerm}
+              onChange={(e) => handleSearch(e.target.value)}
+              className="max-w-sm"
+            />
+
+            <Button variant="outline" onClick={handleClearFilters}>
+              Clear Search
+            </Button>
           </div>
 
           <div className="rounded-md border">
@@ -166,11 +144,11 @@ const AdminList = ({ onEdit, admins, isLoading }: AdminListProps) => {
                   <TableHead>Designation</TableHead>
                   <TableHead>Email</TableHead>
                   <TableHead>Contact</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {admins.map((admin: TAdmin) => (
+                {adminsData?.data?.map((admin: TAdmin) => (
                   <TableRow key={admin.id}>
                     <TableCell>
                       {`${admin.name.firstName} ${
@@ -190,16 +168,13 @@ const AdminList = ({ onEdit, admins, isLoading }: AdminListProps) => {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleEdit(admin)}
-                            className="cursor-pointer"
-                          >
+                          <DropdownMenuItem onClick={() => handleEdit(admin)}>
                             <Pencil className="mr-2 h-4 w-4" />
                             Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleDelete(admin)}
-                            className="cursor-pointer text-red-600"
+                            className="text-red-600"
                           >
                             <Trash2 className="mr-2 h-4 w-4" />
                             Delete
@@ -220,8 +195,7 @@ const AdminList = ({ onEdit, admins, isLoading }: AdminListProps) => {
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              admin record.
+              This will permanently delete this admin.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
