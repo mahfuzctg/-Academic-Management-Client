@@ -4,8 +4,8 @@ import DashboardLayout from "@/components/layout/DashboardLayout";
 import HomeLayout from "@/components/layout/HomeLayout";
 import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import { ThemeProvider } from "@/components/theme-provider";
-import Home from "@/pages/Home";
 import InstructorManagement from "@/pages/facultys/facultyManagement";
+import Home from "@/pages/Home";
 import JobManagement from "@/pages/Jobs/JobManagement";
 import LoginForm from "@/pages/Login";
 import RegisterForm from "@/pages/Register";
@@ -13,10 +13,11 @@ import { routeGenerator } from "@/utils/routesGenerator";
 import { createBrowserRouter } from "react-router-dom";
 import { adminPaths } from "./admin.routes";
 import { studentPaths } from "./student.routes";
+
+import BlogsSection from "@/pages/blogs/BlogsSection";
+import { NotFoundPage } from "@/pages/NotFound";
 import StudentCourseList from "@/pages/Students/courses/StudentCourseList";
 import { facultyPaths } from "./faculty.routes";
-import { NotFoundPage } from "@/pages/NotFound";
-import OfferedCourseSection from "@/pages/offerCourses/OfferedCourseSection";
 
 const router = createBrowserRouter([
   {
@@ -33,7 +34,7 @@ const router = createBrowserRouter([
       },
       {
         path: "courses",
-        element: <OfferedCourseSection />,
+        element: <StudentCourseList />,
       },
       {
         path: "instructors",
@@ -42,6 +43,10 @@ const router = createBrowserRouter([
       {
         path: "jobs",
         element: <JobManagement />,
+      },
+      {
+        path: "blogs",
+        element: <BlogsSection />,
       },
       {
         path: "login",

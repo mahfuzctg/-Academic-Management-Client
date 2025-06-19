@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useDispatch } from "react-redux";
 import { motion } from "framer-motion";
 import { Input } from "@/components/ui/input";
@@ -37,86 +37,80 @@ import {
 } from "@/components/ui/alert-dialog";
 import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 import { setSelectedStudent } from "@/redux/features/studentSlice";
-import type { TStudent } from "@/types/student";
 import {
   useGetAllStudentsQuery,
   useDeleteStudentMutation,
 } from "@/redux/features/student/studentApi";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useDebounce } from "@/hooks/useDebounce";
+import type { TStudent } from "@/types/student";
+import { useGetAllAcademicDepartmentsQuery } from "@/redux/features/academic/academicDepartmentApi";
+import { useGetAllFacultiesQuery } from "@/redux/features/faculty/facultyApi";
+import { useGetAllSemestersQuery } from "@/redux/features/admin/academicManagement.api";
+import { Pagination } from "@/components/ui/pagination";
 
 interface StudentListProps {
   onEdit: (student: TStudent) => void;
-  semesterId?: string;
-  departmentId?: string;
-  students: TStudent[];
-  isLoading: boolean;
 }
 
-const StudentList = ({
-  onEdit,
-  semesterId,
-  departmentId,
-  students,
-  isLoading,
-}: StudentListProps) => {
+const StudentList = ({ onEdit }: StudentListProps) => {
   const dispatch = useDispatch();
+
   const [filters, setFilters] = useState({
-    search: "",
+    searchTerm: "",
     department: "",
     faculty: "",
     semester: "",
   });
+
+  const [page, setPage] = useState(1);
+  const limit = 10;
+
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [studentToDelete, setStudentToDelete] = useState<TStudent | null>(null);
-  const [filteredStudents, setFilteredStudents] = useState<TStudent[]>([]);
 
-  const { data: studentsData, isLoading: apiLoading } =
-    useGetAllStudentsQuery(filters);
+  const debouncedSearchTerm = useDebounce(filters.searchTerm, 500);
+
+  const queryParams = useMemo(() => {
+    const params: { name: string; value: string }[] = [
+      { name: "page", value: page.toString() },
+      { name: "limit", value: limit.toString() },
+    ];
+    if (debouncedSearchTerm)
+      params.push({ name: "searchTerm", value: debouncedSearchTerm });
+    if (filters.department)
+      params.push({ name: "department", value: filters.department });
+    if (filters.faculty)
+      params.push({ name: "faculty", value: filters.faculty });
+    if (filters.semester)
+      params.push({ name: "semester", value: filters.semester });
+    return params;
+  }, [debouncedSearchTerm, filters, page]);
+
+  const { data: studentsData, isLoading } = useGetAllStudentsQuery(queryParams);
+  const { data: departments } = useGetAllAcademicDepartmentsQuery([]);
+  const { data: faculties } = useGetAllFacultiesQuery([]);
+  const { data: semesters } = useGetAllSemestersQuery([]);
+
   const [deleteStudent] = useDeleteStudentMutation();
 
-  useEffect(() => {
-    if (studentsData?.data) {
-      let filtered = [...studentsData.data];
-
-      if (semesterId) {
-        filtered = filtered.filter(
-          (student) => student.admissionSemester === semesterId
-        );
-      }
-
-      if (departmentId) {
-        filtered = filtered.filter(
-          (student) => student.academicDepartment === departmentId
-        );
-      }
-
-      setFilteredStudents(filtered);
-    }
-  }, [studentsData, semesterId, departmentId]);
-
-  const handleSearch = (value: string) => {
-    setFilters((prev) => ({ ...prev, search: value }));
-  };
-
+  const handleSearch = (value: string) =>
+    setFilters((prev) => ({ ...prev, searchTerm: value }));
   const handleDepartmentChange = (value: string) => {
     setFilters((prev) => ({ ...prev, department: value }));
+    setPage(1);
   };
-
   const handleFacultyChange = (value: string) => {
     setFilters((prev) => ({ ...prev, faculty: value }));
+    setPage(1);
   };
-
   const handleSemesterChange = (value: string) => {
     setFilters((prev) => ({ ...prev, semester: value }));
+    setPage(1);
   };
-
   const handleClearFilters = () => {
-    setFilters({
-      search: "",
-      department: "",
-      faculty: "",
-      semester: "",
-    });
+    setFilters({ searchTerm: "", department: "", faculty: "", semester: "" });
+    setPage(1);
   };
 
   const handleEdit = (student: TStudent) => {
@@ -144,15 +138,18 @@ const StudentList = ({
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
-        <Skeleton className="h-10 w-full" />
+        {Array.from({ length: 5 }).map((_, idx) => (
+          <Skeleton key={idx} className="h-10 w-full" />
+        ))}
       </div>
     );
   }
 
+  const students = studentsData?.data || [];
+  console.log({ semesters });
+  console.log({ faculties });
+  console.log({ departments });
+  console.log(students);
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -168,11 +165,11 @@ const StudentList = ({
             <div className="flex flex-wrap gap-4">
               <Input
                 placeholder="Search students..."
-                value={filters.search}
+                value={filters.searchTerm}
                 onChange={(e) => handleSearch(e.target.value)}
                 className="max-w-sm"
               />
-              <Select
+              {/* <Select
                 value={filters.department}
                 onValueChange={handleDepartmentChange}
               >
@@ -180,12 +177,11 @@ const StudentList = ({
                   <SelectValue placeholder="Department" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="computer-science">
-                    Computer Science
-                  </SelectItem>
-                  <SelectItem value="engineering">Engineering</SelectItem>
-                  <SelectItem value="business">Business</SelectItem>
-                  <SelectItem value="arts">Arts</SelectItem>
+                  {departments?.data?.map((dept: any) => (
+                    <SelectItem key={dept._id} value={dept._id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Select
@@ -196,10 +192,11 @@ const StudentList = ({
                   <SelectValue placeholder="Faculty" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="science">Science</SelectItem>
-                  <SelectItem value="engineering">Engineering</SelectItem>
-                  <SelectItem value="business">Business</SelectItem>
-                  <SelectItem value="arts">Arts</SelectItem>
+                  {faculties?.data?.map((faculty: any) => (
+                    <SelectItem key={faculty._id} value={faculty._id}>
+                      {faculty.name}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
               <Select
@@ -210,10 +207,14 @@ const StudentList = ({
                   <SelectValue placeholder="Semester" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="fall2023">Fall 2023</SelectItem>
-                  <SelectItem value="spring2024">Spring 2024</SelectItem>
+                  {semesters?.data?.map((sem: any) => (
+                    <SelectItem key={sem._id} value={sem._id}>
+                      {sem.name} {sem.year}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
-              </Select>
+              </Select> */}
+
               <Button variant="outline" onClick={handleClearFilters}>
                 Clear Filters
               </Button>
@@ -234,28 +235,29 @@ const StudentList = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {students.map((student: TStudent) => (
+                {students?.map((student: TStudent) => (
                   <TableRow key={student.id}>
                     <TableCell>
-                      {`${student.name.firstName} ${
-                        student.name.middleName
-                          ? student.name.middleName + " "
-                          : ""
-                      }${student.name.lastName}`}
+                      {`${student?.name?.firstName || ""} ${
+                        student?.name?.middleName || ""
+                      } ${student?.name?.lastName || ""}`.trim()}
                     </TableCell>
                     <TableCell>{student.id}</TableCell>
                     <TableCell>{student.email}</TableCell>
                     <TableCell>{student.contactNo}</TableCell>
                     <TableCell>
-                      {typeof student.academicDepartment === "object"
-                        ? student.academicDepartment.name
-                        : student.academicDepartment}
+                      {typeof student?.academicDepartment === "object"
+                        ? student?.academicDepartment?.name || "N/A"
+                        : student?.academicDepartment || "N/A"}
                     </TableCell>
                     <TableCell>
-                      {typeof student.admissionSemester === "object" &&
-                      student.admissionSemester
-                        ? `${student.admissionSemester.name} ${student.admissionSemester.year}`
-                        : student.admissionSemester}
+                      {typeof student?.admissionSemester === "object" &&
+                      student?.admissionSemester?.name &&
+                      student?.admissionSemester?.year
+                        ? `${student?.admissionSemester?.name} ${student?.admissionSemester?.year}`
+                        : typeof student?.admissionSemester === "string"
+                        ? student?.admissionSemester
+                        : "N/A"}
                     </TableCell>
                     <TableCell>
                       <DropdownMenu>
@@ -270,15 +272,13 @@ const StudentList = ({
                             onClick={() => handleEdit(student)}
                             className="cursor-pointer"
                           >
-                            <Pencil className="mr-2 h-4 w-4" />
-                            Edit
+                            <Pencil className="mr-2 h-4 w-4" /> Edit
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={() => handleDelete(student)}
                             className="cursor-pointer text-red-600"
                           >
-                            <Trash2 className="mr-2 h-4 w-4" />
-                            Delete
+                            <Trash2 className="mr-2 h-4 w-4" /> Delete
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -288,6 +288,16 @@ const StudentList = ({
               </TableBody>
             </Table>
           </div>
+
+          {studentsData?.meta && (
+            <div className="mt-4 flex justify-center">
+              <Pagination
+                currentPage={page}
+                totalPages={Math.ceil(studentsData.meta.total / limit)}
+                onPageChange={setPage}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 

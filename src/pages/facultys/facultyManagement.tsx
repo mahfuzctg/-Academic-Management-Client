@@ -2,7 +2,7 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Plus, MoreHorizontal, Pencil, Trash2 } from "lucide-react";
+import { Plus, MoreHorizontal, Pencil, Trash2, BookOpen } from "lucide-react";
 
 import type { TFaculty } from "@/types/faculty";
 
@@ -291,7 +291,15 @@ export default function FacultyManagement() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
+                              onClick={() => handleViewSubjects(faculty)}
+                              className="cursor-pointer"
+                            >
+                              <BookOpen className="mr-2 h-4 w-4" />
+                              View Subjects
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
                               onClick={() => handleEdit(faculty)}
+                              className="cursor-pointer"
                             >
                               <Pencil className="mr-2 h-4 w-4" />
                               Edit
