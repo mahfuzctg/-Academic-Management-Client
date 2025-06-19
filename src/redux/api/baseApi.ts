@@ -13,11 +13,7 @@ import type { RootState } from "../store";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: "http://localhost:5000/api/v1",
-<<<<<<< HEAD
   // baseUrl: "https://academic-management-server-ten.vercel.app/api/v1",
-=======
-  // baseUrl: "https://academic-management-one.vercel.app/api/v1",
->>>>>>> ca15fcaa2d6e26aae0aac72aa0d96ea4de332548
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
