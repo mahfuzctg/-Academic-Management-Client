@@ -6,6 +6,9 @@ export interface IBlog {
   link?: string;
   profileImage?: string;
   bannerImage?: string;
-  createdAt?: string; // add createdAt date string
-  updatedAt?: string; // optional updatedAt too
+  createdAt?: string;
+  updatedAt?: string;
+
+  votes?: number;
+  votedBy?: string[] | any;
 }
