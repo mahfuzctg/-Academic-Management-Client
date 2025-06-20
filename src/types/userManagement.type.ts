@@ -14,7 +14,7 @@ export interface TStudent {
   email: string;
   contactNo: string;
   emergencyContactNo: string;
-  bloogGroup: string;
+  bloodGroup: string;
   presentAddress: string;
   permanentAddress: string;
   guardian: TGuardian;
@@ -28,7 +28,7 @@ export interface TStudent {
 }
 
 export type TUser = {
-  _id: string;
+  _id: string | any;
   id: string;
   email: string;
   needsPasswordChange: boolean;

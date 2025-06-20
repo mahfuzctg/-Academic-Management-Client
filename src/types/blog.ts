@@ -8,7 +8,7 @@ export interface IBlog {
   bannerImage?: string;
   createdAt?: string;
   updatedAt?: string;
-
+  createdBy: string;
   votes?: number;
   votedBy?: string[] | any;
 }

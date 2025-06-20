@@ -1,5 +1,7 @@
+import CreateBlogModal from "@/components/modal/CreateBlogModal";
 import EditBlogModal from "@/components/modal/EditBlogModal";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
@@ -10,7 +12,13 @@ import {
 } from "@/redux/features/blog/blogApi";
 import { useAppSelector } from "@/redux/hooks";
 import type { IBlog } from "@/types/blog";
-import { CheckCircle, Pencil, ThumbsUp, Trash2 } from "lucide-react";
+import {
+  CheckCircle,
+  Pencil,
+  PlusCircle,
+  ThumbsUp,
+  Trash2,
+} from "lucide-react";
 import React, { useState } from "react";
 
 const formatDate = (dateStr: string) => {
@@ -30,6 +38,7 @@ const MyBlogSection: React.FC = () => {
   const { toast } = useToast();
   const [votedBlogIds, setVotedBlogIds] = useState<string[]>([]);
   const [editingBlog, setEditingBlog] = useState<IBlog | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const handleVote = async (blogId: string) => {
     try {
@@ -68,9 +77,16 @@ const MyBlogSection: React.FC = () => {
 
   return (
     <div className="p-4 sm:p-6">
-      <h2 className="text-2xl font-semibold mb-4 text-gray-800 dark:text-white">
-        My Blogs
-      </h2>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
+          My Blogs
+        </h2>
+        <Button onClick={() => setCreateModalOpen(true)} className="gap-2">
+          <PlusCircle className="w-5 h-5" />
+          Create New Blog
+        </Button>
+      </div>
+
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
         {isLoading ? (
           Array.from({ length: 3 }).map((_, i) => (
@@ -187,10 +203,19 @@ const MyBlogSection: React.FC = () => {
         )}
       </div>
 
+      {/* Edit Modal */}
       {editingBlog && (
         <EditBlogModal
           blog={editingBlog}
           onClose={() => setEditingBlog(null)}
+        />
+      )}
+
+      {/* Create Modal */}
+      {createModalOpen && (
+        <CreateBlogModal
+          open={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
         />
       )}
     </div>
