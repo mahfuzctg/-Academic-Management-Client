@@ -44,7 +44,7 @@ const StudentCourseList = () => {
   const [selectedCourse, setSelectedCourse] = useState<ICourse | null>(null);
   const [enrollDialogOpen, setEnrollDialogOpen] = useState(false);
 
-  const { data: courses, isLoading, isError } = useGetAllCoursesQuery();
+  const { data: courses, isLoading, isError } = useGetAllCoursesQuery([]);
   const { data: enrolledCourses } = useGetEnrolledCoursesQuery();
   const [enrollInCourse] = useEnrollInCourseMutation();
 

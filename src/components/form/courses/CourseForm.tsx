@@ -109,8 +109,9 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
     defaultValues: {
       title: course?.title || "",
       prefix: course?.prefix || "",
-      code: typeof course?.code === "number" ? course.code : 0,
-      credits: typeof course?.credits === "number" ? course.credits : 0,
+      code: typeof course?.code === "number" ? String(course.code) : "",
+      credits:
+        typeof course?.credits === "number" ? String(course.credits) : "",
       preRequisiteCourses: course?.preRequisiteCourses || [],
       isDeleted: course?.isDeleted || false,
       subjectType: course?.subjectType || "Theory",
@@ -118,8 +119,8 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
       availableSubjects: course?.availableSubjects || [],
       subjectsToSelect:
         typeof course?.subjectsToSelect === "number"
-          ? course.subjectsToSelect
-          : 0,
+          ? String(course.subjectsToSelect)
+          : "0",
     },
   });
 
