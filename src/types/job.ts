@@ -119,17 +119,19 @@ export interface FreelancerFilters {
 }
 
 export interface IJob {
-  _id?: string;
+  _id?: string | any;
+  id: number | any;
   title: string;
   category: string;
   description: string;
   bannerImage?: string;
-  profileImage?: string;
+  profileImage?: string | any;
   author: string;
   minPrice: number;
   maxPrice: number;
   deadline: string;
   vacancy: number;
+  appliedBy: string | any;
   workMode: "remote" | "onsite" | "hybrid";
   createdAt?: string;
   updatedAt?: string;

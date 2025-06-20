@@ -52,6 +52,15 @@ export const jobApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["jobs"],
     }),
+
+    // New applyJob mutation
+    applyJob: builder.mutation<IJob, string>({
+      query: (jobId) => ({
+        url: `/jobs/${jobId}/apply`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["jobs"],
+    }),
   }),
   overrideExisting: true,
 });
@@ -62,4 +71,5 @@ export const {
   useCreateJobMutation,
   useUpdateJobMutation,
   useDeleteJobMutation,
+  useApplyJobMutation,
 } = jobApi;
