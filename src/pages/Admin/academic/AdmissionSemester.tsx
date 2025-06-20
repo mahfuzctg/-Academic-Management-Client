@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,21 +34,50 @@ import {
   Months,
 } from "@/types/academic";
 import { FormFields } from "@/components/ui/form-field";
+import { useGetAllAcademicYearsQuery } from "@/redux/features/academic/academicYearApi";
+
+export type TAcademicSemesterName =
+  | "1st Semester"
+  | "2nd Semester"
+  | "3rd Semester"
+  | "4th Semester"
+  | "5th Semester"
+  | "6th Semester"
+  | "7th Semester"
+  | "8th Semester";
+export type TAcademicSemesterCode =
+  | "01"
+  | "02"
+  | "03"
+  | "04"
+  | "05"
+  | "06"
+  | "07"
+  | "08";
 
 const semesterSchema = z.object({
-  name: z.nativeEnum(AcademicSemesterName, {
-    required_error: "Semester name is required",
-  }),
-  year: z.string().min(1, "Year is required"),
-  code: z.nativeEnum(AcademicSemesterCode, {
+  name: z.enum(
+    [
+      "1st Semester",
+      "2nd Semester",
+      "3rd Semester",
+      "4th Semester",
+      "5th Semester",
+      "6th Semester",
+      "7th Semester",
+      "8th Semester",
+    ],
+    { required_error: "Semester name is required" }
+  ),
+  // year: z.string().min(1, "Year is required"),
+  code: z.enum(["01", "02", "03", "04", "05", "06", "07", "08"], {
     required_error: "Semester code is required",
   }),
   startMonth: z.nativeEnum(Months, {
     required_error: "Start month is required",
   }),
-  endMonth: z.nativeEnum(Months, {
-    required_error: "End month is required",
-  }),
+  endMonth: z.nativeEnum(Months, { required_error: "End month is required" }),
+  academicYear: z.string().min(1, "Academic Year is required"),
 });
 
 type SemesterFormData = z.infer<typeof semesterSchema>;
@@ -63,17 +92,45 @@ const AdmissionSemester = () => {
   const { data: semesters, isLoading } = useGetAllAcademicSemestersQuery([]);
   const [addSemester] = useCreateAcademicSemesterMutation();
   const [updateSemester] = useUpdateAcademicSemesterMutation();
+  const { data: academicYears } = useGetAllAcademicYearsQuery([]);
+
+  const semesterNameToCode: Record<string, string> = {
+    "1st Semester": "01",
+    "2nd Semester": "02",
+    "3rd Semester": "03",
+    "4th Semester": "04",
+    "5th Semester": "05",
+    "6th Semester": "06",
+    "7th Semester": "07",
+    "8th Semester": "08",
+  };
 
   const form = useForm<SemesterFormData>({
     resolver: zodResolver(semesterSchema),
     defaultValues: {
-      name: AcademicSemesterName.AUTUMN,
-      year: "",
-      code: AcademicSemesterCode.AUTUMN,
+      name: "1st Semester",
+      // year: "",
+      code: "01",
       startMonth: Months.JANUARY,
       endMonth: Months.DECEMBER,
+      academicYear: "",
     },
   });
+
+  // Automatically update code when name changes
+  useEffect(() => {
+    const subscription = form.watch((value, { name: changedField }) => {
+      if (changedField === "name" && value.name) {
+        // Ensure the value is a valid key of semesterNameToCode
+        const code =
+          semesterNameToCode[value.name as keyof typeof semesterNameToCode];
+        if (code) {
+          form.setValue("code", code as SemesterFormData["code"]);
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [form]);
 
   const onSubmit = async (data: SemesterFormData) => {
     try {
@@ -82,20 +139,27 @@ const AdmissionSemester = () => {
           id: selectedSemester._id,
           data: {
             name: data.name,
-            year: data.year,
+            // year: data.year,
             code: data.code,
             startMonth: data.startMonth,
             endMonth: data.endMonth,
+            academicYear: data.academicYear,
           },
         };
-        console.log(selectedSemester);
         await updateSemester(updateData).unwrap();
         toast({
           title: "Success",
           description: "Semester updated successfully",
         });
       } else {
-        const createData: CreateSemesterDto = data;
+        const createData: CreateSemesterDto = {
+          name: data.name as CreateSemesterDto["name"],
+          // year: data.year,
+          code: data.code as CreateSemesterDto["code"],
+          startMonth: data.startMonth,
+          endMonth: data.endMonth,
+          academicYear: data.academicYear,
+        };
         await addSemester(createData).unwrap();
         toast({
           title: "Success",
@@ -118,32 +182,50 @@ const AdmissionSemester = () => {
     setSelectedSemester(semester);
     form.reset({
       name: semester.name,
-      year: semester.year,
+      // year: semester.year,
       code: semester.code,
       startMonth: semester.startMonth,
       endMonth: semester.endMonth,
+      academicYear:
+        typeof semester.academicYear === "object" &&
+        semester.academicYear !== null
+          ? semester.academicYear._id
+          : semester.academicYear,
     });
     setIsOpen(true);
   };
 
-  // Convert enum values to select options format
-  const semesterNameOptions = Object.values(AcademicSemesterName).map(
-    (value) => ({
-      label: value,
-      value: value,
-    })
-  );
+  // Convert union values to select options format
+  const semesterNameOptions = [
+    "1st Semester",
+    "2nd Semester",
+    "3rd Semester",
+    "4th Semester",
+    "5th Semester",
+    "6th Semester",
+    "7th Semester",
+    "8th Semester",
+  ].map((value) => ({ label: value, value }));
 
-  const semesterCodeOptions = Object.values(AcademicSemesterCode).map(
-    (value) => ({
-      label: value,
-      value: value,
-    })
-  );
+  const semesterCodeOptions = [
+    "01",
+    "02",
+    "03",
+    "04",
+    "05",
+    "06",
+    "07",
+    "08",
+  ].map((value) => ({ label: value, value }));
 
   const monthOptions = Object.values(Months).map((value) => ({
     label: value,
     value: value,
+  }));
+
+  const academicYearOptions = academicYears?.data?.map((year: any) => ({
+    label: year.name,
+    value: year._id,
   }));
 
   return (
@@ -177,20 +259,23 @@ const AdmissionSemester = () => {
                   options={semesterNameOptions}
                   required
                 />
-                <FormFields.TextWithIcon
-                  form={form}
-                  name="year"
-                  label="Year"
-                  placeholder="e.g., 2024"
-                  required
-                />
                 <FormFields.Select
                   form={form}
                   name="code"
                   label="Semester Code"
                   options={semesterCodeOptions}
                   required
+                  disabled
                 />
+
+                <FormFields.Select
+                  form={form}
+                  name="academicYear"
+                  label="Academic Year"
+                  options={academicYearOptions}
+                  required
+                />
+
                 <FormFields.Select
                   form={form}
                   name="startMonth"
@@ -221,7 +306,8 @@ const AdmissionSemester = () => {
           <TableHeader>
             <TableRow>
               <TableHead>Semester Name</TableHead>
-              <TableHead>Year</TableHead>
+              <TableHead>Academic Year</TableHead>
+              {/* <TableHead>Year</TableHead> */}
               <TableHead>Code</TableHead>
               <TableHead>Start Month</TableHead>
               <TableHead>End Month</TableHead>
@@ -232,7 +318,13 @@ const AdmissionSemester = () => {
             {semesters?.data?.map((semester: any) => (
               <TableRow key={semester.id}>
                 <TableCell>{semester.name}</TableCell>
-                <TableCell>{semester.year}</TableCell>
+                <TableCell>
+                  {typeof semester.academicYear === "object" &&
+                  semester.academicYear !== null
+                    ? semester.academicYear.name
+                    : semester.academicYear || "N/A"}
+                </TableCell>
+                {/* <TableCell>{semester.year}</TableCell> */}
                 <TableCell>{semester.code}</TableCell>
                 <TableCell>{semester.startMonth}</TableCell>
                 <TableCell>{semester.endMonth}</TableCell>
