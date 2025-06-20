@@ -1,3 +1,4 @@
+import MyBlogSection from "@/pages/blogs/MyBlogSection";
 import { StudentDashboard } from "@/pages/Dashboard/StudentDashboard";
 import AcademicCourseShow from "@/pages/share/facultyAndStudent/academicCourseShow";
 import AcademicDepartmentShow from "@/pages/share/facultyAndStudent/academicDepartmentShow";
@@ -9,6 +10,7 @@ import MyCourses from "@/pages/Students/courses/MyCourses";
 import StudentProfile from "@/pages/Students/StudentProfile";
 import {
   Award,
+  Blocks,
   BookOpen,
   Building2,
   CalendarDays,
@@ -81,5 +83,11 @@ export const studentPaths = [
     path: "offered-course",
     element: <AcademicOfferedCourseShow />,
     icon: <BookOpen className="w-5 h-5" />,
+  },
+  {
+    name: "My Blog",
+    path: "my-blog",
+    element: <MyBlogSection />,
+    icon: <Blocks className="w-5 h-5" />,
   },
 ];

@@ -59,6 +59,8 @@ export default function NavBar() {
   const navLinks = getNavLinks(user?.role);
 
   console.log(user);
+  const role = user?.role?.toLowerCase(); // assuming roles are like "Admin", "Student", etc.
+  const profileLink = role ? `/${role}/profile` : "/profile"; // fallback
 
   const handleLogout = () => {
     dispatch(logout());
@@ -144,7 +146,13 @@ export default function NavBar() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="dark:bg-gray-800">
                     <DropdownMenuItem className="dark:text-gray-300">
-                      <Link to="/profile">Profile</Link>
+                      {/* <Link to="//profile">Profile</Link> */}
+                      <Link
+                        to={profileLink}
+                        className="text-sm text-primary hover:underline"
+                      >
+                        Profile
+                      </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem className="dark:text-gray-300">
                       <Link to="/settings">Settings</Link>
