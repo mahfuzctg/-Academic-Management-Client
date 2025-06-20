@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 export type TGrade = "A" | "B" | "C" | "D" | "F" | "NA";
 
 export type TEnrolledCourseMarks = {
@@ -7,18 +9,25 @@ export type TEnrolledCourseMarks = {
   finalTerm: number;
 };
 
+export type TSubjectMarks = {
+  subjectName: string;
+  marks: TEnrolledCourseMarks;
+};
+
 export type TEnrolledCourse = {
-  semesterRegistration: string;
-  academicSemester: string;
-  academicFaculty: string;
-  academicDepartment: string;
-  offeredCourse: string;
-  course: string;
-  student: string;
-  faculty: string;
+  semesterRegistration: Types.ObjectId;
+  academicSemester: Types.ObjectId;
+  academicFaculty: Types.ObjectId;
+  academicDepartment: Types.ObjectId;
+  offeredCourse: Types.ObjectId;
+  course: Types.ObjectId;
+  student: Types.ObjectId;
+  faculty: Types.ObjectId;
   isEnrolled: boolean;
   courseMarks: TEnrolledCourseMarks;
+  subjectMarks?: TSubjectMarks[];
   grade: TGrade;
   gradePoints: number;
-  isCompleted: boolean;
+  isPassed: boolean;
+  selectedSubjects?: string[];
 };

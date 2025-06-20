@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
-import { useGetSemestersQuery } from "@/redux/features/academic/academicApi";
+import { useGetAllAcademicSemestersQuery } from "@/redux/features/academic/academicSemesterApi";
 import {
   useCreateSemesterRegistrationMutation,
   useDeleteSemesterRegistrationMutation,
@@ -93,9 +93,10 @@ const SemesterRegistrationFrom = ({
   const [createSemesterRegistration] = useCreateSemesterRegistrationMutation();
   const [updateSemesterRegistration] = useUpdateSemesterRegistrationMutation();
   const [deleteSemesterRegistration] = useDeleteSemesterRegistrationMutation();
-  const { data: academicSemesters } = useGetSemestersQuery(undefined);
+  // const { data: academicSemesters } = useGetAllAcademicSemestersQuery([]);
+  const { data: academicSemesters } = useGetAllAcademicSemestersQuery([]);
   const { data: semesterRegistrations, isLoading } =
-    useGetAllSemesterRegistrationsQuery(undefined);
+    useGetAllSemesterRegistrationsQuery([]);
 
   const form = useForm<TSemesterRegistration>({
     resolver: zodResolver(semesterRegistrationSchema),
@@ -167,13 +168,27 @@ const SemesterRegistrationFrom = ({
     setIsOpen(true);
   };
 
-  const academicSemesterOptions = academicSemesters?.data?.map(
-    (semester: any) => ({
-      value: semester._id,
-      label: `${semester.name} ${semester.year}`,
-    })
-  );
+  // Fix: Ensure academicSemesters is loaded and has data, and handle possible API response shape
+  const academicSemesterOptions =
+    academicSemesters && Array.isArray(academicSemesters.data)
+      ? academicSemesters.data
+          .filter(
+            (semester: any) =>
+              semester &&
+              (semester.name || semester.name === "") &&
+              (semester.year || semester.year === "" || semester.academicYear)
+          )
+          .map((semester: any) => ({
+            value: semester._id,
+            // Try to show both name and year/academicYear for clarity
+            label: `${semester.name || ""} ${
+              semester.year || semester.academicYear || ""
+            }`.trim(),
+          }))
+      : [];
 
+  console.log("academicSemesterOptions", academicSemesters?.data);
+  console.log("academicSeme", academicSemesterOptions);
   const statusOptions = [
     { value: "UPCOMING", label: "Upcoming" },
     { value: "ONGOING", label: "Ongoing" },
@@ -181,7 +196,10 @@ const SemesterRegistrationFrom = ({
   ];
 
   const filteredRegistrations = semesterRegistrations?.data?.filter(
-    (registration) => !initialStatus || registration.status === initialStatus
+    (registration: any) =>
+      registration &&
+      registration.academicSemester &&
+      (!initialStatus || registration.status === initialStatus)
   );
 
   return (

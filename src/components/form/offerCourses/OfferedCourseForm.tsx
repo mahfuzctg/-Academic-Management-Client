@@ -29,9 +29,8 @@ import type { Days } from "@/types/offeredCourse";
 import { useGetAllAcademicFacultiesQuery } from "@/redux/features/academic/academicFacultyApi";
 import { useGetAllCoursesQuery } from "@/redux/features/course/courseApi";
 import { useGetAllFacultiesQuery } from "@/redux/features/faculty/facultyApi";
-import { useGetDepartmentsQuery } from "@/redux/features/academic/academicApi";
+import { useGetAllAcademicDepartmentsQuery } from "@/redux/features/academic/academicDepartmentApi";
 import { useGetAllSemesterRegistrationsQuery } from "@/redux/features/semesterRegistration/semesterRegistrationApi";
-// -;
 
 // Validation Schema
 const timeStringSchema = z.string().refine(
@@ -103,14 +102,14 @@ const OfferedCourseForm = ({
   const [updateOfferedCourse] = useUpdateOfferedCourseMutation();
 
   // Fetch data for select inputs
-  const { data: semesterRegistrations } =
-    useGetAllSemesterRegistrationsQuery(undefined);
-  const { data: academicFaculties } =
-    useGetAllAcademicFacultiesQuery(undefined);
-  const { data: academicDepartments } = useGetDepartmentsQuery(undefined);
+  const { data: semesterRegistrations } = useGetAllSemesterRegistrationsQuery(
+    []
+  );
+  const { data: academicFaculties } = useGetAllAcademicFacultiesQuery([]);
+  const { data: academicDepartments } = useGetAllAcademicDepartmentsQuery([]);
 
-  const { data: courses } = useGetAllCoursesQuery();
-  const { data: faculties } = useGetAllFacultiesQuery(undefined);
+  const { data: courses } = useGetAllCoursesQuery([]);
+  const { data: faculties } = useGetAllFacultiesQuery([]);
 
   const form = useForm<TOfferedCourseFormValues>({
     resolver: zodResolver(createOfferedCourseValidationSchema),
@@ -190,11 +189,16 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {semesterRegistrations?.data?.map((semester) => (
-                          <SelectItem key={semester._id} value={semester._id}>
-                            {semester.academicSemester.name}
-                          </SelectItem>
-                        ))}
+                        {semesterRegistrations?.data
+                          ?.filter(
+                            (semester: any) =>
+                              semester && semester.academicSemester
+                          )
+                          .map((semester: any) => (
+                            <SelectItem key={semester._id} value={semester._id}>
+                              {semester.academicSemester.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -220,11 +224,20 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {academicFaculties?.data?.map((faculty) => (
-                          <SelectItem key={faculty._id} value={faculty._id}>
-                            {faculty.name}
-                          </SelectItem>
-                        ))}
+                        {/* If academicFaculties or academicFaculties.data is not available, show a message */}
+                        {!academicFaculties?.data ? (
+                          <div className="px-2 py-1 text-sm text-muted-foreground">
+                            No faculty data found.
+                          </div>
+                        ) : (
+                          academicFaculties.data
+                            .filter((faculty: any) => faculty && faculty.name)
+                            .map((faculty: any) => (
+                              <SelectItem key={faculty._id} value={faculty._id}>
+                                {faculty.name}
+                              </SelectItem>
+                            ))
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -253,14 +266,18 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {academicDepartments?.data?.map((department) => (
-                          <SelectItem
-                            key={department._id}
-                            value={department._id}
-                          >
-                            {department.name}
-                          </SelectItem>
-                        ))}
+                        {academicDepartments?.data
+                          ?.filter(
+                            (department: any) => department && department.name
+                          )
+                          .map((department: any) => (
+                            <SelectItem
+                              key={department._id}
+                              value={department._id}
+                            >
+                              {department.name}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -286,11 +303,13 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {courses?.map((course) => (
-                          <SelectItem key={course._id} value={course._id}>
-                            {course.title} ({course.code})
-                          </SelectItem>
-                        ))}
+                        {courses
+                          ?.filter((course: any) => course && course.title)
+                          .map((course: any) => (
+                            <SelectItem key={course._id} value={course._id}>
+                              {course.title} ({course.code})
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -318,11 +337,15 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {faculties?.data?.map((faculty) => (
-                          <SelectItem key={faculty._id} value={faculty._id}>
-                            {faculty.fullName}
-                          </SelectItem>
-                        ))}
+                        {faculties?.data
+                          ?.filter(
+                            (faculty: any) => faculty && faculty.fullName
+                          )
+                          .map((faculty: any) => (
+                            <SelectItem key={faculty._id} value={faculty._id}>
+                              {faculty.fullName}
+                            </SelectItem>
+                          ))}
                       </SelectContent>
                     </Select>
                     <FormMessage />

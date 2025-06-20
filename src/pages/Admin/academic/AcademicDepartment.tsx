@@ -1,4 +1,6 @@
-import { useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import {
@@ -24,11 +26,11 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Form } from "@/components/ui/form";
 import {
-  useAddDepartmentMutation,
-  useGetDepartmentsQuery,
-  useUpdateDepartmentMutation,
-  useDeleteDepartmentMutation,
-} from "@/redux/features/academic/academicApi";
+  useGetAllAcademicDepartmentsQuery,
+  useCreateAcademicDepartmentMutation,
+  useUpdateAcademicDepartmentMutation,
+  useDeleteAcademicDepartmentMutation,
+} from "@/redux/features/academic/academicDepartmentApi";
 import { FormFields } from "@/components/ui/form-field";
 import { Pencil, Trash2, Plus, Search } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -44,12 +46,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useGetAllAcademicFacultiesQuery } from "@/redux/features/academic/academicFacultyApi";
 import { Input } from "@/components/ui/input";
+import { useGetAllAcademicYearsQuery } from "@/redux/features/academic/academicYearApi";
 
 const departmentSchema = z.object({
   name: z.string().min(1, "Department name is required"),
   academicFaculty: z.string().min(1, "Academic faculty is required"),
   description: z.string().optional(),
   headOfDepartment: z.string().optional(),
+  academicYear: z.string().min(1, "Academic year is required"),
 });
 
 type DepartmentFormData = z.infer<typeof departmentSchema>;
@@ -57,43 +61,68 @@ type DepartmentFormData = z.infer<typeof departmentSchema>;
 const AcademicDepartment = () => {
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+
   const [selectedDepartment, setSelectedDepartment] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
+  const [page, setPage] = useState(1);
+  const [limit] = useState(5);
 
-  const { data: departments, isLoading } = useGetDepartmentsQuery(undefined);
-  const { data: faculties } = useGetAllAcademicFacultiesQuery({});
-  const [addDepartment] = useAddDepartmentMutation();
-  const [updateDepartment] = useUpdateDepartmentMutation();
-  const [deleteDepartment] = useDeleteDepartmentMutation();
+  const { data: departments, isLoading } = useGetAllAcademicDepartmentsQuery(
+    []
+  );
+  const {
+    data: academicYears,
+    isLoading: isLoadingYears,
+    isError: isErrorYears,
+  } = useGetAllAcademicYearsQuery([]);
+  console.log("academicYears", academicYears);
+  console.log("departments", departments);
+  // Reset to first page on search
+  useEffect(() => {
+    setPage(1);
+  }, [searchQuery]);
+
+  const filteredDepartments = departments?.data?.filter((department: any) =>
+    department.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const total = filteredDepartments?.length || 0;
+  const totalPages = Math.ceil(total / limit);
+  const paginatedDepartments = filteredDepartments?.slice(
+    (page - 1) * limit,
+    page * limit
+  );
+
+  const { data: faculties } = useGetAllAcademicFacultiesQuery([]);
+  const [addDepartment] = useCreateAcademicDepartmentMutation();
+  const [updateDepartment] = useUpdateAcademicDepartmentMutation();
 
   const form = useForm<DepartmentFormData>({
     resolver: zodResolver(departmentSchema),
     defaultValues: {
       name: "",
       academicFaculty: "",
-      description: "",
-      headOfDepartment: "",
+      academicYear: "",
     },
   });
-
-  const filteredDepartments = departments?.data?.filter((department) =>
-    department.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   const onSubmit = async (data: DepartmentFormData) => {
     try {
       if (selectedDepartment) {
         await updateDepartment({
           id: selectedDepartment._id,
-          data,
+          data: {
+            ...data,
+          },
         }).unwrap();
         toast({
           title: "Success",
           description: "Department updated successfully",
         });
       } else {
-        await addDepartment(data).unwrap();
+        await addDepartment({
+          ...data,
+        }).unwrap();
         toast({
           title: "Success",
           description: "Department added successfully",
@@ -116,31 +145,12 @@ const AcademicDepartment = () => {
     form.reset({
       name: department.name,
       academicFaculty: department.academicFaculty._id,
-      description: department.description || "",
-      headOfDepartment: department.headOfDepartment || "",
+      academicYear: department.academicYear._id,
     });
     setIsOpen(true);
   };
 
-  const handleDelete = async () => {
-    if (!selectedDepartment) return;
-
-    try {
-      await deleteDepartment(selectedDepartment._id).unwrap();
-      toast({
-        title: "Success",
-        description: "Department deleted successfully",
-      });
-      setIsDeleteDialogOpen(false);
-      setSelectedDepartment(null);
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to delete department",
-        variant: "destructive",
-      });
-    }
-  };
+  const totalPage = Math.ceil((departments?.meta?.total || 0) / limit);
 
   return (
     <motion.div
@@ -193,29 +203,31 @@ const AcademicDepartment = () => {
                   />
                   <FormFields.Select
                     form={form}
+                    name="academicYear"
+                    label="Academic Year"
+                    placeholder="Select academic year"
+                    options={
+                      academicYears?.data?.map((year: any) => ({
+                        label: year.name,
+                        value: year._id,
+                      })) || []
+                    }
+                    required
+                  />
+                  <FormFields.Select
+                    form={form}
                     name="academicFaculty"
                     label="Academic Faculty"
                     placeholder="Select academic faculty"
                     options={
-                      faculties?.data?.map((faculty) => ({
+                      faculties?.data?.map((faculty: any) => ({
                         label: faculty.name,
                         value: faculty._id,
                       })) || []
                     }
                     required
                   />
-                  <FormFields.TextWithIcon
-                    form={form}
-                    name="description"
-                    label="Description"
-                    placeholder="Enter department description"
-                  />
-                  <FormFields.TextWithIcon
-                    form={form}
-                    name="headOfDepartment"
-                    label="Head of Department"
-                    placeholder="Enter head of department name"
-                  />
+
                   <DialogFooter>
                     <Button type="submit" className="w-full">
                       {selectedDepartment
@@ -234,7 +246,10 @@ const AcademicDepartment = () => {
             <Input
               placeholder="Search departments..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setPage(1);
+              }}
               className="pl-8"
             />
           </div>
@@ -249,22 +264,18 @@ const AcademicDepartment = () => {
                 <TableRow>
                   <TableHead>Department Name</TableHead>
                   <TableHead>Academic Faculty</TableHead>
-                  <TableHead>Head of Department</TableHead>
-                  <TableHead>Description</TableHead>
+
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredDepartments?.map((department: any) => (
+                {paginatedDepartments?.map((department: any) => (
                   <TableRow key={department._id}>
                     <TableCell className="font-medium">
-                      {department.name}
+                      {department?.name}
                     </TableCell>
-                    <TableCell>{department.academicFaculty?.name}</TableCell>
-                    <TableCell>{department.headOfDepartment || "-"}</TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {department.description || "-"}
-                    </TableCell>
+                    <TableCell>{department?.academicFaculty?.name}</TableCell>
+
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         <Button
@@ -274,16 +285,6 @@ const AcademicDepartment = () => {
                         >
                           <Pencil className="w-4 h-4" />
                         </Button>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          onClick={() => {
-                            setSelectedDepartment(department);
-                            setIsDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -292,38 +293,39 @@ const AcademicDepartment = () => {
             </Table>
           )}
 
-          {!isLoading && filteredDepartments?.length === 0 && (
+          {!isLoading && paginatedDepartments?.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               No departments found matching your search.
             </div>
           )}
+
+          {totalPages > 1 && (
+            <div className="flex justify-between items-center mt-4">
+              <p className="text-sm text-muted-foreground">
+                Page {page} of {totalPage}
+              </p>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page === 1}
+                  onClick={() => setPage((prev) => prev - 1)}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={page === totalPage}
+                  onClick={() => setPage((prev) => prev + 1)}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
-
-      <AlertDialog
-        open={isDeleteDialogOpen}
-        onOpenChange={setIsDeleteDialogOpen}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              department
-              {selectedDepartment && ` "${selectedDepartment.name}"`}.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </motion.div>
   );
 };

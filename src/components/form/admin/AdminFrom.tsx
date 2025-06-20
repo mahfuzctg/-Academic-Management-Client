@@ -40,10 +40,9 @@ const adminSchema = z.object({
   email: z.string().email("Invalid email address"),
   contactNo: z.string().min(1, "Contact number is required"),
   emergencyContactNo: z.string().min(1, "Emergency contact number is required"),
-  bloogGroup: z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]),
+  bloodGroup: z.enum(["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"]),
   presentAddress: z.string().min(1, "Present address is required"),
   permanentAddress: z.string().min(1, "Permanent address is required"),
-  profileImg: z.string().optional(),
 });
 
 type AdminFormData = z.infer<typeof adminSchema>;
@@ -58,7 +57,6 @@ const AdminForm = ({ admin, onSuccess }: AdminFormProps) => {
   const [createAdmin] = useCreateAdminMutation();
   const [updateAdmin] = useUpdateAdminMutation();
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
-
   const form = useForm<AdminFormData>({
     resolver: zodResolver(adminSchema),
     defaultValues: {
@@ -73,9 +71,10 @@ const AdminForm = ({ admin, onSuccess }: AdminFormProps) => {
       email: "",
       contactNo: "",
       emergencyContactNo: "",
-      bloogGroup: "A+",
+      bloodGroup: "A+",
       presentAddress: "",
       permanentAddress: "",
+      // profileImg: "", // Ensure this is a string
     },
   });
 
@@ -89,7 +88,7 @@ const AdminForm = ({ admin, onSuccess }: AdminFormProps) => {
         email: admin.email,
         contactNo: admin.contactNo,
         emergencyContactNo: admin.emergencyContactNo,
-        bloogGroup: admin.bloogGroup,
+        bloodGroup: admin.bloodGroup,
         presentAddress: admin.presentAddress,
         permanentAddress: admin.permanentAddress,
       });
@@ -97,14 +96,22 @@ const AdminForm = ({ admin, onSuccess }: AdminFormProps) => {
   }, [admin, form]);
 
   const onSubmit = async (data: AdminFormData) => {
+    console.log("adminFormData", data);
     try {
       const formData = new FormData();
       const adminData = {
         password: "123456",
         admin: {
-          ...data,
-          user: admin?.user || "",
-          id: admin?.id || "",
+          name: data.name,
+          designation: data.designation,
+          gender: data.gender,
+          dateOfBirth: data.dateOfBirth,
+          email: data.email,
+          contactNo: data.contactNo,
+          emergencyContactNo: data.emergencyContactNo,
+          bloodGroup: data.bloodGroup,
+          presentAddress: data.presentAddress,
+          permanentAddress: data.permanentAddress,
         },
       };
       formData.append("data", JSON.stringify(adminData));
@@ -162,16 +169,19 @@ const AdminForm = ({ admin, onSuccess }: AdminFormProps) => {
         </CardHeader>
         <CardContent>
           <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+            <form
+              onSubmit={form.handleSubmit(onSubmit as any)}
+              className="space-y-6"
+            >
               <div className="space-y-4">
                 <h3 className="text-lg font-medium">Personal Information</h3>
 
                 {/* Image Upload Field */}
                 <div className="flex flex-col gap-2">
                   <FormField
-                    control={form.control}
+                    control={form.control as any}
                     name="profileImg"
-                    render={({ field: { onChange, value, ...field } }) => (
+                    render={({ field }) => (
                       <FormItem>
                         <FormLabel>Profile Image</FormLabel>
                         <FormControl>
@@ -179,16 +189,17 @@ const AdminForm = ({ admin, onSuccess }: AdminFormProps) => {
                             type="file"
                             accept="image/*"
                             onChange={(e) => {
+                              const file = e.target.files?.[0] ?? "";
+                              field.onChange(file);
                               handleImageChange(e);
-                              onChange(e.target.files?.[0]);
                             }}
-                            {...field}
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
+
                   {selectedImage && (
                     <div className="mt-2">
                       <img
@@ -280,7 +291,7 @@ const AdminForm = ({ admin, onSuccess }: AdminFormProps) => {
                 <div className="grid grid-2 gap-4">
                   <FormFields.Select
                     form={form}
-                    name="bloogGroup"
+                    name="bloodGroup"
                     label="Blood Group"
                     options={[
                       { label: "A+", value: "A+" },

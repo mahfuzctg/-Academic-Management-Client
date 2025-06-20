@@ -1,179 +1,47 @@
-import { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { motion } from "framer-motion";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/components/ui/use-toast";
-import { Badge } from "@/components/ui/badge";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Briefcase, MapPin, DollarSign, Clock } from "lucide-react";
-import { setFilters, clearFilters } from "@/redux/features/job/jobSlice";
-import type { RootState } from "@/redux/store";
-import type { JobListing } from "@/types/job";
-import JobForm from "@/components/form/jobs/JobForm";
-import ProposalForm from "@/components/form/jobs/ProposalForm";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useGetAllJobsQuery } from "@/redux/features/job/jobApi";
 
-export default function JobSection() {
-  const { toast } = useToast();
-  const dispatch = useDispatch();
-  const { filters } = useSelector((state: RootState) => state.jobs);
-  const { data: jobsData, isLoading, error } = useGetAllJobsQuery(filters);
-  const [isJobFormOpen, setIsJobFormOpen] = useState(false);
-  const [isProposalFormOpen, setIsProposalFormOpen] = useState(false);
-  const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
-
-  const handleSearch = (value: string) => {
-    dispatch(setFilters({ search: value }));
-  };
-
-  const handleClearFilters = () => {
-    dispatch(clearFilters());
-  };
-
-  const handleApply = (job: JobListing) => {
-    setSelectedJob(job);
-    setIsProposalFormOpen(true);
-  };
+const JobSection = () => {
+  const { data: jobs, isLoading } = useGetAllJobsQuery();
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64 text-red-500">
-        Error: {error instanceof Error ? error.message : "Failed to load jobs"}
-      </div>
-    );
-  }
-
-  const jobs = jobsData?.data || [];
-
-  return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Job Opportunities</h1>
-        <Dialog open={isJobFormOpen} onOpenChange={setIsJobFormOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <Briefcase className="mr-2 h-4 w-4" />
-              Post a Job
-            </Button>
-          </DialogTrigger>
-          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
-              <DialogTitle>Post a New Job</DialogTitle>
-            </DialogHeader>
-            <JobForm onSuccess={() => setIsJobFormOpen(false)} />
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Input
-          placeholder="Search jobs..."
-          value={filters.search || ""}
-          onChange={(e) => handleSearch(e.target.value)}
-          className="max-w-sm"
-        />
-        <Button variant="outline" onClick={handleClearFilters}>
-          Clear Filters
-        </Button>
-      </div>
-
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {jobs.map((job: JobListing) => (
-          <Card key={job.id}>
-            <CardHeader>
-              <CardTitle>{job.title}</CardTitle>
-              <CardDescription>
-                {job.employer.name} • {job.location.type}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <Badge variant="outline">{job.type}</Badge>
-                  <Badge
-                    variant={
-                      job.status === "open"
-                        ? "default"
-                        : job.status === "in-progress"
-                        ? "secondary"
-                        : "destructive"
-                    }
-                  >
-                    {job.status}
-                  </Badge>
-                </div>
-                <p className="text-sm">
-                  <span className="font-medium">Budget:</span>{" "}
-                  <span className="flex items-center gap-1">
-                    <DollarSign className="h-4 w-4" />
-                    {job.budget.min} - {job.budget.max} {job.budget.currency}
-                  </span>
-                </p>
-                <p className="text-sm">
-                  <span className="font-medium">Duration:</span>{" "}
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-4 w-4" />
-                    {job.duration}
-                  </span>
-                </p>
-                <div className="space-y-1">
-                  <p className="text-sm font-medium">Requirements:</p>
-                  <ul className="text-sm list-disc list-inside">
-                    {job.requirements.map((req: string, index: number) => (
-                      <li key={index}>{req}</li>
-                    ))}
-                  </ul>
-                </div>
-                <p className="text-sm mt-2">{job.description}</p>
-              </div>
-            </CardContent>
-            <CardFooter>
-              {job.status === "open" && (
-                <Button className="w-full" onClick={() => handleApply(job)}>
-                  Apply Now
-                </Button>
-              )}
-            </CardFooter>
-          </Card>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[...Array(3)].map((_, idx) => (
+          <Skeleton key={idx} className="h-[200px] w-full rounded-xl" />
         ))}
       </div>
+    );
+  }
 
-      <Dialog open={isProposalFormOpen} onOpenChange={setIsProposalFormOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Submit Proposal</DialogTitle>
-          </DialogHeader>
-          {selectedJob && (
-            <ProposalForm
-              jobId={selectedJob.id}
-              onSuccess={() => setIsProposalFormOpen(false)}
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {jobs?.map((job) => (
+        <Card
+          key={job._id}
+          className="hover:shadow-xl transition-all duration-300"
+        >
+          <CardHeader>
+            <img
+              src={job.bannerImage}
+              alt={job.title}
+              className="w-full h-[160px] object-cover rounded-md"
             />
-          )}
-        </DialogContent>
-      </Dialog>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <CardTitle className="text-xl font-semibold">{job.title}</CardTitle>
+            <p className="text-sm text-muted-foreground">{job.category}</p>
+            <p className="text-sm">
+              💰 {job.minPrice} - {job.maxPrice} BDT
+            </p>
+            <p className="text-sm">📅 Deadline: {job.deadline}</p>
+            <p className="text-sm capitalize">📍 {job.workMode}</p>
+          </CardContent>
+        </Card>
+      ))}
     </div>
   );
-}
+};
+
+export default JobSection;

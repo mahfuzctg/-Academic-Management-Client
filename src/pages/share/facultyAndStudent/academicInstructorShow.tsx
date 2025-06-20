@@ -6,19 +6,19 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useState } from "react";
-import { useGetAllFacultiesQuery } from "@/redux/features/faculty/facultyApi";
-import type { TFaculty } from "@/types/faculty";
+import { useGetAllAcademicFacultiesQuery } from "@/redux/features/academic/academicFacultyApi";
+//  import type { TFaculty } from "@/types/faculty";
 // import { TFaculty } from "@/types/faculty";
 
 const AcademicInstructorShow = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: faculties, isLoading } = useGetAllFacultiesQuery(undefined);
+  const { data: faculties, isLoading } = useGetAllAcademicFacultiesQuery([]);
 
   const filteredFaculties = faculties?.data?.filter(
-    (faculty: TFaculty) =>
-      faculty.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    (faculty: any) =>
+      faculty.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       faculty.designation?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      faculty.academicDepartment?.name
+      faculty.academicDepartment
         .toLowerCase()
         .includes(searchQuery.toLowerCase())
   );
@@ -57,9 +57,9 @@ const AcademicInstructorShow = () => {
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredFaculties?.map((faculty: TFaculty) => (
+              {filteredFaculties?.map((faculty: any) => (
                 <motion.div
-                  key={faculty._id}
+                  key={faculty.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   whileHover={{ y: -5 }}
@@ -70,7 +70,7 @@ const AcademicInstructorShow = () => {
                       <div className="flex items-start justify-between">
                         <div className="space-y-1">
                           <h3 className="text-xl font-semibold">
-                            {faculty.fullName}
+                            {faculty.name}
                           </h3>
                           <p className="text-sm text-muted-foreground">
                             {faculty.designation}
@@ -88,7 +88,7 @@ const AcademicInstructorShow = () => {
                             className="bg-blue-50 text-blue-700 hover:bg-blue-100"
                           >
                             <Building2 className="w-3 h-3 mr-1" />
-                            {faculty.academicDepartment?.name}
+                            {faculty.academicDepartment}
                           </Badge>
                           {faculty.status && (
                             <Badge

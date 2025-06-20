@@ -17,7 +17,7 @@ const adminApi = baseApi.injectEndpoints({
         url: "/admin/stats",
         method: "GET",
       }),
-      providesTags: ["academic"],
+      providesTags: ["admin"],
       transformResponse: (response: TResponseRedux<SystemStats>) => response,
     }),
 
@@ -26,7 +26,7 @@ const adminApi = baseApi.injectEndpoints({
         url: "/admin/activities",
         method: "GET",
       }),
-      providesTags: ["academic"],
+      providesTags: ["admin"],
       transformResponse: (response: TResponseRedux<RecentActivity[]>) =>
         response,
     }),
@@ -36,7 +36,7 @@ const adminApi = baseApi.injectEndpoints({
         url: "/admin/announcements",
         method: "GET",
       }),
-      providesTags: ["academic"],
+      providesTags: ["admin"],
       transformResponse: (response: TResponseRedux<Announcement[]>) => response,
     }),
 
@@ -49,7 +49,7 @@ const adminApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["academic"],
+      invalidatesTags: ["admin"],
       transformResponse: (response: TResponseRedux<Announcement>) => response,
     }),
 
@@ -59,7 +59,7 @@ const adminApi = baseApi.injectEndpoints({
         url: "/admin/chat/rooms",
         method: "GET",
       }),
-      providesTags: ["academic"],
+      providesTags: ["admin"],
       transformResponse: (response: TResponseRedux<ChatRoom[]>) => response,
     }),
 
@@ -68,7 +68,7 @@ const adminApi = baseApi.injectEndpoints({
         url: `/admin/chat/rooms/${roomId}/messages`,
         method: "GET",
       }),
-      providesTags: ["academic"],
+      providesTags: ["admin"],
       transformResponse: (response: TResponseRedux<ChatMessage[]>) => response,
     }),
 
@@ -81,7 +81,7 @@ const adminApi = baseApi.injectEndpoints({
         method: "POST",
         body: { message },
       }),
-      invalidatesTags: ["academic"],
+      invalidatesTags: ["admin"],
       transformResponse: (response: TResponseRedux<ChatMessage>) => response,
     }),
 
@@ -94,7 +94,7 @@ const adminApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["academic"],
+      invalidatesTags: ["admin"],
       transformResponse: (response: TResponseRedux<ChatRoom>) => response,
     }),
 
@@ -112,7 +112,7 @@ const adminApi = baseApi.injectEndpoints({
           params: params,
         };
       },
-      providesTags: ["academic"],
+      providesTags: ["admin"],
       transformResponse: (response: TResponseRedux<TAdmin[]>) => ({
         data: response.data,
         meta: response.meta,
@@ -121,11 +121,11 @@ const adminApi = baseApi.injectEndpoints({
 
     createAdmin: builder.mutation({
       query: (data) => ({
-        url: "/admins",
+        url: "/users/create-admin",
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["academic"],
+      invalidatesTags: ["admin"],
     }),
 
     updateAdmin: builder.mutation({
@@ -134,7 +134,7 @@ const adminApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: updatedData,
       }),
-      invalidatesTags: ["academic"],
+      invalidatesTags: ["admin"],
     }),
 
     deleteAdmin: builder.mutation({
@@ -142,7 +142,7 @@ const adminApi = baseApi.injectEndpoints({
         url: `/admins/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["academic"],
+      invalidatesTags: ["admin"],
     }),
   }),
 });

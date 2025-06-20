@@ -1,5 +1,6 @@
 import { InstructorDashboard } from "@/pages/Dashboard/InstructorDashboard";
 import FacultyProfile from "@/pages/facultys/FacultyProfile";
+import GradesPage from "@/pages/facultys/Grades/GradesPage";
 import AcademicCourseShow from "@/pages/share/facultyAndStudent/academicCourseShow";
 import AcademicDepartmentShow from "@/pages/share/facultyAndStudent/academicDepartmentShow";
 import AcademicFacultyShow from "@/pages/share/facultyAndStudent/academicfacultyShow";
@@ -67,6 +68,12 @@ export const facultyPaths = [
     name: "OfferCourse ",
     path: "offered-course",
     element: <AcademicOfferedCourseShow />,
+    icon: <BookOpen className="w-5 h-5" />,
+  },
+  {
+    name: "Grades",
+    path: "grades",
+    element: <GradesPage />,
     icon: <BookOpen className="w-5 h-5" />,
   },
 ];

@@ -6,7 +6,6 @@ import ProtectedRoute from "@/components/layout/ProtectedRoute";
 import { ThemeProvider } from "@/components/theme-provider";
 import InstructorManagement from "@/pages/facultys/facultyManagement";
 import Home from "@/pages/Home";
-import JobManagement from "@/pages/Jobs/JobManagement";
 import LoginForm from "@/pages/Login";
 import RegisterForm from "@/pages/Register";
 import { routeGenerator } from "@/utils/routesGenerator";
@@ -15,6 +14,7 @@ import { adminPaths } from "./admin.routes";
 import { studentPaths } from "./student.routes";
 
 import BlogsSection from "@/pages/blogs/BlogsSection";
+import JobSection from "@/pages/Jobs/JobSection";
 import { NotFoundPage } from "@/pages/NotFound";
 import StudentCourseList from "@/pages/Students/courses/StudentCourseList";
 import { facultyPaths } from "./faculty.routes";
@@ -42,7 +42,7 @@ const router = createBrowserRouter([
       },
       {
         path: "jobs",
-        element: <JobManagement />,
+        element: <JobSection />,
       },
       {
         path: "blogs",

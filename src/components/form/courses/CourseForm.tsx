@@ -26,11 +26,41 @@ import {
 } from "@/redux/features/course/courseApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { useEffect } from "react";
+
+// Types
+export type TPreRequisiteCourses = {
+  course: string; // ObjectId as string in form
+  isDeleted: boolean;
+};
+
+export type TSubject = {
+  name: string;
+  credits: number;
+  isDeleted?: boolean;
+};
+
+export type TCourse = {
+  title: string;
+  prefix: string;
+  code: number;
+  credits: number;
+  isDeleted?: boolean;
+  preRequisiteCourses: TPreRequisiteCourses[];
+  subjectType: "Theory" | "Lab" | "Project";
+  note?: string;
+  availableSubjects?: TSubject[];
+  subjectsToSelect?: number;
+};
 
 // Validation Schema
 const PreRequisiteCourseValidationSchema = z.object({
   course: z.string(),
+  isDeleted: z.boolean().optional(),
+});
+
+const SubjectValidationSchema = z.object({
+  name: z.string().min(1, "Subject name is required"),
+  credits: z.coerce.number().min(1, "Credits required"),
   isDeleted: z.boolean().optional(),
 });
 
@@ -41,6 +71,10 @@ const createCourseValidationSchema = z.object({
   credits: z.string().min(1, "Credits is required"),
   preRequisiteCourses: z.array(PreRequisiteCourseValidationSchema).optional(),
   isDeleted: z.boolean().optional(),
+  subjectType: z.enum(["Theory", "Lab", "Project"]),
+  note: z.string().optional(),
+  availableSubjects: z.array(SubjectValidationSchema).optional(),
+  subjectsToSelect: z.string().optional(),
 });
 
 type TCourseFormValues = z.infer<typeof createCourseValidationSchema>;
@@ -52,8 +86,12 @@ interface CourseFormProps {
     prefix: string;
     code: number;
     credits: number;
-    preRequisiteCourses?: { course: string; isDeleted?: boolean }[];
+    preRequisiteCourses?: TPreRequisiteCourses[];
     isDeleted?: boolean;
+    subjectType?: "Theory" | "Lab" | "Project";
+    note?: string;
+    availableSubjects?: TSubject[];
+    subjectsToSelect?: number;
   };
   onSuccess?: () => void;
 }
@@ -62,35 +100,45 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
   const { toast } = useToast();
   const [createCourse] = useCreateCourseMutation();
   const [updateCourse] = useUpdateCourseMutation();
-  const { data: availableCourses } = useGetAllCoursesQuery();
+  const { data: availableCourses } = useGetAllCoursesQuery([], {
+    refetchOnMountOrArgChange: true,
+  });
 
   const form = useForm<TCourseFormValues>({
     resolver: zodResolver(createCourseValidationSchema),
     defaultValues: {
       title: course?.title || "",
       prefix: course?.prefix || "",
-      code: course?.code?.toString() || "",
-      credits: course?.credits?.toString() || "",
+      code: typeof course?.code === "number" ? String(course.code) : "",
+      credits:
+        typeof course?.credits === "number" ? String(course.credits) : "",
       preRequisiteCourses: course?.preRequisiteCourses || [],
       isDeleted: course?.isDeleted || false,
+      subjectType: course?.subjectType || "Theory",
+      note: course?.note || "",
+      availableSubjects: course?.availableSubjects || [],
+      subjectsToSelect:
+        typeof course?.subjectsToSelect === "number"
+          ? String(course.subjectsToSelect)
+          : "0",
     },
   });
 
-  const onSubmit = async (data: TCourseFormValues) => {
+  const onSubmit = async (data: any) => {
     try {
       const formattedData = {
         ...data,
-        code: parseInt(data.code),
-        credits: parseInt(data.credits),
+        availableSubjects: Array.isArray(data.availableSubjects)
+          ? data.availableSubjects
+          : [],
+        preRequisiteCourses: Array.isArray(data.preRequisiteCourses)
+          ? data.preRequisiteCourses
+          : [],
       };
-
       if (course) {
         await updateCourse({
           id: course.id,
-          data: {
-            ...formattedData,
-            code: formattedData.code.toString(),
-          },
+          data: formattedData,
         }).unwrap();
         toast({
           title: "Success",
@@ -103,10 +151,10 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
           description: "Course created successfully",
         });
       }
-
       form.reset();
       onSuccess?.();
     } catch (error) {
+      console.log(error);
       toast({
         title: "Error",
         description: "Something went wrong",
@@ -116,7 +164,7 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full overflow-auto h-[80vh]">
       <CardHeader>
         <CardTitle>{course ? "Edit Course" : "Add New Course"}</CardTitle>
       </CardHeader>
@@ -199,6 +247,62 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
 
             <FormField
               control={form.control}
+              name="subjectType"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subject Type</FormLabel>
+                  <FormControl>
+                    <Select value={field.value} onValueChange={field.onChange}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select subject type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="Theory">Theory</SelectItem>
+                        <SelectItem value="Lab">Lab</SelectItem>
+                        <SelectItem value="Project">Project</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="note"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Note</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter note (optional)" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="subjectsToSelect"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subjects to Select</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="number"
+                      placeholder="Enter number of subjects to select"
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Prerequisite Courses */}
+            <FormField
+              control={form.control}
               name="preRequisiteCourses"
               render={({ field }) => (
                 <FormItem>
@@ -232,7 +336,7 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
                     </Select>
                   </FormControl>
                   <div className="mt-2 space-y-2">
-                    {field.value?.map((prereq, index) => (
+                    {(field.value || []).map((prereq, index) => (
                       <div
                         key={index}
                         className="flex items-center justify-between p-2 border rounded"
@@ -249,7 +353,7 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
                           variant="destructive"
                           size="sm"
                           onClick={() => {
-                            const newPrereqs = field.value?.filter(
+                            const newPrereqs = (field.value || []).filter(
                               (_, i) => i !== index
                             );
                             field.onChange(newPrereqs);
@@ -260,6 +364,73 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
                       </div>
                     ))}
                   </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Available Subjects (multi-input) */}
+            <FormField
+              control={form.control}
+              name="availableSubjects"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Available Subjects</FormLabel>
+                  <FormControl>
+                    <div className="space-y-2">
+                      {(field.value || []).map(
+                        (subject: TSubject, idx: number) => (
+                          <div key={idx} className="flex gap-2 items-center">
+                            <Input
+                              placeholder="Subject Name"
+                              value={subject.name}
+                              onChange={(e) => {
+                                const updated = [...(field.value || [])];
+                                updated[idx].name = e.target.value;
+                                field.onChange(updated);
+                              }}
+                            />
+                            <Input
+                              type="number"
+                              placeholder="Credits"
+                              value={subject.credits}
+                              onChange={(e) => {
+                                const updated = [...(field.value || [])];
+                                updated[idx].credits = Number(e.target.value);
+                                field.onChange(updated);
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                const updated = (field.value || []).filter(
+                                  (_: any, i: number) => i !== idx
+                                );
+                                field.onChange(updated);
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        )
+                      )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          field.onChange([
+                            ...(field.value || []),
+                            { name: "", credits: 0 },
+                          ]);
+                        }}
+                      >
+                        Add Subject
+                      </Button>
+                    </div>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}

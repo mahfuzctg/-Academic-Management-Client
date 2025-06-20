@@ -13,7 +13,7 @@ import type { RootState } from "../store";
 
 const baseQuery = fetchBaseQuery({
   baseUrl: "http://localhost:5000/api/v1",
-  // baseUrl: "https://academic-management-one.vercel.app/api/v1",
+  // baseUrl: "https://academic-management-server-ten.vercel.app/api/v1",
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
@@ -45,7 +45,8 @@ const baseQueryWithRefreshToken: BaseQueryFn<
     console.log("Sending refresh token");
 
     const res = await fetch(
-      "https://academic-management-one.vercel.app/api/v1/auth/refresh-token",
+      // "https://academic-management-server-ten.vercel.app/api/v1/auth/refresh-token",
+      "http://localhost:5000/api/v1/auth/refresh-token",
       {
         method: "POST",
         credentials: "include",
@@ -81,10 +82,11 @@ export const baseApi = createApi({
     "courses",
     "offeredCourse",
     "student",
+    "AcademicDepartment",
+    "AcademicSemester",
     "job",
-    "academic",
-    "Department",
-    "Semester",
+    "Grades",
+    "admin",
     "AcademicYear",
     "Course",
     "Faculty",
@@ -99,6 +101,7 @@ export const baseApi = createApi({
     "user-profile",
     "offered-courses",
     "blogs",
+    "jobs",
   ],
   endpoints: () => ({}),
 });

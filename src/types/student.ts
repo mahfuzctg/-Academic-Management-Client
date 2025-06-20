@@ -101,3 +101,19 @@ export interface StudentFilters {
   faculty?: string;
   semester?: string;
 }
+
+// Subject-wise marks type
+export type TSubjectMarks = {
+  [subject: string]: number;
+};
+
+// Mark distribution type for a student in a course
+export type TMarkDistribution = {
+  student: string; // Types.ObjectId as string
+  course: string; // Types.ObjectId as string
+  classTests: number[];
+  subjects: TSubjectMarks;
+  finalExam?: number;
+  totalMarks?: number;
+  resultStatus?: "PASS" | "FAIL" | "INCOMPLETE";
+};

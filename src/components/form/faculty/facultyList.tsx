@@ -63,14 +63,6 @@ const FacultyList = ({ onEdit, onViewSubjects }: FacultyListProps) => {
     setFilters((prev) => ({ ...prev, search: value }));
   };
 
-  const handleDepartmentChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, department: value }));
-  };
-
-  const handleFacultyChange = (value: string) => {
-    setFilters((prev) => ({ ...prev, faculty: value }));
-  };
-
   const handleClearFilters = () => {
     setFilters({
       search: "",
@@ -123,36 +115,7 @@ const FacultyList = ({ onEdit, onViewSubjects }: FacultyListProps) => {
                 onChange={(e) => handleSearch(e.target.value)}
                 className="max-w-sm"
               />
-              <Select
-                value={filters.department}
-                onValueChange={handleDepartmentChange}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Department" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="computer-science">
-                    Computer Science
-                  </SelectItem>
-                  <SelectItem value="engineering">Engineering</SelectItem>
-                  <SelectItem value="business">Business</SelectItem>
-                  <SelectItem value="arts">Arts</SelectItem>
-                </SelectContent>
-              </Select>
-              <Select
-                value={filters.faculty}
-                onValueChange={handleFacultyChange}
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Faculty" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="science">Science</SelectItem>
-                  <SelectItem value="engineering">Engineering</SelectItem>
-                  <SelectItem value="business">Business</SelectItem>
-                  <SelectItem value="arts">Arts</SelectItem>
-                </SelectContent>
-              </Select>
+
               <Button variant="outline" onClick={handleClearFilters}>
                 Clear Filters
               </Button>

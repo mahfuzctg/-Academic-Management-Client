@@ -9,7 +9,7 @@ import { useState } from "react";
 
 const AcademicFacultyShow = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: faculties, isLoading } = useGetAllAcademicFacultiesQuery({});
+  const { data: faculties, isLoading } = useGetAllAcademicFacultiesQuery([]);
 
   const filteredFaculties = faculties?.data?.filter((faculty: any) =>
     faculty.name.toLowerCase().includes(searchQuery.toLowerCase())

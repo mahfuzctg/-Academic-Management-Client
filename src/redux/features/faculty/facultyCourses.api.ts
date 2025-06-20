@@ -1,5 +1,6 @@
-import { TQueryParam, TResponseRedux } from '../../../types';
-import { baseApi } from '../../api/baseApi';
+// import { TQueryParam, TResponseRedux } from '../../../types';
+import type { TQueryParam, TResponseRedux } from "@/types/global";
+import { baseApi } from "../../api/baseApi";
 
 const facultyCourseApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -14,12 +15,12 @@ const facultyCourseApi = baseApi.injectEndpoints({
           });
         }
         return {
-          url: '/enrolled-courses',
-          method: 'GET',
+          url: "/enrolled-courses",
+          method: "GET",
           params: params,
         };
       },
-      providesTags: ['offeredCourse'],
+      providesTags: ["offeredCourse"],
       transformResponse: (response: TResponseRedux<any>) => {
         return {
           data: response.data,
@@ -30,8 +31,8 @@ const facultyCourseApi = baseApi.injectEndpoints({
 
     addMark: builder.mutation({
       query: (data) => ({
-        url: '/enrolled-courses/update-enrolled-course-marks',
-        method: 'PATCH',
+        url: "/enrolled-courses/update-enrolled-course-marks",
+        method: "PATCH",
         body: data,
       }),
     }),

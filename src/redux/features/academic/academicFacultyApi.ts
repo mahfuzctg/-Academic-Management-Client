@@ -1,4 +1,6 @@
 import { baseApi } from "@/redux/api/baseApi";
+import type { TQueryParam, TResponseRedux } from "@/types/global";
+import type { TAcademicFaculty } from "@/types/academicManagement.type";
 
 export const academicFacultyApi = baseApi.injectEndpoints({
   endpoints: (build) => ({
@@ -37,15 +39,25 @@ export const academicFacultyApi = baseApi.injectEndpoints({
     }),
 
     getAllAcademicFaculties: build.query({
-      query: (arg: Record<string, any>) => ({
-        url: "/academic-faculties",
-        method: "GET",
-        params: arg,
-      }),
-      transformResponse: (baseQueryReturnValue: any) => {
+      query: (args?: TQueryParam[]) => {
+        const params = new URLSearchParams();
+
+        if (args) {
+          args.forEach((item: TQueryParam) => {
+            params.append(item.name, item.value as string);
+          });
+        }
+
         return {
-          data: baseQueryReturnValue.data,
-          meta: baseQueryReturnValue.meta,
+          url: "/academic-faculties",
+          method: "GET",
+          params,
+        };
+      },
+      transformResponse: (response: TResponseRedux<TAcademicFaculty[]>) => {
+        return {
+          data: response.data,
+          meta: response.meta,
         };
       },
       providesTags: ["AcademicFaculty"],

@@ -117,3 +117,20 @@ export interface FreelancerFilters {
   minExperience?: number;
   status?: FreelancerProfile["status"];
 }
+
+export interface IJob {
+  _id?: string;
+  title: string;
+  category: string;
+  description: string;
+  bannerImage?: string;
+  profileImage?: string;
+  author: string;
+  minPrice: number;
+  maxPrice: number;
+  deadline: string;
+  vacancy: number;
+  workMode: "remote" | "onsite" | "hybrid";
+  createdAt?: string;
+  updatedAt?: string;
+}

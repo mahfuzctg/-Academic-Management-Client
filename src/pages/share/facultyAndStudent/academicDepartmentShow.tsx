@@ -1,13 +1,6 @@
 import { motion } from "framer-motion";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { useGetDepartmentsQuery } from "@/redux/features/academic/academicApi";
+
+import { useGetAllAcademicDepartmentsQuery } from "@/redux/features/academic/academicDepartmentApi";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Users, GraduationCap } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
@@ -17,9 +10,11 @@ import { useState } from "react";
 
 const AcademicDepartmentShow = () => {
   const [searchQuery, setSearchQuery] = useState("");
-  const { data: departments, isLoading } = useGetDepartmentsQuery(undefined);
+  const { data: departments, isLoading } = useGetAllAcademicDepartmentsQuery(
+    []
+  );
 
-  const filteredDepartments = departments?.data?.filter((department) =>
+  const filteredDepartments = departments?.data?.filter((department: any) =>
     department.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 

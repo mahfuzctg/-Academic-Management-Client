@@ -1,23 +1,9 @@
 import { motion } from "framer-motion";
 import { useState, useEffect } from "react";
-import {
-  Building2,
-  Users,
-  GraduationCap,
-  Plus,
-  Pencil,
-  Search,
-} from "lucide-react";
+import { Calendar, Plus, Pencil, Search, Circle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -41,45 +27,38 @@ import {
 } from "@/components/ui/form";
 
 import {
-  useCreateAcademicFacultyMutation,
-  useGetAllAcademicFacultiesQuery,
-  useUpdateAcademicFacultyMutation,
-} from "@/redux/features/academic/academicFacultyApi";
-import { useGetAllAcademicYearsQuery } from "@/redux/features/academic/academicYearApi";
+  useCreateAcademicYearMutation,
+  useGetAllAcademicYearsQuery,
+  useUpdateAcademicYearMutation,
+} from "@/redux/features/academic/academicYearApi";
 
-const facultySchema = z.object({
-  name: z.string().min(1, "Faculty name is required"),
-  academicYear: z.string().min(1, "Academic year is required"),
-  description: z.string().optional(),
+const academicYearSchema = z.object({
+  name: z.string().min(1, "Academic year name is required"),
 });
 
-type FacultyFormData = z.infer<typeof facultySchema>;
+type AcademicYearFormData = z.infer<typeof academicYearSchema>;
 
-const AcademicFaculty = () => {
+const AcademicYear = () => {
   const { toast } = useToast();
   const [searchQuery, setSearchQuery] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedFaculty, setSelectedFaculty] = useState<any>(null);
+  const [selectedYear, setSelectedYear] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 9;
 
-  const [addFaculty] = useCreateAcademicFacultyMutation();
-  const [updateFaculty] = useUpdateAcademicFacultyMutation();
+  const [addYear] = useCreateAcademicYearMutation();
+  const [updateYear] = useUpdateAcademicYearMutation();
 
   const {
-    data: faculties,
+    data: academicYears,
     isLoading,
     isError,
-  } = useGetAllAcademicFacultiesQuery([]);
+  } = useGetAllAcademicYearsQuery([]);
 
-  const { data: academicYears } = useGetAllAcademicYearsQuery([]);
-
-  const form = useForm<FacultyFormData>({
-    resolver: zodResolver(facultySchema),
+  const form = useForm<AcademicYearFormData>({
+    resolver: zodResolver(academicYearSchema),
     defaultValues: {
       name: "",
-      academicYear: "",
-      description: "",
     },
   });
 
@@ -88,54 +67,52 @@ const AcademicFaculty = () => {
     setCurrentPage(1);
   }, [searchQuery]);
 
-  const filteredFaculties = faculties?.data?.filter((faculty: any) =>
-    faculty.name.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredYears = academicYears?.data?.filter((year: any) =>
+    year.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const total = filteredFaculties?.length || 0;
+  const total = filteredYears?.length || 0;
   const totalPages = Math.ceil(total / itemsPerPage);
-  const paginatedFaculties = filteredFaculties?.slice(
+  const paginatedYears = filteredYears?.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const onSubmit = async (data: FacultyFormData) => {
+  const onSubmit = async (data: AcademicYearFormData) => {
     try {
-      if (selectedFaculty) {
-        await updateFaculty({
-          id: selectedFaculty._id,
+      if (selectedYear) {
+        await updateYear({
+          id: selectedYear._id,
           data,
         }).unwrap();
         toast({
           title: "Success",
-          description: "Faculty updated successfully",
+          description: "Academic year updated successfully",
         });
       } else {
-        await addFaculty(data).unwrap();
-        console.log("ok");
+        await addYear(data).unwrap();
         toast({
           title: "Success",
-          description: "Faculty added successfully",
+          description: "Academic year added successfully",
         });
       }
       setIsDialogOpen(false);
       form.reset();
-      setSelectedFaculty(null);
+      setSelectedYear(null);
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error?.data?.message || "Failed to save faculty data",
+        description:
+          error?.data?.message || "Failed to save academic year data",
         variant: "destructive",
       });
     }
   };
 
-  const handleEdit = (faculty: any) => {
-    setSelectedFaculty(faculty);
+  const handleEdit = (year: any) => {
+    setSelectedYear(year);
     form.reset({
-      name: faculty.name || "",
-      academicYear: faculty.academicYear?._id || faculty.academicYear || "",
-      description: faculty.description || "",
+      name: year.name || "",
     });
     setIsDialogOpen(true);
   };
@@ -148,10 +125,11 @@ const AcademicFaculty = () => {
         className="flex flex-col items-center justify-center min-h-[400px] gap-4"
       >
         <div className="bg-red-100 p-6 rounded-full">
-          <Building2 className="h-10 w-10 text-red-500" />
+          <Calendar className="h-10 w-10 text-red-500" />
         </div>
         <p className="text-red-500 text-center max-w-md text-lg">
-          Failed to load faculties. Please refresh the page or try again later.
+          Failed to load academic years. Please refresh the page or try again
+          later.
         </p>
         <Button variant="outline" onClick={() => window.location.reload()}>
           Retry
@@ -172,28 +150,30 @@ const AcademicFaculty = () => {
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex flex-col gap-2">
               <CardTitle className="text-3xl font-bold bg-gradient-to-r from-primary to-blue-600 bg-clip-text text-transparent">
-                Academic Faculties
+                Academic Years
               </CardTitle>
               <p className="text-muted-foreground">
-                Manage academic faculties and their departments
+                Manage academic years and their active status
               </p>
             </div>
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
               <DialogTrigger asChild>
                 <Button
                   onClick={() => {
-                    setSelectedFaculty(null);
+                    setSelectedYear(null);
                     form.reset();
                   }}
                 >
                   <Plus className="w-4 h-4 mr-2" />
-                  Add Faculty
+                  Add Academic Year
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>
-                    {selectedFaculty ? "Edit Faculty" : "Add New Faculty"}
+                    {selectedYear
+                      ? "Edit Academic Year"
+                      : "Add New Academic Year"}
                   </DialogTitle>
                 </DialogHeader>
                 <Form {...form}>
@@ -206,62 +186,19 @@ const AcademicFaculty = () => {
                       name="name"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Faculty Name</FormLabel>
+                          <FormLabel>Academic Year Name</FormLabel>
                           <FormControl>
-                            <Input
-                              placeholder="Enter faculty name"
-                              {...field}
-                            />
+                            <Input placeholder="e.g., 2024-2025" {...field} />
                           </FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
                     />
-                    <FormField
-                      control={form.control}
-                      name="academicYear"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Academic Year</FormLabel>
-                          <Select
-                            onValueChange={field.onChange}
-                            defaultValue={field.value}
-                          >
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select academic year" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {academicYears?.data?.map((year: any) => (
-                                <SelectItem key={year._id} value={year._id}>
-                                  {year.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="description"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Description</FormLabel>
-                          <FormControl>
-                            <Input
-                              placeholder="Enter faculty description"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+
                     <Button type="submit" className="w-full">
-                      {selectedFaculty ? "Update Faculty" : "Add Faculty"}
+                      {selectedYear
+                        ? "Update Academic Year"
+                        : "Add Academic Year"}
                     </Button>
                   </form>
                 </Form>
@@ -271,7 +208,7 @@ const AcademicFaculty = () => {
           <div className="relative max-w-md mt-4">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
             <Input
-              placeholder="Search faculties..."
+              placeholder="Search academic years..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10"
@@ -286,9 +223,9 @@ const AcademicFaculty = () => {
           ) : (
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {paginatedFaculties?.map((faculty: any) => (
+                {paginatedYears?.map((year: any) => (
                   <motion.div
-                    key={faculty._id}
+                    key={year._id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     whileHover={{ y: -5 }}
@@ -299,52 +236,27 @@ const AcademicFaculty = () => {
                         <div className="flex items-start justify-between">
                           <div className="space-y-1">
                             <h3 className="text-xl font-semibold">
-                              {faculty.name}
+                              {year.name}
                             </h3>
-                            {faculty.academicYear && (
-                              <p className="text-sm text-primary">
-                                {typeof faculty.academicYear === "string"
-                                  ? faculty.academicYear
-                                  : faculty.academicYear.name}
-                              </p>
-                            )}
-                            <p className="text-sm text-muted-foreground">
-                              {faculty.description}
-                            </p>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="secondary">
+                                <Circle className="w-3 h-3 mr-1" />
+                                Active
+                              </Badge>
+                            </div>
                           </div>
                           <div className="flex gap-2">
                             <Button
                               variant="ghost"
                               size="icon"
-                              onClick={() => handleEdit(faculty)}
+                              onClick={() => handleEdit(year)}
                             >
                               <Pencil className="h-4 w-4" />
                             </Button>
+
                             <div className="bg-primary/10 p-2 rounded-lg">
-                              <Building2 className="h-6 w-6 text-primary" />
+                              <Calendar className="h-6 w-6 text-primary" />
                             </div>
-                          </div>
-                        </div>
-                        <div className="space-y-3 pt-2">
-                          <div className="flex flex-wrap gap-2">
-                            {faculty.totalDepartments > 0 && (
-                              <Badge
-                                variant="secondary"
-                                className="bg-blue-50 text-blue-700 hover:bg-blue-100"
-                              >
-                                <Users className="w-3 h-3 mr-1" />
-                                {faculty.totalDepartments} Departments
-                              </Badge>
-                            )}
-                            {faculty.totalStudents > 0 && (
-                              <Badge
-                                variant="secondary"
-                                className="bg-green-50 text-green-700 hover:bg-green-100"
-                              >
-                                <GraduationCap className="w-3 h-3 mr-1" />
-                                {faculty.totalStudents} Students
-                              </Badge>
-                            )}
                           </div>
                         </div>
                       </CardContent>
@@ -380,17 +292,17 @@ const AcademicFaculty = () => {
             </>
           )}
 
-          {!isLoading && filteredFaculties?.length === 0 && (
+          {!isLoading && filteredYears?.length === 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               className="flex flex-col items-center justify-center py-12 gap-4"
             >
               <div className="bg-blue-100 p-6 rounded-full">
-                <Building2 className="h-10 w-10 text-blue-600" />
+                <Calendar className="h-10 w-10 text-blue-600" />
               </div>
               <p className="text-center text-lg text-muted-foreground">
-                No faculties found matching your search.
+                No academic years found matching your search.
               </p>
             </motion.div>
           )}
@@ -400,4 +312,4 @@ const AcademicFaculty = () => {
   );
 };
 
-export default AcademicFaculty;
+export default AcademicYear;

@@ -24,106 +24,6 @@ import type { TQueryParam, TResponseRedux } from "@/types/global";
 
 export const academicApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Department endpoints
-    getDepartments: builder.query({
-      query: (args) => {
-        const params = new URLSearchParams();
-        if (args) {
-          args.forEach((item: TQueryParam) => {
-            params.append(item.name, item.value as string);
-          });
-        }
-        return {
-          url: "/academic-departments",
-          method: "GET",
-          params: params,
-        };
-      },
-      providesTags: ["Department"],
-      transformResponse: (response: TResponseRedux<Department[]>) => {
-        return {
-          data: response.data,
-          meta: response.meta,
-        };
-      },
-    }),
-
-    addDepartment: builder.mutation({
-      query: (data: CreateDepartmentDto) => ({
-        url: "/academic-departments/create-academic-department",
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: ["Department"],
-    }),
-
-    updateDepartment: builder.mutation({
-      query: ({ id, data }: { id: string; data: UpdateDepartmentDto }) => ({
-        url: `/academic-departments/${id}`,
-        method: "PATCH",
-        body: data,
-      }),
-      invalidatesTags: ["Department"],
-    }),
-
-    deleteDepartment: builder.mutation({
-      query: (id: string) => ({
-        url: `/academic-departments/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Department"],
-    }),
-
-    // Semester endpoints
-    getSemesters: builder.query({
-      query: (args) => {
-        const params = new URLSearchParams();
-        if (args) {
-          args.forEach((item: TQueryParam) => {
-            params.append(item.name, item.value as string);
-          });
-        }
-        return {
-          url: "/academic-semesters",
-          method: "GET",
-          params: params,
-        };
-      },
-      providesTags: ["Semester"],
-      transformResponse: (response: TResponseRedux<Semester[]>) => {
-        return {
-          data: response.data,
-          meta: response.meta,
-        };
-      },
-    }),
-
-    addSemester: builder.mutation({
-      query: (data: CreateSemesterDto) => ({
-        url: "/academic-semesters/create-academic-semester",
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: ["Semester"],
-    }),
-
-    updateSemester: builder.mutation({
-      query: ({ id, data }: { id: string; data: UpdateSemesterDto }) => ({
-        url: `/academic-semesters/${id}`,
-        method: "PATCH",
-        body: data,
-      }),
-      invalidatesTags: ["Semester"],
-    }),
-
-    deleteSemester: builder.mutation({
-      query: (id: string) => ({
-        url: `/academic-semesters/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Semester"],
-    }),
-
     // Academic Year endpoints
     getAcademicYears: builder.query({
       query: (args) => {
@@ -224,56 +124,6 @@ export const academicApi = baseApi.injectEndpoints({
       invalidatesTags: ["Course"],
     }),
 
-    // Faculty endpoints
-    getFaculties: builder.query({
-      query: (args) => {
-        const params = new URLSearchParams();
-        if (args) {
-          args.forEach((item: TQueryParam) => {
-            params.append(item.name, item.value as string);
-          });
-        }
-        return {
-          url: "/faculties",
-          method: "GET",
-          params: params,
-        };
-      },
-      providesTags: ["Faculty"],
-      transformResponse: (response: TResponseRedux<Faculty[]>) => {
-        return {
-          data: response.data,
-          meta: response.meta,
-        };
-      },
-    }),
-
-    addFaculty: builder.mutation({
-      query: (data: CreateFacultyDto) => ({
-        url: "/faculties",
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: ["Faculty"],
-    }),
-
-    updateFaculty: builder.mutation({
-      query: ({ id, data }: { id: string; data: UpdateFacultyDto }) => ({
-        url: `/faculties/${id}`,
-        method: "PATCH",
-        body: data,
-      }),
-      invalidatesTags: ["Faculty"],
-    }),
-
-    deleteFaculty: builder.mutation({
-      query: (id: string) => ({
-        url: `/faculties/${id}`,
-        method: "DELETE",
-      }),
-      invalidatesTags: ["Faculty"],
-    }),
-
     // Program endpoints
     getPrograms: builder.query({
       query: (args) => {
@@ -349,18 +199,6 @@ export const academicApi = baseApi.injectEndpoints({
 });
 
 export const {
-  // Department hooks
-  useGetDepartmentsQuery,
-  useAddDepartmentMutation,
-  useUpdateDepartmentMutation,
-  useDeleteDepartmentMutation,
-
-  // Semester hooks
-  useGetSemestersQuery,
-  useAddSemesterMutation,
-  useUpdateSemesterMutation,
-  useDeleteSemesterMutation,
-
   // Academic Year hooks
   useGetAcademicYearsQuery,
   useAddAcademicYearMutation,
@@ -372,12 +210,6 @@ export const {
   useAddCourseMutation,
   useUpdateCourseMutation,
   useDeleteCourseMutation,
-
-  // Faculty hooks
-  useGetFacultiesQuery,
-  useAddFacultyMutation,
-  useUpdateFacultyMutation,
-  useDeleteFacultyMutation,
 
   // Program hooks
   useGetProgramsQuery,
