@@ -224,13 +224,20 @@ const OfferedCourseForm = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        {academicFaculties?.data
-                          ?.filter((faculty: any) => faculty && faculty.name)
-                          .map((faculty: any) => (
-                            <SelectItem key={faculty._id} value={faculty._id}>
-                              {faculty.name}
-                            </SelectItem>
-                          ))}
+                        {/* If academicFaculties or academicFaculties.data is not available, show a message */}
+                        {!academicFaculties?.data ? (
+                          <div className="px-2 py-1 text-sm text-muted-foreground">
+                            No faculty data found.
+                          </div>
+                        ) : (
+                          academicFaculties.data
+                            .filter((faculty: any) => faculty && faculty.name)
+                            .map((faculty: any) => (
+                              <SelectItem key={faculty._id} value={faculty._id}>
+                                {faculty.name}
+                              </SelectItem>
+                            ))
+                        )}
                       </SelectContent>
                     </Select>
                     <FormMessage />

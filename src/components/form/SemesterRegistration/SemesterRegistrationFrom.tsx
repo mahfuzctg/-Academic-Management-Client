@@ -93,6 +93,7 @@ const SemesterRegistrationFrom = ({
   const [createSemesterRegistration] = useCreateSemesterRegistrationMutation();
   const [updateSemesterRegistration] = useUpdateSemesterRegistrationMutation();
   const [deleteSemesterRegistration] = useDeleteSemesterRegistrationMutation();
+  // const { data: academicSemesters } = useGetAllAcademicSemestersQuery([]);
   const { data: academicSemesters } = useGetAllAcademicSemestersQuery([]);
   const { data: semesterRegistrations, isLoading } =
     useGetAllSemesterRegistrationsQuery([]);
@@ -167,13 +168,27 @@ const SemesterRegistrationFrom = ({
     setIsOpen(true);
   };
 
-  const academicSemesterOptions = academicSemesters?.data
-    ?.filter((semester: any) => semester && semester.name && semester.year)
-    .map((semester: any) => ({
-      value: semester._id,
-      label: `${semester.name} ${semester.year}`,
-    }));
+  // Fix: Ensure academicSemesters is loaded and has data, and handle possible API response shape
+  const academicSemesterOptions =
+    academicSemesters && Array.isArray(academicSemesters.data)
+      ? academicSemesters.data
+          .filter(
+            (semester: any) =>
+              semester &&
+              (semester.name || semester.name === "") &&
+              (semester.year || semester.year === "" || semester.academicYear)
+          )
+          .map((semester: any) => ({
+            value: semester._id,
+            // Try to show both name and year/academicYear for clarity
+            label: `${semester.name || ""} ${
+              semester.year || semester.academicYear || ""
+            }`.trim(),
+          }))
+      : [];
 
+  console.log("academicSemesterOptions", academicSemesters?.data);
+  console.log("academicSeme", academicSemesterOptions);
   const statusOptions = [
     { value: "UPCOMING", label: "Upcoming" },
     { value: "ONGOING", label: "Ongoing" },

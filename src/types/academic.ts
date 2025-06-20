@@ -8,17 +8,25 @@ export interface AcademicYear {
   updatedAt: string;
 }
 
-export enum AcademicSemesterName {
-  AUTUMN = "Autumn",
-  SUMMER = "Summer",
-  FALL = "Fall",
-}
+export type AcademicSemesterName =
+  | "1st Semester"
+  | "2nd Semester"
+  | "3rd Semester"
+  | "4th Semester"
+  | "5th Semester"
+  | "6th Semester"
+  | "7th Semester"
+  | "8th Semester";
 
-export enum AcademicSemesterCode {
-  AUTUMN = "01",
-  SUMMER = "02",
-  FALL = "03",
-}
+export type AcademicSemesterCode =
+  | "01"
+  | "02"
+  | "03"
+  | "04"
+  | "05"
+  | "06"
+  | "07"
+  | "08";
 
 export enum Months {
   JANUARY = "January",

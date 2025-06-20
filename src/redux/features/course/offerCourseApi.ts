@@ -83,6 +83,21 @@ export const offerCourseApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["offeredCourses"],
     }),
+    getOfferedCoursesBySemester: builder.query({
+      query: (academicSemesterId: string) => ({
+        url: `/offered-courses/by-semester/${academicSemesterId}`,
+        method: "GET",
+      }),
+      providesTags: ["offeredCourses"],
+    }),
+
+    getOfferedCoursesByYear: builder.query({
+      query: (academicYearId: string) => ({
+        url: `/offered-courses/by-year/${academicYearId}`,
+        method: "GET",
+      }),
+      providesTags: ["offeredCourses"],
+    }),
   }),
   overrideExisting: true,
 });
@@ -94,4 +109,6 @@ export const {
   useCreateOfferedCourseMutation,
   useUpdateOfferedCourseMutation,
   useDeleteOfferedCourseMutation,
+  useGetOfferedCoursesBySemesterQuery,
+  useGetOfferedCoursesByYearQuery,
 } = offerCourseApi;

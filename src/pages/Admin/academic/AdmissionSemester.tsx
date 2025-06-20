@@ -29,8 +29,6 @@ import {
 import {
   type Semester,
   type CreateSemesterDto,
-  AcademicSemesterName,
-  AcademicSemesterCode,
   Months,
 } from "@/types/academic";
 import { FormFields } from "@/components/ui/form-field";
