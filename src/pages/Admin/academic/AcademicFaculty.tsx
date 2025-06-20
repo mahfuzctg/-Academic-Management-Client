@@ -11,6 +11,13 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -38,9 +45,11 @@ import {
   useGetAllAcademicFacultiesQuery,
   useUpdateAcademicFacultyMutation,
 } from "@/redux/features/academic/academicFacultyApi";
+import { useGetAllAcademicYearsQuery } from "@/redux/features/academic/academicYearApi";
 
 const facultySchema = z.object({
   name: z.string().min(1, "Faculty name is required"),
+  academicYear: z.string().min(1, "Academic year is required"),
   description: z.string().optional(),
 });
 
@@ -63,10 +72,13 @@ const AcademicFaculty = () => {
     isError,
   } = useGetAllAcademicFacultiesQuery([]);
 
+  const { data: academicYears } = useGetAllAcademicYearsQuery([]);
+
   const form = useForm<FacultyFormData>({
     resolver: zodResolver(facultySchema),
     defaultValues: {
       name: "",
+      academicYear: "",
       description: "",
     },
   });
@@ -122,6 +134,7 @@ const AcademicFaculty = () => {
     setSelectedFaculty(faculty);
     form.reset({
       name: faculty.name || "",
+      academicYear: faculty.academicYear?._id || faculty.academicYear || "",
       description: faculty.description || "",
     });
     setIsDialogOpen(true);
@@ -206,6 +219,33 @@ const AcademicFaculty = () => {
                     />
                     <FormField
                       control={form.control}
+                      name="academicYear"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Academic Year</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select academic year" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {academicYears?.data?.map((year: any) => (
+                                <SelectItem key={year._id} value={year._id}>
+                                  {year.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
                       name="description"
                       render={({ field }) => (
                         <FormItem>
@@ -261,6 +301,13 @@ const AcademicFaculty = () => {
                             <h3 className="text-xl font-semibold">
                               {faculty.name}
                             </h3>
+                            {faculty.academicYear && (
+                              <p className="text-sm text-primary">
+                                {typeof faculty.academicYear === "string"
+                                  ? faculty.academicYear
+                                  : faculty.academicYear.name}
+                              </p>
+                            )}
                             <p className="text-sm text-muted-foreground">
                               {faculty.description}
                             </p>

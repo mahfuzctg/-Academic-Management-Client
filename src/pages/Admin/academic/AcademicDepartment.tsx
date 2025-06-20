@@ -46,12 +46,14 @@ import {
 } from "@/components/ui/alert-dialog";
 import { useGetAllAcademicFacultiesQuery } from "@/redux/features/academic/academicFacultyApi";
 import { Input } from "@/components/ui/input";
+import { useGetAllAcademicYearsQuery } from "@/redux/features/academic/academicYearApi";
 
 const departmentSchema = z.object({
   name: z.string().min(1, "Department name is required"),
   academicFaculty: z.string().min(1, "Academic faculty is required"),
   description: z.string().optional(),
   headOfDepartment: z.string().optional(),
+  academicYear: z.string().min(1, "Academic year is required"),
 });
 
 type DepartmentFormData = z.infer<typeof departmentSchema>;
@@ -68,6 +70,12 @@ const AcademicDepartment = () => {
   const { data: departments, isLoading } = useGetAllAcademicDepartmentsQuery(
     []
   );
+  const {
+    data: academicYears,
+    isLoading: isLoadingYears,
+    isError: isErrorYears,
+  } = useGetAllAcademicYearsQuery([]);
+  console.log("academicYears", academicYears);
   console.log("departments", departments);
   // Reset to first page on search
   useEffect(() => {
@@ -94,6 +102,7 @@ const AcademicDepartment = () => {
     defaultValues: {
       name: "",
       academicFaculty: "",
+      academicYear: "",
     },
   });
 
@@ -104,8 +113,6 @@ const AcademicDepartment = () => {
           id: selectedDepartment._id,
           data: {
             ...data,
-            code: "123",
-            totalCredits: 123,
           },
         }).unwrap();
         toast({
@@ -115,8 +122,6 @@ const AcademicDepartment = () => {
       } else {
         await addDepartment({
           ...data,
-          code: "123",
-          totalCredits: 123,
         }).unwrap();
         toast({
           title: "Success",
@@ -140,6 +145,7 @@ const AcademicDepartment = () => {
     form.reset({
       name: department.name,
       academicFaculty: department.academicFaculty._id,
+      academicYear: department.academicYear._id,
     });
     setIsOpen(true);
   };
@@ -197,11 +203,24 @@ const AcademicDepartment = () => {
                   />
                   <FormFields.Select
                     form={form}
+                    name="academicYear"
+                    label="Academic Year"
+                    placeholder="Select academic year"
+                    options={
+                      academicYears?.data?.map((year: any) => ({
+                        label: year.name,
+                        value: year._id,
+                      })) || []
+                    }
+                    required
+                  />
+                  <FormFields.Select
+                    form={form}
                     name="academicFaculty"
                     label="Academic Faculty"
                     placeholder="Select academic faculty"
                     options={
-                      faculties?.data?.map((faculty) => ({
+                      faculties?.data?.map((faculty: any) => ({
                         label: faculty.name,
                         value: faculty._id,
                       })) || []
