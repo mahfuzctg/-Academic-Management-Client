@@ -167,12 +167,12 @@ const SemesterRegistrationFrom = ({
     setIsOpen(true);
   };
 
-  const academicSemesterOptions = academicSemesters?.data?.map(
-    (semester: any) => ({
+  const academicSemesterOptions = academicSemesters?.data
+    ?.filter((semester: any) => semester && semester.name && semester.year)
+    .map((semester: any) => ({
       value: semester._id,
       label: `${semester.name} ${semester.year}`,
-    })
-  );
+    }));
 
   const statusOptions = [
     { value: "UPCOMING", label: "Upcoming" },
@@ -181,7 +181,10 @@ const SemesterRegistrationFrom = ({
   ];
 
   const filteredRegistrations = semesterRegistrations?.data?.filter(
-    (registration) => !initialStatus || registration.status === initialStatus
+    (registration: any) =>
+      registration &&
+      registration.academicSemester &&
+      (!initialStatus || registration.status === initialStatus)
   );
 
   return (

@@ -79,7 +79,7 @@ const AdmissionSemester = () => {
     try {
       if (selectedSemester) {
         const updateData = {
-          id: selectedSemester.id,
+          id: selectedSemester._id,
           data: {
             name: data.name,
             year: data.year,
@@ -88,6 +88,7 @@ const AdmissionSemester = () => {
             endMonth: data.endMonth,
           },
         };
+        console.log(selectedSemester);
         await updateSemester(updateData).unwrap();
         toast({
           title: "Success",
