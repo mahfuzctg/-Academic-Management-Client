@@ -22,7 +22,10 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useGetAllOfferedCoursesQuery } from "@/redux/features/course/offerCourseApi";
+import {
+  useGetAllOfferedCoursesQuery,
+  useGetOfferedCoursesBySemesterQuery,
+} from "@/redux/features/course/offerCourseApi";
 import {
   useCreateEnrolledCourseMutation,
   useGetMyEnrolledCoursesQuery,

@@ -15,6 +15,8 @@ import {
   useGetAllFacultyCoursesQuery,
   useAddMarkMutation,
 } from "@/redux/features/faculty/facultyCourses.api";
+import { useGetAllStudentsQuery } from "@/redux/features/student/studentApi";
+import { useGetAllCoursesQuery } from "@/redux/features/course/courseApi";
 import type { TEnrolledCourse } from "@/types/enrolledCourse";
 
 function calculateGrade(marks: number) {
@@ -34,6 +36,25 @@ export default function GradesPage() {
   // Fetch all enrolled courses for this faculty
   const { data: facultyCoursesData } = useGetAllFacultyCoursesQuery(undefined);
   const enrolledCourses: TEnrolledCourse[] = facultyCoursesData?.data || [];
+
+  // Fetch all students and courses
+  const { data: studentsData } = useGetAllStudentsQuery();
+  const { data: coursesData } = useGetAllCoursesQuery();
+  const students = studentsData?.data || [];
+  const courses = coursesData || [];
+
+  // Create lookup maps
+  const studentMap = useMemo(() => {
+    const map = new Map();
+    students.forEach((s) => map.set(s.id, s));
+    return map;
+  }, [students]);
+
+  const courseMap = useMemo(() => {
+    const map = new Map();
+    courses.forEach((c) => map.set(c.id, c));
+    return map;
+  }, [courses]);
 
   // Dropdown state
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
@@ -55,7 +76,7 @@ export default function GradesPage() {
   }, [enrolledCourses]);
 
   // Filter students for the selected course
-  const students = useMemo(() => {
+  const studentsForCourse = useMemo(() => {
     if (!selectedCourseId) return [];
     return enrolledCourses.filter((c) => c.course === selectedCourseId);
   }, [enrolledCourses, selectedCourseId]);
@@ -103,7 +124,7 @@ export default function GradesPage() {
 
   // Assign or update grades for all students in the course
   const handleAssignGrades = async () => {
-    for (const student of students) {
+    for (const student of studentsForCourse) {
       const marksObj = studentMarks[student.student] || {
         classTest1: 0,
         classTest2: 0,
@@ -158,14 +179,14 @@ export default function GradesPage() {
               <SelectContent>
                 {courseOptions.map(([id, name]) => (
                   <SelectItem key={id} value={id}>
-                    {name}
+                    {courseMap.get(id)?.title || name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Button
               onClick={handleAssignGrades}
-              disabled={!selectedCourseId || students.length === 0}
+              disabled={!selectedCourseId || studentsForCourse.length === 0}
             >
               Save Grades
             </Button>
@@ -177,7 +198,7 @@ export default function GradesPage() {
             <table className="min-w-full text-sm text-left border rounded-lg">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="px-4 py-2 border">Student ID</th>
+                  <th className="px-4 py-2 border">Student</th>
                   <th className="px-4 py-2 border">Course</th>
                   <th className="px-4 py-2 border">Class Test 1</th>
                   <th className="px-4 py-2 border">Class Test 2</th>
@@ -189,14 +210,14 @@ export default function GradesPage() {
                 </tr>
               </thead>
               <tbody>
-                {students.length === 0 ? (
+                {studentsForCourse.length === 0 ? (
                   <tr>
                     <td colSpan={9} className="text-center py-4">
                       No students found for this course.
                     </td>
                   </tr>
                 ) : (
-                  students.map((student) => {
+                  studentsForCourse.map((student) => {
                     const marksObj = studentMarks[student.student] || {
                       classTest1: 0,
                       classTest2: 0,
@@ -212,8 +233,14 @@ export default function GradesPage() {
                     const result = getResultStatus(total);
                     return (
                       <tr key={student.student}>
-                        <td className="px-4 py-2 border">{student.student}</td>
-                        <td className="px-4 py-2 border">{student.course}</td>
+                        <td className="px-4 py-2 border">
+                          {studentMap.get(student.student)?.fullName ||
+                            student.student}
+                        </td>
+                        <td className="px-4 py-2 border">
+                          {courseMap.get(student.course)?.title ||
+                            student.course}
+                        </td>
                         <td className="px-4 py-2 border">
                           <Input
                             type="number"
@@ -305,7 +332,7 @@ export default function GradesPage() {
             <table className="min-w-full text-sm text-left border rounded-lg">
               <thead>
                 <tr className="bg-gray-100">
-                  <th className="px-4 py-2 border">Student ID</th>
+                  <th className="px-4 py-2 border">Student</th>
                   <th className="px-4 py-2 border">Course</th>
                   <th className="px-4 py-2 border">Class Test 1</th>
                   <th className="px-4 py-2 border">Class Test 2</th>
@@ -328,8 +355,12 @@ export default function GradesPage() {
                     const result = getResultStatus(total);
                     return (
                       <tr key={h.student + idx}>
-                        <td className="px-4 py-2 border">{h.student}</td>
-                        <td className="px-4 py-2 border">{h.course}</td>
+                        <td className="px-4 py-2 border">
+                          {studentMap.get(h.student)?.fullName || h.student}
+                        </td>
+                        <td className="px-4 py-2 border">
+                          {courseMap.get(h.course)?.title || h.course}
+                        </td>
                         <td className="px-4 py-2 border">
                           {h.courseMarks.classTest1}
                         </td>
