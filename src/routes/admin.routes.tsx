@@ -1,6 +1,7 @@
 import AcademicManagement from "@/pages/Academic/AcademicManagement";
 import AcademicDepartment from "@/pages/Admin/academic/AcademicDepartment";
 import AcademicFacultyPage from "@/pages/Admin/academic/AcademicFaculty";
+import AcademicYear from "@/pages/Admin/academic/AcademicYear";
 import AcademicSemester from "@/pages/Admin/academic/AdmissionSemester";
 import AdminManagement from "@/pages/Admin/AdminManagement";
 import AdminCourseList from "@/pages/Admin/courses/AdminCourseList";
@@ -35,6 +36,12 @@ export const adminPaths = [
     path: "academic-management",
     element: <AcademicManagement />,
     icon: <GraduationCap className="w-5 h-5" />,
+  },
+  {
+    name: "Academic Year",
+    path: "academic-year",
+    element: <AcademicYear />,
+    icon: <CalendarDays className="w-5 h-5" />,
   },
   {
     name: "Academic Faculty",
