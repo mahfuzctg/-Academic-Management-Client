@@ -1,13 +1,16 @@
+import EditBlogModal from "@/components/modal/EditBlogModal";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import {
+  useDeleteBlogMutation,
   useGetAllBlogsQuery,
   useVoteBlogMutation,
 } from "@/redux/features/blog/blogApi";
 import { useAppSelector } from "@/redux/hooks";
-import { CheckCircle, ThumbsUp } from "lucide-react";
+import type { IBlog } from "@/types/blog";
+import { CheckCircle, Pencil, ThumbsUp, Trash2 } from "lucide-react";
 import React, { useState } from "react";
 
 const formatDate = (dateStr: string) => {
@@ -22,9 +25,11 @@ const formatDate = (dateStr: string) => {
 const MyBlogSection: React.FC = () => {
   const { data: blogs, isLoading } = useGetAllBlogsQuery();
   const [voteBlog] = useVoteBlogMutation();
+  const [deleteBlog] = useDeleteBlogMutation();
   const { user } = useAppSelector((state) => state.auth);
   const { toast } = useToast();
   const [votedBlogIds, setVotedBlogIds] = useState<string[]>([]);
+  const [editingBlog, setEditingBlog] = useState<IBlog | null>(null);
 
   const handleVote = async (blogId: string) => {
     try {
@@ -38,6 +43,22 @@ const MyBlogSection: React.FC = () => {
       toast({
         title: "Vote Failed",
         description: "You might have already voted or an error occurred.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteBlog(id).unwrap();
+      toast({
+        title: "Blog Deleted",
+        description: "Your blog has been successfully removed.",
+      });
+    } catch (error) {
+      toast({
+        title: "Delete Failed",
+        description: "An error occurred while deleting the blog.",
         variant: "destructive",
       });
     }
@@ -118,6 +139,23 @@ const MyBlogSection: React.FC = () => {
                     </span>
                   </div>
 
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => setEditingBlog(blog)}
+                      className="text-blue-600 hover:text-blue-800"
+                      title="Edit"
+                    >
+                      <Pencil className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(blog._id!)}
+                      className="text-red-600 hover:text-red-800"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+
                   <button
                     onClick={() => {
                       if (!hasVoted && blog._id) handleVote(blog._id);
@@ -148,6 +186,13 @@ const MyBlogSection: React.FC = () => {
           </p>
         )}
       </div>
+
+      {editingBlog && (
+        <EditBlogModal
+          blog={editingBlog}
+          onClose={() => setEditingBlog(null)}
+        />
+      )}
     </div>
   );
 };
