@@ -7,7 +7,7 @@ import type {
 export type { TEnrollment, EnrollmentFilters, EnrollmentFormData };
 
 export interface Subject {
-  id: string;
+  _id: string;
   code: string;
   name: string;
   description: string;
@@ -19,7 +19,7 @@ export interface Subject {
 }
 
 export interface CourseOffering {
-  id: string;
+  _id: string;
   subjectId: string;
   subject: Subject;
   semester: number;
@@ -42,7 +42,7 @@ export interface CourseOffering {
 }
 
 export interface ICourse {
-  id: string;
+  _id: string;
   name?: string;
   code?: string;
   department?: string;

@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import {
   Select,
@@ -11,13 +10,26 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import * as XLSX from "xlsx";
-import {
-  useGetAllFacultyCoursesQuery,
-  useAddMarkMutation,
-} from "@/redux/features/faculty/facultyCourses.api";
-import { useGetAllStudentsQuery } from "@/redux/features/student/studentApi";
-import { useGetAllCoursesQuery } from "@/redux/features/course/courseApi";
+import { toast } from "sonner";
 import type { TEnrolledCourse } from "@/types/enrolledCourse";
+import {
+  useGetAllEnrolledCoursesQuery,
+  useUpdateEnrolledCourseMarksMutation,
+} from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
+import GradeEntryTable from "./components/GradeEntryTable";
+
+type TStudentMarks = Record<
+  string, // studentId
+  Record<
+    string, // subjectName
+    {
+      classTest1: number;
+      classTest2: number;
+      midTerm: number;
+      finalTerm: number;
+    }
+  >
+>;
 
 function calculateGrade(marks: number) {
   if (marks >= 90) return "A+";
@@ -33,128 +45,196 @@ function getResultStatus(marks: number) {
 }
 
 export default function GradesPage() {
-  // Fetch all enrolled courses for this faculty
-  const { data: facultyCoursesData } = useGetAllFacultyCoursesQuery(undefined);
+  const {
+    data: facultyCoursesData,
+    refetch,
+    isLoading,
+  } = useGetAllEnrolledCoursesQuery(undefined);
   const enrolledCourses: TEnrolledCourse[] = facultyCoursesData?.data || [];
 
-  // Fetch all students and courses
-  const { data: studentsData } = useGetAllStudentsQuery();
-  const { data: coursesData } = useGetAllCoursesQuery();
-  const students = studentsData?.data || [];
-  const courses = coursesData || [];
-
-  // Create lookup maps
-  const studentMap = useMemo(() => {
-    const map = new Map();
-    students.forEach((s) => map.set(s.id, s));
-    return map;
-  }, [students]);
-
-  const courseMap = useMemo(() => {
-    const map = new Map();
-    courses.forEach((c) => map.set(c.id, c));
-    return map;
-  }, [courses]);
-
-  // Dropdown state
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
 
-  // Find selected course object
-  const selectedCourse = useMemo(
-    () => enrolledCourses.find((c) => c.course === selectedCourseId),
-    [enrolledCourses, selectedCourseId]
-  );
-
-  // Get unique course options
   const courseOptions = useMemo(() => {
-    const courses = new Map<string, string>();
+    const courses = new Map<string, { _id: string; title: string }>();
     enrolledCourses.forEach((c) => {
-      if (c.course && typeof c.course === "string")
-        courses.set(c.course, c.course);
+      if (c.course && c.course._id) {
+        courses.set(
+          c.course._id,
+          c.course as unknown as { _id: string; title: string }
+        );
+      }
     });
-    return Array.from(courses.entries());
+    return Array.from(courses.values());
   }, [enrolledCourses]);
 
-  // Filter students for the selected course
   const studentsForCourse = useMemo(() => {
     if (!selectedCourseId) return [];
-    return enrolledCourses.filter((c) => c.course === selectedCourseId);
+    return enrolledCourses.filter((c) => c.course._id === selectedCourseId);
   }, [enrolledCourses, selectedCourseId]);
 
-  // Grading state
-  const [studentMarks, setStudentMarks] = useState<
-    Record<
-      string,
-      {
-        classTest1: number;
-        classTest2: number;
-        midTerm: number;
-        finalTerm: number;
-      }
-    >
-  >({});
-  const [history, setHistory] = useState<TEnrolledCourse[]>([]);
+  const [studentMarks, setStudentMarks] = useState<TStudentMarks>({});
 
-  // Add mark mutation
-  const [addMark] = useAddMarkMutation();
+  const [updateEnrolledCourseMarks, { isLoading: isSubmitting }] =
+    useUpdateEnrolledCourseMarksMutation();
 
-  // Load grading history for selected course
   useEffect(() => {
-    if (enrolledCourses && selectedCourseId) {
-      setHistory(enrolledCourses.filter((g) => g.course === selectedCourseId));
-    }
-  }, [enrolledCourses, selectedCourseId]);
+    if (selectedCourseId) {
+      const initialMarks: TStudentMarks = {};
+      const studentsInCourse = enrolledCourses.filter(
+        (c) => c.course._id === selectedCourseId
+      );
 
-  // Handle mark input change
+      studentsInCourse.forEach((enrollment) => {
+        initialMarks[enrollment.student.id] = {};
+        enrollment.selectedSubjects?.forEach((subject) => {
+          const subjectMarks = enrollment.subjectMarks?.find(
+            (sm) => sm.subjectName === subject
+          );
+          initialMarks[enrollment.student.id][subject] = {
+            classTest1: subjectMarks?.marks.classTest1 || 0,
+            classTest2: subjectMarks?.marks.classTest2 || 0,
+            midTerm: subjectMarks?.marks.midTerm || 0,
+            finalTerm: subjectMarks?.marks.finalTerm || 0,
+          };
+        });
+      });
+      setStudentMarks(initialMarks);
+    } else {
+      setStudentMarks({});
+    }
+  }, [selectedCourseId, enrolledCourses]);
+
   const handleMarkChange = (
     studentId: string,
+    subjectName: string,
     field: keyof TEnrolledCourse["courseMarks"],
     value: string
   ) => {
-    setStudentMarks((prev) => {
-      const prevMarks = prev[studentId] || {
-        classTest1: 0,
-        classTest2: 0,
-        midTerm: 0,
-        finalTerm: 0,
-      };
-      return { ...prev, [studentId]: { ...prevMarks, [field]: Number(value) } };
-    });
+    setStudentMarks((prev) => ({
+      ...prev,
+      [studentId]: {
+        ...prev[studentId],
+        [subjectName]: {
+          ...prev[studentId]?.[subjectName],
+          [field]: Number(value) || 0,
+        },
+      },
+    }));
   };
 
-  // Assign or update grades for all students in the course
   const handleAssignGrades = async () => {
-    for (const student of studentsForCourse) {
-      const marksObj = studentMarks[student.student] || {
-        classTest1: 0,
-        classTest2: 0,
-        midTerm: 0,
-        finalTerm: 0,
-      };
-      const totalMarks =
-        marksObj.classTest1 +
-        marksObj.classTest2 +
-        marksObj.midTerm +
-        marksObj.finalTerm;
-      const grade = calculateGrade(totalMarks);
-      const resultStatus = getResultStatus(totalMarks);
-      await addMark({
-        studentId: student.student,
-        courseId: student.course,
-        marks: marksObj,
-        totalMarks,
-        grade,
-        resultStatus,
+    const toastId = toast.loading("Submitting grades...");
+    try {
+      const promises = studentsForCourse
+        .flatMap((student) => {
+          const studentId = student.student.id;
+          const marksBySubject = studentMarks[studentId];
+          if (!marksBySubject) return [];
+
+          return Object.entries(marksBySubject).map(([subjectName, marks]) => {
+            const isAlreadyGraded = student.subjectMarks?.some(
+              (sm) => sm.subjectName === subjectName
+            );
+            if (isAlreadyGraded) return null;
+
+            const totalMarks =
+              (marks.classTest1 ?? 0) +
+              (marks.classTest2 ?? 0) +
+              (marks.midTerm ?? 0) +
+              (marks.finalTerm ?? 0);
+
+            const gradeData = {
+              studentId,
+              courseId: student.course._id,
+              subjectName,
+              marks,
+              grade: calculateGrade(totalMarks),
+              isPassed: getResultStatus(totalMarks) === "PASS",
+            };
+            return updateEnrolledCourseMarks(gradeData).unwrap();
+          });
+        })
+        .filter((p) => p !== null);
+
+      await Promise.all(promises);
+
+      toast.success("Grades submitted successfully!", { id: toastId });
+      refetch();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to submit grades. Please try again.", {
+        id: toastId,
       });
     }
   };
 
-  // Export grading history to Excel
   const exportToExcel = () => {
-    const worksheet = XLSX.utils.json_to_sheet(history);
+    const dataToExport = studentsForCourse.flatMap((enrollment: any) => {
+      const studentFullName = `${enrollment.student.name.firstName} ${
+        enrollment.student.name.middleName || ""
+      } ${enrollment.student.name.lastName}`;
+
+      if (
+        !enrollment.selectedSubjects ||
+        enrollment.selectedSubjects.length === 0
+      ) {
+        return [
+          {
+            StudentName: studentFullName,
+            StudentId: enrollment.student.id,
+            Course: enrollment.course.title,
+            Subject: "N/A",
+            ClassTest1: "N/A",
+            ClassTest2: "N/A",
+            MidTerm: "N/A",
+            FinalTerm: "N/A",
+            Total: "N/A",
+            Grade: "N/A",
+            Result: "N/A",
+          },
+        ];
+      }
+
+      return enrollment.selectedSubjects.map((subject) => {
+        const marksObj = studentMarks[enrollment.student.id]?.[subject] || {
+          classTest1: 0,
+          classTest2: 0,
+          midTerm: 0,
+          finalTerm: 0,
+        };
+        const total =
+          (marksObj.classTest1 ?? 0) +
+          (marksObj.classTest2 ?? 0) +
+          (marksObj.midTerm ?? 0) +
+          (marksObj.finalTerm ?? 0);
+        const grade = calculateGrade(total);
+        const result = getResultStatus(total);
+
+        return {
+          StudentName: studentFullName,
+          StudentId: enrollment.student.id,
+          Course: enrollment.course.title,
+          Subject: subject,
+          ClassTest1: marksObj.classTest1,
+          ClassTest2: marksObj.classTest2,
+          MidTerm: marksObj.midTerm,
+          FinalTerm: marksObj.finalTerm,
+          Total: total,
+          Grade: grade,
+          Result: result,
+        };
+      });
+    });
+
+    const worksheet = XLSX.utils.json_to_sheet(dataToExport);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Grades");
-    XLSX.writeFile(workbook, "grading_history.xlsx");
+    XLSX.writeFile(
+      workbook,
+      `grading_sheet_${
+        courseOptions.find((c) => c._id === selectedCourseId)?.title || "course"
+      }.xlsx`
+    );
   };
 
   return (
@@ -172,223 +252,53 @@ export default function GradesPage() {
             <Select
               value={selectedCourseId}
               onValueChange={setSelectedCourseId}
+              disabled={isLoading}
             >
-              <SelectTrigger className="w-[220px]">
+              <SelectTrigger className="w-[280px]">
                 <SelectValue placeholder="Select Course" />
               </SelectTrigger>
               <SelectContent>
-                {courseOptions.map(([id, name]) => (
-                  <SelectItem key={id} value={id}>
-                    {courseMap.get(id)?.title || name}
+                {courseOptions.map((course) => (
+                  <SelectItem key={course._id} value={course._id}>
+                    {course.title}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
             <Button
               onClick={handleAssignGrades}
-              disabled={!selectedCourseId || studentsForCourse.length === 0}
+              disabled={
+                !selectedCourseId ||
+                studentsForCourse.length === 0 ||
+                isSubmitting
+              }
             >
-              Save Grades
+              {isSubmitting ? "Submitting..." : "Save Grades"}
             </Button>
-            <Button variant="secondary" onClick={exportToExcel}>
+            <Button
+              variant="secondary"
+              onClick={exportToExcel}
+              disabled={
+                !selectedCourseId ||
+                studentsForCourse.length === 0 ||
+                isSubmitting
+              }
+            >
               Export to Excel
             </Button>
           </div>
-          <div className="overflow-x-auto mt-4">
-            <table className="min-w-full text-sm text-left border rounded-lg">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="px-4 py-2 border">Student</th>
-                  <th className="px-4 py-2 border">Course</th>
-                  <th className="px-4 py-2 border">Class Test 1</th>
-                  <th className="px-4 py-2 border">Class Test 2</th>
-                  <th className="px-4 py-2 border">Mid Term</th>
-                  <th className="px-4 py-2 border">Final Term</th>
-                  <th className="px-4 py-2 border">Total</th>
-                  <th className="px-4 py-2 border">Grade</th>
-                  <th className="px-4 py-2 border">Result</th>
-                </tr>
-              </thead>
-              <tbody>
-                {studentsForCourse.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="text-center py-4">
-                      No students found for this course.
-                    </td>
-                  </tr>
-                ) : (
-                  studentsForCourse.map((student) => {
-                    const marksObj = studentMarks[student.student] || {
-                      classTest1: 0,
-                      classTest2: 0,
-                      midTerm: 0,
-                      finalTerm: 0,
-                    };
-                    const total =
-                      marksObj.classTest1 +
-                      marksObj.classTest2 +
-                      marksObj.midTerm +
-                      marksObj.finalTerm;
-                    const grade = calculateGrade(total);
-                    const result = getResultStatus(total);
-                    return (
-                      <tr key={student.student}>
-                        <td className="px-4 py-2 border">
-                          {studentMap.get(student.student)?.fullName ||
-                            student.student}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {courseMap.get(student.course)?.title ||
-                            student.course}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          <Input
-                            type="number"
-                            min={0}
-                            max={25}
-                            value={marksObj.classTest1}
-                            onChange={(e) =>
-                              handleMarkChange(
-                                student.student,
-                                "classTest1",
-                                e.target.value
-                              )
-                            }
-                            className="w-20"
-                          />
-                        </td>
-                        <td className="px-4 py-2 border">
-                          <Input
-                            type="number"
-                            min={0}
-                            max={25}
-                            value={marksObj.classTest2}
-                            onChange={(e) =>
-                              handleMarkChange(
-                                student.student,
-                                "classTest2",
-                                e.target.value
-                              )
-                            }
-                            className="w-20"
-                          />
-                        </td>
-                        <td className="px-4 py-2 border">
-                          <Input
-                            type="number"
-                            min={0}
-                            max={25}
-                            value={marksObj.midTerm}
-                            onChange={(e) =>
-                              handleMarkChange(
-                                student.student,
-                                "midTerm",
-                                e.target.value
-                              )
-                            }
-                            className="w-20"
-                          />
-                        </td>
-                        <td className="px-4 py-2 border">
-                          <Input
-                            type="number"
-                            min={0}
-                            max={25}
-                            value={marksObj.finalTerm}
-                            onChange={(e) =>
-                              handleMarkChange(
-                                student.student,
-                                "finalTerm",
-                                e.target.value
-                              )
-                            }
-                            className="w-20"
-                          />
-                        </td>
-                        <td className="px-4 py-2 border font-semibold">
-                          {total}
-                        </td>
-                        <td className="px-4 py-2 border font-semibold">
-                          {grade}
-                        </td>
-                        <td className="px-4 py-2 border font-semibold">
-                          {result}
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>Grading History</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm text-left border rounded-lg">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="px-4 py-2 border">Student</th>
-                  <th className="px-4 py-2 border">Course</th>
-                  <th className="px-4 py-2 border">Class Test 1</th>
-                  <th className="px-4 py-2 border">Class Test 2</th>
-                  <th className="px-4 py-2 border">Mid Term</th>
-                  <th className="px-4 py-2 border">Final Term</th>
-                  <th className="px-4 py-2 border">Total</th>
-                  <th className="px-4 py-2 border">Grade</th>
-                  <th className="px-4 py-2 border">Result</th>
-                </tr>
-              </thead>
-              <tbody>
-                {history.length > 0 ? (
-                  history.map((h, idx) => {
-                    const total =
-                      h.courseMarks.classTest1 +
-                      h.courseMarks.classTest2 +
-                      h.courseMarks.midTerm +
-                      h.courseMarks.finalTerm;
-                    const grade = calculateGrade(total);
-                    const result = getResultStatus(total);
-                    return (
-                      <tr key={h.student + idx}>
-                        <td className="px-4 py-2 border">
-                          {studentMap.get(h.student)?.fullName || h.student}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {courseMap.get(h.course)?.title || h.course}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {h.courseMarks.classTest1}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {h.courseMarks.classTest2}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {h.courseMarks.midTerm}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {h.courseMarks.finalTerm}
-                        </td>
-                        <td className="px-4 py-2 border">{total}</td>
-                        <td className="px-4 py-2 border">{grade}</td>
-                        <td className="px-4 py-2 border">{result}</td>
-                      </tr>
-                    );
-                  })
-                ) : (
-                  <tr>
-                    <td className="px-4 py-2 border text-center" colSpan={9}>
-                      No grading history found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+          {isLoading ? (
+            <p>Loading...</p>
+          ) : (
+            <GradeEntryTable
+              studentsForCourse={studentsForCourse}
+              studentMarks={studentMarks}
+              handleMarkChange={handleMarkChange}
+              calculateGrade={calculateGrade}
+              getResultStatus={getResultStatus}
+              selectedCourseId={selectedCourseId}
+            />
+          )}
         </CardContent>
       </Card>
     </motion.div>
