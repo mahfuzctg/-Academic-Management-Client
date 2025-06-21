@@ -44,7 +44,7 @@ const BlogsSection: React.FC = () => {
   };
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4 sm:p-6">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4 sm:p-6 w-9/12 mx-auto">
       {isLoading
         ? Array.from({ length: 3 }).map((_, i) => (
             <Card

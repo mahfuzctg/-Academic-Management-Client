@@ -15,6 +15,19 @@ export const jobApi = baseApi.injectEndpoints({
       providesTags: ["jobs"],
     }),
 
+    // New endpoint: get jobs posted by the logged-in user
+    getMyJobs: builder.query<IJob[], void>({
+      query: () => ({
+        url: "/jobs/my-jobs",
+        method: "GET",
+      }),
+      transformResponse: (response: unknown) => {
+        const res = response as { data: IJob[] };
+        return res.data;
+      },
+      providesTags: ["jobs"],
+    }),
+
     getSingleJob: builder.query<IJob, string>({
       query: (id) => ({
         url: `/jobs/${id}`,
@@ -53,7 +66,6 @@ export const jobApi = baseApi.injectEndpoints({
       invalidatesTags: ["jobs"],
     }),
 
-    // New applyJob mutation
     applyJob: builder.mutation<IJob, string>({
       query: (jobId) => ({
         url: `/jobs/${jobId}/apply`,
@@ -67,6 +79,7 @@ export const jobApi = baseApi.injectEndpoints({
 
 export const {
   useGetAllJobsQuery,
+  useGetMyJobsQuery,
   useGetSingleJobQuery,
   useCreateJobMutation,
   useUpdateJobMutation,
