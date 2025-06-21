@@ -57,7 +57,7 @@ export default function FacultyManagement() {
   >();
   const [isSubjectsDialogOpen, setIsSubjectsDialogOpen] = useState(false);
   const [selectedFacultyForSubjects, setSelectedFacultyForSubjects] = useState<
-    TFaculty | undefined
+    TFaculty | undefined | any
   >();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [facultyToDelete, setFacultyToDelete] = useState<any | null>(null);
@@ -415,78 +415,85 @@ export default function FacultyManagement() {
               </div>
 
               <div className="space-y-4">
-                {selectedFacultyForSubjects.assignedSubjects.map((subject) => (
-                  <div
-                    key={subject.id}
-                    className="p-4 border rounded-lg space-y-4"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold">{subject.name}</h3>
-                        <p className="text-sm text-muted-foreground">
-                          Code: {subject.code} | Semester: {subject.semester}
-                        </p>
+                {selectedFacultyForSubjects.assignedSubjects.map(
+                  (subject: any) => (
+                    <div
+                      key={subject.id}
+                      className="p-4 border rounded-lg space-y-4"
+                    >
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-semibold">{subject.name}</h3>
+                          <p className="text-sm text-muted-foreground">
+                            Code: {subject.code} | Semester: {subject.semester}
+                          </p>
+                        </div>
+                        <Button variant="outline" size="sm">
+                          View Students
+                        </Button>
                       </div>
-                      <Button variant="outline" size="sm">
-                        View Students
-                      </Button>
-                    </div>
 
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Student List</h4>
-                      <div className="border rounded-md">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b">
-                              <th className="text-left p-2">Student ID</th>
-                              <th className="text-left p-2">Name</th>
-                              <th className="text-left p-2">Grade</th>
-                              <th className="text-left p-2">Attendance</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {subject.students.map((student) => (
-                              <tr key={student.studentId} className="border-b">
-                                <td className="p-2">{student.studentId}</td>
-                                <td className="p-2">{student.name}</td>
-                                <td className="p-2">
-                                  {student.grade || "N/A"}
-                                </td>
-                                <td className="p-2">{student.attendance}%</td>
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium">Student List</h4>
+                        <div className="border rounded-md">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left p-2">Student ID</th>
+                                <th className="text-left p-2">Name</th>
+                                <th className="text-left p-2">Grade</th>
+                                <th className="text-left p-2">Attendance</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {subject.students.map((student: any) => (
+                                <tr
+                                  key={student.studentId}
+                                  className="border-b"
+                                >
+                                  <td className="p-2">{student.studentId}</td>
+                                  <td className="p-2">{student.name}</td>
+                                  <td className="p-2">
+                                    {student.grade || "N/A"}
+                                  </td>
+                                  <td className="p-2">{student.attendance}%</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium">Grading History</h4>
-                      <div className="border rounded-md">
-                        <table className="w-full">
-                          <thead>
-                            <tr className="border-b">
-                              <th className="text-left p-2">Date</th>
-                              <th className="text-left p-2">Student ID</th>
-                              <th className="text-left p-2">Grade</th>
-                              <th className="text-left p-2">Semester</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {subject.gradingHistory.map((record, index) => (
-                              <tr key={index} className="border-b">
-                                <td className="p-2">{record.date}</td>
-                                <td className="p-2">{record.studentId}</td>
-                                <td className="p-2">{record.grade}</td>
-                                <td className="p-2">{record.semester}</td>
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium">Grading History</h4>
+                        <div className="border rounded-md">
+                          <table className="w-full">
+                            <thead>
+                              <tr className="border-b">
+                                <th className="text-left p-2">Date</th>
+                                <th className="text-left p-2">Student ID</th>
+                                <th className="text-left p-2">Grade</th>
+                                <th className="text-left p-2">Semester</th>
                               </tr>
-                            ))}
-                          </tbody>
-                        </table>
+                            </thead>
+                            <tbody>
+                              {subject.gradingHistory.map(
+                                (record: any, index: any) => (
+                                  <tr key={index} className="border-b">
+                                    <td className="p-2">{record.date}</td>
+                                    <td className="p-2">{record.studentId}</td>
+                                    <td className="p-2">{record.grade}</td>
+                                    <td className="p-2">{record.semester}</td>
+                                  </tr>
+                                )
+                              )}
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                )}
               </div>
             </div>
           )}

@@ -58,7 +58,10 @@ export default function GradesPage() {
     const courses = new Map<string, { _id: string; title: string }>();
     enrolledCourses.forEach((c) => {
       if (c.course && c.course._id) {
-        courses.set(c.course._id, c.course as { _id: string; title: string });
+        courses.set(
+          c.course._id,
+          c.course as unknown as { _id: string; title: string }
+        );
       }
     });
     return Array.from(courses.values());
@@ -166,7 +169,7 @@ export default function GradesPage() {
   };
 
   const exportToExcel = () => {
-    const dataToExport = studentsForCourse.flatMap((enrollment) => {
+    const dataToExport = studentsForCourse.flatMap((enrollment: any) => {
       const studentFullName = `${enrollment.student.name.firstName} ${
         enrollment.student.name.middleName || ""
       } ${enrollment.student.name.lastName}`;
