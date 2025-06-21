@@ -17,19 +17,9 @@ import {
   useUpdateEnrolledCourseMarksMutation,
 } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
 import GradeEntryTable from "./components/GradeEntryTable";
+import type { TStudentMarks } from "./components/SubjectMarksTable";
 
-type TStudentMarks = Record<
-  string, // studentId
-  Record<
-    string, // subjectName
-    {
-      classTest1: number;
-      classTest2: number;
-      midTerm: number;
-      finalTerm: number;
-    }
-  >
->;
+
 
 function calculateGrade(marks: number) {
   if (marks >= 90) return "A+";
@@ -195,7 +185,7 @@ export default function GradesPage() {
         ];
       }
 
-      return enrollment.selectedSubjects.map((subject) => {
+      return enrollment.selectedSubjects.map((subject: any) => {
         const marksObj = studentMarks[enrollment.student.id]?.[subject] || {
           classTest1: 0,
           classTest2: 0,
