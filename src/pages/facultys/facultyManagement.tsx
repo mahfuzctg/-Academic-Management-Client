@@ -416,9 +416,9 @@ export default function FacultyManagement() {
 
               <div className="space-y-4">
                 {selectedFacultyForSubjects.assignedSubjects.map(
-                  (subject: any) => (
+                  (subject: any, index: any | string) => (
                     <div
-                      key={subject.id}
+                      key={index}
                       className="p-4 border rounded-lg space-y-4"
                     >
                       <div className="flex justify-between items-start">

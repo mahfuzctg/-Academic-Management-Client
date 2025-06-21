@@ -8,6 +8,7 @@ import AcademicInstructorShow from "@/pages/share/facultyAndStudent/academicInst
 import AcademicSemesterShow from "@/pages/share/facultyAndStudent/AcademickSemesterShow";
 import AcademicOfferedCourseShow from "@/pages/share/facultyAndStudent/academicOfferedCourseShow";
 import MyCourses from "@/pages/Students/courses/MyCourses";
+import StudentGradesPage from "@/pages/Students/StudentGrades/StudentGradesPage";
 import StudentProfile from "@/pages/Students/StudentProfile";
 import {
   Award,
@@ -42,7 +43,7 @@ export const studentPaths = [
   {
     name: "Grades",
     path: "grades",
-    element: <StudentProfile />,
+    element: <StudentGradesPage />,
     icon: <Award className="w-5 h-5" />,
   },
 
