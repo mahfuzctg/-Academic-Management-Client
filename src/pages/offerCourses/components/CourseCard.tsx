@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -5,8 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import type { IOfferedCourse } from "@/types/offeredCourse";
 import { motion } from "framer-motion";
 import {
   BookOpen,
@@ -15,7 +16,6 @@ import {
   Clock,
   Users,
 } from "lucide-react";
-import type { IOfferedCourse } from "@/types/offeredCourse";
 
 type CourseCardProps = {
   course: IOfferedCourse;
@@ -124,7 +124,7 @@ const CourseCard = ({ course, isEnrolled, onEnroll }: CourseCardProps) => {
               disabled
             >
               <CheckCircle2 className="w-4 h-4 mr-2" />
-              Already Enrolled
+              Enrolled
             </Button>
           ) : (
             <Button

@@ -3,7 +3,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -16,11 +15,11 @@ type WorkMode = "remote" | "onsite" | "hybrid";
 
 interface CreateJobModalProps {
   open: boolean;
-  setOpen: (open: boolean) => void;
+  onClose: () => void;
   onCreated: () => void;
 }
 
-const CreateJobModal = ({ open, setOpen, onCreated }: CreateJobModalProps) => {
+const CreateJobModal = ({ open, onClose, onCreated }: CreateJobModalProps) => {
   const { user } = useAppSelector((state) => state.auth);
   const { toast } = useToast();
   const [createJob, { isLoading }] = useCreateJobMutation();
@@ -42,10 +41,7 @@ const CreateJobModal = ({ open, setOpen, onCreated }: CreateJobModalProps) => {
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
@@ -79,14 +75,14 @@ const CreateJobModal = ({ open, setOpen, onCreated }: CreateJobModalProps) => {
       return;
     }
 
-    // if (!user?._id) {
-    //   toast({
-    //     title: "Unauthorized",
-    //     description: "You must be logged in to create a job.",
-    //     variant: "destructive",
-    //   });
-    //   return;
-    // }
+    if (!user?._id) {
+      toast({
+        title: "Unauthorized",
+        description: "Please log in to create a job.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     try {
       await createJob({
@@ -109,9 +105,8 @@ const CreateJobModal = ({ open, setOpen, onCreated }: CreateJobModalProps) => {
       });
 
       onCreated();
-      setOpen(false);
+      onClose();
 
-      // Reset form
       setForm({
         title: "",
         category: "",
@@ -137,14 +132,12 @@ const CreateJobModal = ({ open, setOpen, onCreated }: CreateJobModalProps) => {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-md max-h-[80vh] overflow-y-auto space-y-4 p-4">
-        <DialogHeader>
-          <DialogTitle>Create a New Job</DialogTitle>
-          <DialogDescription>
-            Fill out the form below to post a job opportunity.
-          </DialogDescription>
-        </DialogHeader>
+    <Dialog open={open} onOpenChange={onClose}>
+      <DialogContent className="space-y-4 max-w-md max-h-[80vh] overflow-y-auto p-4">
+        <DialogTitle>Create a New Job</DialogTitle>
+        <DialogDescription>
+          Fill out the form below to post a job opportunity.
+        </DialogDescription>
 
         <Input
           name="title"
@@ -222,7 +215,7 @@ const CreateJobModal = ({ open, setOpen, onCreated }: CreateJobModalProps) => {
         </select>
 
         <div className="flex justify-end space-x-2">
-          <Button variant="outline" onClick={() => setOpen(false)}>
+          <Button variant="outline" onClick={onClose}>
             Cancel
           </Button>
           <Button onClick={handleSubmit} disabled={isLoading}>

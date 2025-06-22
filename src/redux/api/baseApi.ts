@@ -19,7 +19,7 @@ const baseQuery = fetchBaseQuery({
     const token = (getState() as RootState).auth.token;
 
     if (token) {
-      headers.set("authorization", `Bearer ${token}`);
+      headers.set("authorization", `${token}`);
     }
 
     return headers;
@@ -32,21 +32,26 @@ const baseQueryWithRefreshToken: BaseQueryFn<
   DefinitionType
 > = async (args, api, extraOptions): Promise<any> => {
   let result = await baseQuery(args, api, extraOptions);
-
-  // Handle 404 & 403 errors with toast
-  if (result?.error?.status === 404 || result?.error?.status === 403) {
-    const errorMessage = result.error.data as { message?: string };
-    if (errorMessage?.message) toast.error(errorMessage.message);
+  if (result?.error?.status === 404) {
+    const errorMessage = result.error.data as { message: string };
+    toast.error(errorMessage.message);
   }
-
-  // Handle 401 error by trying to refresh token
+  if (result?.error?.status === 403) {
+    const errorMessage = result.error.data as { message: string };
+    toast.error(errorMessage.message);
+  }
   if (result?.error?.status === 401) {
+    //* Send Refresh
     console.log("Sending refresh token");
 
-    const res = await fetch("http://localhost:5000/api/v1/auth/refresh-token", {
-      method: "POST",
-      credentials: "include",
-    });
+    const res = await fetch(
+      // "https://academic-management-server-ten.vercel.app/api/v1/auth/refresh-token",
+      "http://localhost:5000/api/v1/auth/refresh-token",
+      {
+        method: "POST",
+        credentials: "include",
+      }
+    );
 
     const data = await res.json();
 
@@ -60,7 +65,6 @@ const baseQueryWithRefreshToken: BaseQueryFn<
         })
       );
 
-      // Retry original query with new token
       result = await baseQuery(args, api, extraOptions);
     } else {
       api.dispatch(logout());
@@ -74,25 +78,28 @@ export const baseApi = createApi({
   reducerPath: "baseApi",
   baseQuery: baseQueryWithRefreshToken,
   tagTypes: [
-    "semesters",
+    "semester",
     "courses",
+    "offeredCourse",
+    "student",
+    "AcademicDepartment",
+    "AcademicSemester",
+    "job",
+    "Grades",
+    "admin",
+    "AcademicYear",
+    "Course",
+    "Faculty",
+    "Program",
     "offeredCourses",
-    "students",
-    "academicDepartments",
-    "academicSemesters",
-    "jobs",
-    "grades",
-    "admins",
-    "academicYears",
-    "faculties",
-    "programs",
-    "semesterRegistrations",
-    "enrolledCourses",
-    "academicFaculties",
-    "studentEnrollments",
-    "studentProfiles",
-    "studentCourses",
-    "userProfiles",
+    "SemesterRegistration",
+    "EnrolledCourse",
+    "AcademicFaculty",
+    "student-enrollments",
+    "student-profile",
+    "student-courses",
+    "user-profile",
+    "offered-courses",
     "blogs",
   ],
   endpoints: () => ({}),

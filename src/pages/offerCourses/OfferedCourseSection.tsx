@@ -1,31 +1,10 @@
 import SectionHeader from "@/components/resuable/SectionHeader";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
-import {
-  useGetAllOfferedCoursesQuery,
-  useGetOfferedCoursesBySemesterQuery,
-} from "@/redux/features/course/offerCourseApi";
+import { useGetAllOfferedCoursesQuery } from "@/redux/features/course/offerCourseApi";
 import {
   useCreateEnrolledCourseMutation,
   useGetMyEnrolledCoursesQuery,
@@ -36,15 +15,7 @@ import type {
   TCourse as TBaseCourse,
 } from "@/types/offeredCourse";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  BookOpen,
-  CalendarDays,
-  CheckCircle2,
-  Clock,
-  GraduationCap,
-  Search,
-  Users,
-} from "lucide-react";
+import { BookOpen, GraduationCap, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import CourseCard from "./components/CourseCard";
 import EnrollmentDialog from "./components/EnrollmentDialog";
@@ -53,7 +24,7 @@ import SubjectSelectionDialog from "./components/SubjectSelectionDialog";
 // Extend types to include new fields for subject selection
 type TExtendedCourse = TBaseCourse & {
   subjectsToSelect?: number;
-  availableSubjects?: { name: string; credits: number }[];
+  optionalSubjects?: { name: string; credits: number }[];
 };
 type TExtendedOfferedCourse = Omit<IOfferedCourse, "course"> & {
   course: TExtendedCourse;
@@ -93,8 +64,8 @@ const OfferedCourseSection = () => {
   const handleEnrollClick = (course: TExtendedOfferedCourse) => {
     setSelectedCourse(course);
     if (
-      course.course.availableSubjects &&
-      course.course.availableSubjects.length > 0
+      course.course.optionalSubjects &&
+      course.course.optionalSubjects.length > 0
     ) {
       setSubjectSelectDialogOpen(true);
     } else {
