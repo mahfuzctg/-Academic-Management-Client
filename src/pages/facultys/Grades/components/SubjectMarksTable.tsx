@@ -1,7 +1,7 @@
 import type { TEnrolledCourse } from "@/types/enrolledCourse";
 // import type { TStudentMarks } from "@/types/studentMarks";
-import { CheckCircle2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { CheckCircle2 } from "lucide-react";
 import type { FC } from "react";
 
 export type TStudentMarks = Record<

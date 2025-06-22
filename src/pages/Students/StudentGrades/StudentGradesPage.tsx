@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -12,16 +10,19 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { motion } from "framer-motion";
 import { CheckCircle2, GraduationCap } from "lucide-react";
-import { toast } from "sonner";
-import type { TEnrolledCourse } from "@/types/enrolledCourse";
+import { useState } from "react";
+
+import { toast } from "@/components/ui/use-toast";
 import { useGetMyEnrolledCoursesQuery } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
-import GradingHistoryTable from "./GradingHistoryTable";
+import { useGetAllSemesterRegistrationsQuery } from "@/redux/features/semesterRegistration/semesterRegistrationApi";
 import {
   useGetMeQuery,
   useUpdateStudentMutation,
 } from "@/redux/features/student/studentApi";
-import { useGetAllSemesterRegistrationsQuery } from "@/redux/features/semesterRegistration/semesterRegistrationApi";
+import type { TEnrolledCourse } from "@/types/enrolledCourse";
+import GradingHistoryTable from "./GradingHistoryTable";
 
 /**
  * @description Calculates the best 3 class test marks from 4 class tests
@@ -103,21 +104,29 @@ export default function StudentGradesPage() {
   const getNextSemesterId = (): string | null => {
     if (!semesterRegistrations?.data) return null;
 
+    console.log("semester Registrations", semesterRegistrations);
     // Get current student's admission semester
     const currentStudent = enrolledCoursesData?.data?.[0]?.student;
-    const currentSemester = currentStudent?.admissionSemester;
+
+    console.log("current Student", currentStudent);
+    const currentSemester = currentStudent?.academicSemester;
+    console.log("current Semester", currentSemester);
 
     if (!currentSemester) return null;
 
     // Find current semester in registrations to get its details
-    const currentSemesterData = semesterRegistrations.data.find(
-      (semester) => semester._id === currentSemester
-    );
 
+    const currentSemesterData = semesterRegistrations?.data?.find(
+      (semester) => semester.academicSemester?._id === currentSemester
+    );
+    console.log("current Semester Data ", currentSemesterData);
     if (!currentSemesterData?.academicSemester) return null;
 
     // Determine next semester based on current semester name
     const currentSemesterName = currentSemesterData.academicSemester.name;
+    const currentSemesterId = currentSemesterData.academicSemester._id;
+    console.log("currentSemester Name ", currentSemesterName);
+    console.log("currentSemester _id ", currentSemesterId);
     let nextSemesterName: string;
 
     if (currentSemesterName === "1st Semester") {
@@ -164,7 +173,10 @@ export default function StudentGradesPage() {
       const nextSemesterId = getNextSemesterId();
 
       if (!nextSemesterId) {
-        toast.error("Next semester not found. Please contact administration.");
+        toast({
+          title: "Next semester not found. Please contact administration.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -175,6 +187,13 @@ export default function StudentGradesPage() {
 
       console.log("student", student?.data?._id);
       const studentId = student?.data?._id;
+      if (!studentId) {
+        toast({
+          title: "Student ID not found. Please contact administration.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       await updateOwnProfile({
         id: studentId || "",
@@ -187,9 +206,11 @@ export default function StudentGradesPage() {
         ...registrationData,
       });
 
-      toast.success(
-        "Registration submitted successfully! Your admission semester has been updated."
-      );
+      toast({
+        title:
+          "Registration submitted successfully! Your admission semester has been updated.",
+        variant: "default",
+      });
       setIsModalOpen(false);
       setRegistrationData({
         preferredSubjects: "",
@@ -198,7 +219,10 @@ export default function StudentGradesPage() {
       });
     } catch (error) {
       console.error("Registration error:", error);
-      toast.error("Failed to submit registration. Please try again.");
+      toast({
+        title: "Failed to submit registration. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

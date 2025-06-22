@@ -20,8 +20,8 @@ interface CreateJobModalProps {
 }
 
 const CreateJobModal = ({ open, onClose, onCreated }: CreateJobModalProps) => {
-  const { user } = useAppSelector((state) => state.auth);
   const { toast } = useToast();
+  const { user } = useAppSelector((state) => state.auth);
   const [createJob, { isLoading }] = useCreateJobMutation();
 
   const [form, setForm] = useState({
@@ -75,15 +75,6 @@ const CreateJobModal = ({ open, onClose, onCreated }: CreateJobModalProps) => {
       return;
     }
 
-    if (!user?._id) {
-      toast({
-        title: "Unauthorized",
-        description: "Please log in to create a job.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     try {
       await createJob({
         title,
@@ -96,7 +87,6 @@ const CreateJobModal = ({ open, onClose, onCreated }: CreateJobModalProps) => {
         deadline,
         vacancy: Number(vacancy),
         workMode,
-        author: user._id,
       }).unwrap();
 
       toast({

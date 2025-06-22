@@ -1,28 +1,28 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Form,
-  FormMessage,
   FormControl,
-  FormLabel,
-  FormItem,
   FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
 } from "@/components/ui/form";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import type { TStudent } from "@/types/student";
+import { FormFields } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/use-toast";
+import { useGetAllAcademicDepartmentsQuery } from "@/redux/features/academic/academicDepartmentApi";
+import { useGetAllAcademicSemestersQuery } from "@/redux/features/academic/academicSemesterApi";
 import {
   useCreateStudentMutation,
   useUpdateStudentMutation,
 } from "@/redux/features/student/studentApi";
-import { useToast } from "@/components/ui/use-toast";
-import { useState, useEffect } from "react";
-import { FormFields } from "@/components/ui/form-field";
-import { useGetAllAcademicSemestersQuery } from "@/redux/features/academic/academicSemesterApi";
-import { Input } from "@/components/ui/input";
-import { useGetAllAcademicDepartmentsQuery } from "@/redux/features/academic/academicDepartmentApi";
+import type { TStudent } from "@/types/student";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 const studentSchema = z.object({
   name: z.object({
@@ -198,7 +198,7 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
   // Convert data to select options format
   const semesterOptions =
     semestersData?.data?.map((semester: any) => ({
-      label: `${semester.name} ${semester.year}`,
+      label: `${semester.name} `,
       value: semester._id,
     })) || [];
 

@@ -137,8 +137,8 @@ const OfferedCourseSection = () => {
           transition={{ delay: 0.2 }}
         >
           <SectionHeader
-            title="Our Offered Courses"
-            subtitle="Discover a curated selection of academic and skill-based courses tailored to your goals. Enroll in the right course and take a step closer to your career aspirations."
+            title="Subjects You Can Explore"
+            subtitle="Discover a curated selection of academic and skill-based subjects tailored to your goals. Choose the right subject and take a step closer to your career aspirations."
           />
         </motion.div>
 
