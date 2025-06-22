@@ -60,17 +60,32 @@ const calculateFinalTotal = (
   return Math.min(total, 210); // Cap total at 210
 };
 
+/**
+ * @description Calculates the letter grade based on total marks (out of 210).
+ * @param {number} marks - The total marks (0-210).
+ * @returns {string} The letter grade.
+ */
 function calculateGrade(marks: number) {
-  if (marks >= 90) return "A+";
-  if (marks >= 80) return "A";
-  if (marks >= 70) return "B";
-  if (marks >= 60) return "C";
-  if (marks >= 50) return "D";
+  // Convert marks to percentage (210 is 100%)
+  const percentage = (marks / 210) * 100;
+  
+  if (percentage >= 90) return "A+";
+  if (percentage >= 80) return "A";
+  if (percentage >= 70) return "B";
+  if (percentage >= 60) return "C";
+  if (percentage >= 50) return "D";
   return "F";
 }
 
+/**
+ * @description Determines the result status (PASS/FAIL) based on total marks (out of 210).
+ * @param {number} marks - The total marks (0-210).
+ * @returns {string} The result status.
+ */
 function getResultStatus(marks: number) {
-  return marks >= 50 ? "PASS" : "FAIL";
+  // Convert marks to percentage (210 is 100%)
+  const percentage = (marks / 210) * 100;
+  return percentage >= 50 ? "PASS" : "FAIL";
 }
 
 export default function GradesPage() {

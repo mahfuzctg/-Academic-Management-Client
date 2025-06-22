@@ -51,7 +51,7 @@ const CourseTable: React.FC<Props> = ({
         <TableBody>
           {filteredCourses?.map((course: ICourse) => (
             <CourseRow
-              key={course.id}
+              key={course._id}
               course={course}
               courseFaculties={courseFaculties}
               handleStatusChange={handleStatusChange}

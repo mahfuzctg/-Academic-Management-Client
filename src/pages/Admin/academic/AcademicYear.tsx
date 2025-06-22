@@ -54,7 +54,7 @@ const AcademicYear = () => {
     isLoading,
     isError,
   } = useGetAllAcademicYearsQuery([]);
-
+  console.log("academick", isError);
   const form = useForm<AcademicYearFormData>({
     resolver: zodResolver(academicYearSchema),
     defaultValues: {

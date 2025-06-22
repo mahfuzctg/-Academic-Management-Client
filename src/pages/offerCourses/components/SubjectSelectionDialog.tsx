@@ -68,7 +68,7 @@ const SubjectSelectionDialog = ({
           </AlertDialogDescription>
         </AlertDialogHeader>
         <div className="space-y-4 py-4">
-          {course?.course?.availableSubjects?.map((subject) => (
+          {course?.course?.optionalSubjects?.map((subject) => (
             <div key={subject.name} className="flex items-center space-x-2">
               <Checkbox
                 id={subject.name}

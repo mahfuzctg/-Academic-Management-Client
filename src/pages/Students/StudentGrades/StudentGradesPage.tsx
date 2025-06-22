@@ -17,6 +17,11 @@ import { toast } from "sonner";
 import type { TEnrolledCourse } from "@/types/enrolledCourse";
 import { useGetMyEnrolledCoursesQuery } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
 import GradingHistoryTable from "./GradingHistoryTable";
+import {
+  useGetMeQuery,
+  useUpdateStudentMutation,
+} from "@/redux/features/student/studentApi";
+import { useGetAllSemesterRegistrationsQuery } from "@/redux/features/semesterRegistration/semesterRegistrationApi";
 
 /**
  * @description Calculates the best 3 class test marks from 4 class tests
@@ -37,15 +42,6 @@ const calculateBestThreeCT = (
   return marks.slice(0, 3).reduce((sum, mark) => sum + mark, 0); // Sum of best 3
 };
 
-/**
- * @description Calculates the final total marks with the new grading system
- * @param {number} ct1 - Class Test 1 marks
- * @param {number} ct2 - Class Test 2 marks
- * @param {number} ct3 - Class Test 3 marks
- * @param {number} ct4 - Class Test 4 marks
- * @param {number} finalExam - Final Exam marks
- * @returns {number} Final total marks (capped at 210)
- */
 const calculateFinalTotal = (
   ct1: number,
   ct2: number,
@@ -59,51 +55,97 @@ const calculateFinalTotal = (
   return Math.min(total, 210); // Cap total at 210
 };
 
-/**
- * @description Calculates the letter grade based on total marks.
- * @param {number} marks - The total marks.
- * @returns {string} The letter grade.
- * @author Sp-y-d-e-r
- */
 function calculateGrade(marks: number) {
-  if (marks >= 90) return "A+";
-  if (marks >= 80) return "A";
-  if (marks >= 70) return "B";
-  if (marks >= 60) return "C";
-  if (marks >= 50) return "D";
+  // Convert marks to percentage (210 is 100%)
+  const percentage = (marks / 210) * 100;
+
+  if (percentage >= 90) return "A+";
+  if (percentage >= 80) return "A";
+  if (percentage >= 70) return "B";
+  if (percentage >= 60) return "C";
+  if (percentage >= 50) return "D";
   return "F";
 }
 
-/**
- * @description Determines the result status (PASS/FAIL) based on total marks.
- * @param {number} marks - The total marks.
- * @returns {string} The result status.
- * @author Sp-y-d-e-r
- */
 function getResultStatus(marks: number) {
-  return marks >= 50 ? "PASS" : "FAIL";
+  // Convert marks to percentage (210 is 100%)
+  const percentage = (marks / 210) * 100;
+  return percentage >= 50 ? "PASS" : "FAIL";
 }
 
-/**
- * @description The main component for the student grades page.
- * It displays the student's grades and provides an option to register for the next semester.
- * @returns {JSX.Element} The rendered component.
- * @author Sp-y-d-e-r
- */
 export default function StudentGradesPage() {
-  const { data: enrolledCoursesData, isLoading } =
+  const { data: enrolledCoursesData, isLoading: coursesLoading } =
     useGetMyEnrolledCoursesQuery(undefined);
+
+  const { data: semesterRegistrations } =
+    useGetAllSemesterRegistrationsQuery(undefined);
+  const [updateOwnProfile, { isLoading: updateLoading }] =
+    useUpdateStudentMutation();
+
   const enrolledCourses: TEnrolledCourse[] = enrolledCoursesData?.data || [];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState<TEnrolledCourse | null>(
     null
   );
+
+  const { data: student } = useGetMeQuery();
   const [registrationData, setRegistrationData] = useState({
     preferredSubjects: "",
     academicGoals: "",
     additionalNotes: "",
   });
+
+  /**
+   * @description Gets the next semester ID from semester registrations
+   * @returns {string | null} The next semester ID or null if not found
+   */
+  const getNextSemesterId = (): string | null => {
+    if (!semesterRegistrations?.data) return null;
+
+    // Get current student's admission semester
+    const currentStudent = enrolledCoursesData?.data?.[0]?.student;
+    const currentSemester = currentStudent?.admissionSemester;
+
+    if (!currentSemester) return null;
+
+    // Find current semester in registrations to get its details
+    const currentSemesterData = semesterRegistrations.data.find(
+      (semester) => semester._id === currentSemester
+    );
+
+    if (!currentSemesterData?.academicSemester) return null;
+
+    // Determine next semester based on current semester name
+    const currentSemesterName = currentSemesterData.academicSemester.name;
+    let nextSemesterName: string;
+
+    if (currentSemesterName === "1st Semester") {
+      nextSemesterName = "2nd Semester";
+    } else if (currentSemesterName === "2nd Semester") {
+      nextSemesterName = "3rd Semester";
+    } else if (currentSemesterName === "3rd Semester") {
+      nextSemesterName = "4th Semester";
+    } else if (currentSemesterName === "4th Semester") {
+      nextSemesterName = "5th Semester";
+    } else if (currentSemesterName === "5th Semester") {
+      nextSemesterName = "6th Semester";
+    } else if (currentSemesterName === "6th Semester") {
+      nextSemesterName = "7th Semester";
+    } else if (currentSemesterName === "7th Semester") {
+      nextSemesterName = "8th Semester";
+    } else {
+      // If already in 8th semester or unknown, return null
+      return null;
+    }
+
+    // Find the next semester
+    const nextSemester = semesterRegistrations.data.find(
+      (semester) => semester.academicSemester?.name === nextSemesterName
+    );
+
+    return nextSemester?._id || null;
+  };
 
   /**
    * @description Opens the registration modal for a specific course.
@@ -115,17 +157,39 @@ export default function StudentGradesPage() {
   };
 
   /**
-   * @description Handles the submission of the registration form.
+   * @description Handles the registration submission and updates student's admission semester
    */
   const handleRegistrationSubmit = async () => {
     try {
-      // Here you would typically make an API call to register for the next semester
+      const nextSemesterId = getNextSemesterId();
+
+      if (!nextSemesterId) {
+        toast.error("Next semester not found. Please contact administration.");
+        return;
+      }
+
+      // Update student's admission semester to next semester
+      const updateData = {
+        admissionSemester: nextSemesterId,
+      };
+
+      console.log("student", student?.data?._id);
+      const studentId = student?.data?._id;
+
+      await updateOwnProfile({
+        id: studentId || "",
+        body: updateData,
+      }).unwrap();
+
       console.log("Registration data:", {
-        courseId: selectedCourse?.course.id,
+        courseId: selectedCourse?.course._id,
+        nextSemesterId,
         ...registrationData,
       });
 
-      toast.success("Registration submitted successfully!");
+      toast.success(
+        "Registration submitted successfully! Your admission semester has been updated."
+      );
       setIsModalOpen(false);
       setRegistrationData({
         preferredSubjects: "",
@@ -133,6 +197,7 @@ export default function StudentGradesPage() {
         additionalNotes: "",
       });
     } catch (error) {
+      console.error("Registration error:", error);
       toast.error("Failed to submit registration. Please try again.");
     }
   };
@@ -252,8 +317,11 @@ export default function StudentGradesPage() {
                     <Button
                       onClick={() => openRegistrationModal(course)}
                       className="bg-green-600 hover:bg-green-700"
+                      disabled={updateLoading}
                     >
-                      Register Next Semester
+                      {updateLoading
+                        ? "Processing..."
+                        : "Register Next Semester"}
                     </Button>
                   </div>
                 </div>
@@ -300,7 +368,7 @@ export default function StudentGradesPage() {
           <CardTitle>Detailed Grade Report</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
+          {coursesLoading ? (
             <p>Loading grades...</p>
           ) : (
             <GradingHistoryTable
@@ -324,6 +392,10 @@ export default function StudentGradesPage() {
                   Course: {selectedCourse.course.title}
                 </p>
               )}
+              <p className="mt-2 text-sm text-blue-600">
+                Your admission semester will be updated to the next semester
+                upon successful registration.
+              </p>
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -384,11 +456,16 @@ export default function StudentGradesPage() {
               type="button"
               variant="outline"
               onClick={() => setIsModalOpen(false)}
+              disabled={updateLoading}
             >
               Cancel
             </Button>
-            <Button type="submit" onClick={handleRegistrationSubmit}>
-              Submit Registration
+            <Button
+              type="submit"
+              onClick={handleRegistrationSubmit}
+              disabled={updateLoading}
+            >
+              {updateLoading ? "Submitting..." : "Submit Registration"}
             </Button>
           </DialogFooter>
         </DialogContent>

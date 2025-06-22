@@ -20,6 +20,17 @@ export type TEnrolledCourseMarks = {
 };
 
 /**
+ * @description The subject type
+ * @author Sp-y-d-e-r
+ */
+export type TSubject = {
+  name: string;
+  credits: number;
+  isDeleted?: boolean;
+  isDefault?: boolean;
+};
+
+/**
  * @description The marks of a subject
  * @author Sp-y-d-e-r
  */
@@ -47,6 +58,7 @@ export type TSubjectMarks = {
  * @param gradePoints - The grade points of the course
  * @param isPassed - Whether the student passed the course
  * @param selectedSubjects - The selected subjects of the course
+ * @param defaultSubjects - The default subjects of the course
  */
 export type TEnrolledCourse = {
   _id: string;
@@ -65,4 +77,5 @@ export type TEnrolledCourse = {
   gradePoints: number;
   isPassed: boolean;
   selectedSubjects?: string[];
+  defaultSubjects?: TSubject[];
 };

@@ -53,7 +53,7 @@ import SubjectSelectionDialog from "./components/SubjectSelectionDialog";
 // Extend types to include new fields for subject selection
 type TExtendedCourse = TBaseCourse & {
   subjectsToSelect?: number;
-  availableSubjects?: { name: string; credits: number }[];
+  optionalSubjects?: { name: string; credits: number }[];
 };
 type TExtendedOfferedCourse = Omit<IOfferedCourse, "course"> & {
   course: TExtendedCourse;
@@ -93,8 +93,8 @@ const OfferedCourseSection = () => {
   const handleEnrollClick = (course: TExtendedOfferedCourse) => {
     setSelectedCourse(course);
     if (
-      course.course.availableSubjects &&
-      course.course.availableSubjects.length > 0
+      course.course.optionalSubjects &&
+      course.course.optionalSubjects.length > 0
     ) {
       setSubjectSelectDialogOpen(true);
     } else {

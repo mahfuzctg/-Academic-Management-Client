@@ -37,6 +37,7 @@ export type TSubject = {
   name: string;
   credits: number;
   isDeleted?: boolean;
+  isDefault?: boolean; // New field to distinguish default vs optional subjects
 };
 
 export type TCourse = {
@@ -48,8 +49,9 @@ export type TCourse = {
   preRequisiteCourses: TPreRequisiteCourses[];
   subjectType: "Theory" | "Lab" | "Project";
   note?: string;
-  availableSubjects?: TSubject[];
-  subjectsToSelect?: number;
+  defaultSubjects?: TSubject[]; // 4 default subjects
+  optionalSubjects?: TSubject[]; // 3 optional subjects
+  subjectsToSelect?: number; // How many optional subjects to select (default: 2)
 };
 
 // Validation Schema
@@ -73,7 +75,8 @@ const createCourseValidationSchema = z.object({
   isDeleted: z.boolean().optional(),
   subjectType: z.enum(["Theory", "Lab", "Project"]),
   note: z.string().optional(),
-  availableSubjects: z.array(SubjectValidationSchema).optional(),
+  defaultSubjects: z.array(SubjectValidationSchema).optional(),
+  optionalSubjects: z.array(SubjectValidationSchema).optional(),
   subjectsToSelect: z.string().optional(),
 });
 
@@ -90,7 +93,8 @@ interface CourseFormProps {
     isDeleted?: boolean;
     subjectType?: "Theory" | "Lab" | "Project";
     note?: string;
-    availableSubjects?: TSubject[];
+    defaultSubjects?: TSubject[];
+    optionalSubjects?: TSubject[];
     subjectsToSelect?: number;
   };
   onSuccess?: () => void;
@@ -116,7 +120,8 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
       isDeleted: course?.isDeleted || false,
       subjectType: course?.subjectType || "Theory",
       note: course?.note || "",
-      availableSubjects: course?.availableSubjects || [],
+      defaultSubjects: course?.defaultSubjects || [],
+      optionalSubjects: course?.optionalSubjects || [],
       subjectsToSelect:
         typeof course?.subjectsToSelect === "number"
           ? String(course.subjectsToSelect)
@@ -128,8 +133,11 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
     try {
       const formattedData = {
         ...data,
-        availableSubjects: Array.isArray(data.availableSubjects)
-          ? data.availableSubjects
+        defaultSubjects: Array.isArray(data.defaultSubjects)
+          ? data.defaultSubjects
+          : [],
+        optionalSubjects: Array.isArray(data.optionalSubjects)
+          ? data.optionalSubjects
           : [],
         preRequisiteCourses: Array.isArray(data.preRequisiteCourses)
           ? data.preRequisiteCourses
@@ -287,11 +295,11 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
               name="subjectsToSelect"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Subjects to Select</FormLabel>
+                  <FormLabel>Optional Subjects to Select</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
-                      placeholder="Enter number of subjects to select"
+                      placeholder="Enter number of optional subjects to select (default: 2)"
                       {...field}
                     />
                   </FormControl>
@@ -328,7 +336,7 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
                       </SelectTrigger>
                       <SelectContent>
                         {availableCourses?.map((course) => (
-                          <SelectItem key={course.id} value={course.id}>
+                          <SelectItem key={course._id} value={course._id}>
                             {course.title}
                           </SelectItem>
                         ))}
@@ -344,7 +352,7 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
                         <span>
                           {
                             availableCourses?.find(
-                              (course) => course.id === prereq.course
+                              (course) => course._id === prereq.course
                             )?.title
                           }
                         </span>
@@ -369,13 +377,15 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
               )}
             />
 
-            {/* Available Subjects (multi-input) */}
+            {/* Default Subjects (4 subjects) */}
             <FormField
               control={form.control}
-              name="availableSubjects"
+              name="defaultSubjects"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Available Subjects</FormLabel>
+                  <FormLabel>
+                    Default Subjects (4 subjects - automatically included)
+                  </FormLabel>
                   <FormControl>
                     <div className="space-y-2">
                       {(field.value || []).map(
@@ -423,11 +433,80 @@ const CourseForm = ({ course, onSuccess }: CourseFormProps) => {
                         onClick={() => {
                           field.onChange([
                             ...(field.value || []),
-                            { name: "", credits: 0 },
+                            { name: "", credits: 0, isDefault: true },
                           ]);
                         }}
                       >
-                        Add Subject
+                        Add Default Subject
+                      </Button>
+                    </div>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {/* Optional Subjects (3 subjects) */}
+            <FormField
+              control={form.control}
+              name="optionalSubjects"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Optional Subjects (3 subjects - students select 2)
+                  </FormLabel>
+                  <FormControl>
+                    <div className="space-y-2">
+                      {(field.value || []).map(
+                        (subject: TSubject, idx: number) => (
+                          <div key={idx} className="flex gap-2 items-center">
+                            <Input
+                              placeholder="Subject Name"
+                              value={subject.name}
+                              onChange={(e) => {
+                                const updated = [...(field.value || [])];
+                                updated[idx].name = e.target.value;
+                                field.onChange(updated);
+                              }}
+                            />
+                            <Input
+                              type="number"
+                              placeholder="Credits"
+                              value={subject.credits}
+                              onChange={(e) => {
+                                const updated = [...(field.value || [])];
+                                updated[idx].credits = Number(e.target.value);
+                                field.onChange(updated);
+                              }}
+                            />
+                            <Button
+                              type="button"
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                const updated = (field.value || []).filter(
+                                  (_: any, i: number) => i !== idx
+                                );
+                                field.onChange(updated);
+                              }}
+                            >
+                              Remove
+                            </Button>
+                          </div>
+                        )
+                      )}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          field.onChange([
+                            ...(field.value || []),
+                            { name: "", credits: 0, isDefault: false },
+                          ]);
+                        }}
+                      >
+                        Add Optional Subject
                       </Button>
                     </div>
                   </FormControl>
