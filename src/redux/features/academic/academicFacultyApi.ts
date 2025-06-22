@@ -10,7 +10,7 @@ export const academicFacultyApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["AcademicFaculty"],
+      invalidatesTags: ["academicFaculty"],
     }),
 
     getSingleAcademicFaculty: build.query({
@@ -18,7 +18,7 @@ export const academicFacultyApi = baseApi.injectEndpoints({
         url: `/academic-faculties/${id}`,
         method: "GET",
       }),
-      providesTags: ["AcademicFaculty"],
+      providesTags: ["academicFaculty"],
     }),
 
     updateAcademicFaculty: build.mutation({
@@ -27,7 +27,7 @@ export const academicFacultyApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: ["AcademicFaculty"],
+      invalidatesTags: ["academicFaculty"],
     }),
 
     deleteAcademicFaculty: build.mutation({
@@ -35,7 +35,7 @@ export const academicFacultyApi = baseApi.injectEndpoints({
         url: `/academic-faculties/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["AcademicFaculty"],
+      invalidatesTags: ["academicFaculty"],
     }),
 
     getAllAcademicFaculties: build.query({
@@ -60,7 +60,7 @@ export const academicFacultyApi = baseApi.injectEndpoints({
           meta: response.meta,
         };
       },
-      providesTags: ["AcademicFaculty"],
+      providesTags: ["academicFaculty"],
     }),
   }),
 });

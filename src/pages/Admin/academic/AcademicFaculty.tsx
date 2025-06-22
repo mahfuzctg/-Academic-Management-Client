@@ -140,26 +140,6 @@ const AcademicFaculty = () => {
     setIsDialogOpen(true);
   };
 
-  if (isError) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex flex-col items-center justify-center min-h-[400px] gap-4"
-      >
-        <div className="bg-red-100 p-6 rounded-full">
-          <Building2 className="h-10 w-10 text-red-500" />
-        </div>
-        <p className="text-red-500 text-center max-w-md text-lg">
-          Failed to load faculties. Please refresh the page or try again later.
-        </p>
-        <Button variant="outline" onClick={() => window.location.reload()}>
-          Retry
-        </Button>
-      </motion.div>
-    );
-  }
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

@@ -19,7 +19,7 @@ export const academicYearApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["AcademicYear"],
+      invalidatesTags: ["academicYear"],
     }),
 
     getSingleAcademicYear: build.query({
@@ -27,7 +27,7 @@ export const academicYearApi = baseApi.injectEndpoints({
         url: `/academic-years/${id}`,
         method: "GET",
       }),
-      providesTags: ["AcademicYear"],
+      providesTags: ["academicYear"],
     }),
 
     updateAcademicYear: build.mutation({
@@ -36,7 +36,7 @@ export const academicYearApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: ["AcademicYear"],
+      invalidatesTags: ["academicYear"],
     }),
 
     deleteAcademicYear: build.mutation({
@@ -44,7 +44,7 @@ export const academicYearApi = baseApi.injectEndpoints({
         url: `/academic-years/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["AcademicYear"],
+      invalidatesTags: ["academicYear"],
     }),
 
     getAllAcademicYears: build.query({
@@ -69,7 +69,7 @@ export const academicYearApi = baseApi.injectEndpoints({
           meta: response.meta,
         };
       },
-      providesTags: ["AcademicYear"],
+      providesTags: ["academicYear"],
     }),
   }),
 });
