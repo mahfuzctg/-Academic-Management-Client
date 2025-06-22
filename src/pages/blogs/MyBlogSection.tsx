@@ -1,13 +1,24 @@
+import CreateBlogModal from "@/components/modal/CreateBlogModal";
+import EditBlogModal from "@/components/modal/EditBlogModal";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/ui/use-toast"; // shadcn toast
+import { useToast } from "@/components/ui/use-toast";
 import {
+  useDeleteBlogMutation,
   useGetAllBlogsQuery,
   useVoteBlogMutation,
 } from "@/redux/features/blog/blogApi";
 import { useAppSelector } from "@/redux/hooks";
-import { CheckCircle, ThumbsUp } from "lucide-react";
+import type { IBlog } from "@/types/blog";
+import {
+  CheckCircle,
+  Pencil,
+  PlusCircle,
+  ThumbsUp,
+  Trash2,
+} from "lucide-react";
 import React, { useState } from "react";
 
 const formatDate = (dateStr: string) => {
@@ -19,12 +30,15 @@ const formatDate = (dateStr: string) => {
   return new Date(dateStr).toLocaleDateString(undefined, options);
 };
 
-const BlogsSection: React.FC = () => {
+const MyBlogSection: React.FC = () => {
   const { data: blogs, isLoading } = useGetAllBlogsQuery();
   const [voteBlog] = useVoteBlogMutation();
+  const [deleteBlog] = useDeleteBlogMutation();
   const { user } = useAppSelector((state) => state.auth);
   const { toast } = useToast();
   const [votedBlogIds, setVotedBlogIds] = useState<string[]>([]);
+  const [editingBlog, setEditingBlog] = useState<IBlog | null>(null);
+  const [createModalOpen, setCreateModalOpen] = useState(false);
 
   const handleVote = async (blogId: string) => {
     try {
@@ -32,7 +46,7 @@ const BlogsSection: React.FC = () => {
       setVotedBlogIds((prev) => [...prev, blogId]);
       toast({
         title: "Vote Successful!",
-        description: "Thanks for voting this blog.",
+        description: "You voted for your own blog.",
       });
     } catch (error) {
       toast({
@@ -43,28 +57,51 @@ const BlogsSection: React.FC = () => {
     }
   };
 
+  const handleDelete = async (id: string) => {
+    try {
+      await deleteBlog(id).unwrap();
+      toast({
+        title: "Blog Deleted",
+        description: "Your blog has been successfully removed.",
+      });
+    } catch (error) {
+      toast({
+        title: "Delete Failed",
+        description: "An error occurred while deleting the blog.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const myBlogs = blogs?.filter((blog) => blog.createdBy === user?._id);
+
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 p-4 sm:p-6 w-9/12 mx-auto">
-      {isLoading
-        ? Array.from({ length: 3 }).map((_, i) => (
+    <div className="p-4 sm:p-6">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">
+          My Blogs
+        </h2>
+        <Button onClick={() => setCreateModalOpen(true)} className="gap-2">
+          <PlusCircle className="w-5 h-5" />
+          Create New Blog
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {isLoading ? (
+          Array.from({ length: 3 }).map((_, i) => (
             <Card
               key={i}
               className="p-6 space-y-6 animate-pulse rounded-lg shadow-md dark:shadow-gray-800"
             >
               <Skeleton className="h-44 w-full rounded-xl" />
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-12 w-12 rounded-full" />
-                <Skeleton className="h-6 w-24" />
-              </div>
-              <Skeleton className="h-8 w-3/4" />
-              <Skeleton className="h-5 w-full" />
-              <div className="flex justify-between">
-                <Skeleton className="h-6 w-28 rounded-md" />
-                <Skeleton className="h-6 w-32 rounded-md" />
-              </div>
+              <Skeleton className="h-6 w-2/3" />
+              <Skeleton className="h-4 w-full" />
+              <Skeleton className="h-6 w-24" />
             </Card>
           ))
-        : blogs?.map((blog) => {
+        ) : myBlogs?.length ? (
+          myBlogs.map((blog) => {
             const hasVoted =
               votedBlogIds.includes(blog._id!) ||
               blog.votedBy?.includes(user?._id);
@@ -113,25 +150,40 @@ const BlogsSection: React.FC = () => {
                         Read full article
                       </a>
                     )}
-
-                    <span className="text-sm text-muted-foreground dark:text-gray-400 whitespace-nowrap">
+                    <span className="text-sm text-muted-foreground dark:text-gray-400">
                       {blog.createdAt ? formatDate(blog.createdAt) : "No date"}
                     </span>
                   </div>
+
+                  <div className="flex justify-end gap-3">
+                    <button
+                      onClick={() => setEditingBlog(blog)}
+                      className="text-blue-600 hover:text-blue-800"
+                      title="Edit"
+                    >
+                      <Pencil className="w-5 h-5" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(blog._id!)}
+                      className="text-red-600 hover:text-red-800"
+                      title="Delete"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
+
                   <button
                     onClick={() => {
                       if (!hasVoted && blog._id) handleVote(blog._id);
                     }}
                     disabled={hasVoted}
                     aria-label={hasVoted ? "You have voted" : "Vote this blog"}
-                    className={`
-    mt-4 w-full flex items-center justify-center gap-3 rounded-lg border px-5 py-2 text-sm font-semibold shadow-sm transition-colors duration-300
-    ${
-      hasVoted
-        ? "bg-gray-900 text-white border-gray-900 cursor-not-allowed"
-        : "bg-white text-gray-900 border-gray-900 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white"
-    }
-  `}
+                    className={`mt-4 w-full flex items-center justify-center gap-3 rounded-lg border px-5 py-2 text-sm font-semibold shadow-sm transition-colors duration-300
+                        ${
+                          hasVoted
+                            ? "bg-gray-900 text-white border-gray-900 cursor-not-allowed"
+                            : "bg-white text-gray-900 border-gray-900 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white"
+                        }`}
                   >
                     {hasVoted ? (
                       <CheckCircle className="w-5 h-5 text-white" />
@@ -143,9 +195,31 @@ const BlogsSection: React.FC = () => {
                 </CardContent>
               </Card>
             );
-          })}
+          })
+        ) : (
+          <p className="text-muted-foreground">
+            You haven’t posted any blogs yet.
+          </p>
+        )}
+      </div>
+
+      {/* Edit Modal */}
+      {editingBlog && (
+        <EditBlogModal
+          blog={editingBlog}
+          onClose={() => setEditingBlog(null)}
+        />
+      )}
+
+      {/* Create Modal */}
+      {createModalOpen && (
+        <CreateBlogModal
+          open={createModalOpen}
+          onClose={() => setCreateModalOpen(false)}
+        />
+      )}
     </div>
   );
 };
 
-export default BlogsSection;
+export default MyBlogSection;

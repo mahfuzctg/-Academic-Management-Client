@@ -1,85 +1,88 @@
 import { baseApi } from "@/redux/api/baseApi";
-import type { TQueryParam, TResponseRedux } from "@/types/global";
-import type { JobListing, JobFormData, ProposalFormData } from "@/types/job";
+import type { IJob } from "@/types/job";
 
-const jobApi = baseApi.injectEndpoints({
+export const jobApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    getAllJobs: builder.query({
-      query: (args) => {
-        const params = new URLSearchParams();
-
-        if (args) {
-          args.forEach((item: TQueryParam) => {
-            params.append(item.name, item.value as string);
-          });
-        }
-
-        return {
-          url: "/jobs",
-          method: "GET",
-          params: params,
-        };
+    getAllJobs: builder.query<IJob[], void>({
+      query: () => ({
+        url: "/jobs",
+        method: "GET",
+      }),
+      transformResponse: (response: unknown) => {
+        const res = response as { data: IJob[] };
+        return res.data;
       },
-      providesTags: ["job"],
-      transformResponse: (response: TResponseRedux<JobListing[]>) => {
-        return {
-          data: response.data,
-          meta: response.meta,
-        };
-      },
+      providesTags: ["jobs"],
     }),
 
-    createJob: builder.mutation({
-      query: (data: JobFormData) => ({
+    // New endpoint: get jobs posted by the logged-in user
+    getMyJobs: builder.query<IJob[], void>({
+      query: () => ({
+        url: "/jobs/my-jobs",
+        method: "GET",
+      }),
+      transformResponse: (response: unknown) => {
+        const res = response as { data: IJob[] };
+        return res.data;
+      },
+      providesTags: ["jobs"],
+    }),
+
+    getSingleJob: builder.query<IJob, string>({
+      query: (id) => ({
+        url: `/jobs/${id}`,
+        method: "GET",
+      }),
+      transformResponse: (response: unknown) => {
+        const res = response as { data: IJob };
+        return res.data;
+      },
+      providesTags: ["jobs"],
+    }),
+
+    createJob: builder.mutation<IJob, Partial<IJob>>({
+      query: (data) => ({
         url: "/jobs",
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["job"],
+      invalidatesTags: ["jobs"],
     }),
 
-    updateJob: builder.mutation({
+    updateJob: builder.mutation<IJob, { id: string; data: Partial<IJob> }>({
       query: ({ id, data }) => ({
         url: `/jobs/${id}`,
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: ["job"],
+      invalidatesTags: ["jobs"],
     }),
 
-    deleteJob: builder.mutation({
+    deleteJob: builder.mutation<void, string>({
       query: (id) => ({
         url: `/jobs/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["job"],
+      invalidatesTags: ["jobs"],
     }),
 
-    submitProposal: builder.mutation({
-      query: (data: ProposalFormData) => ({
-        url: "/jobs/proposals",
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: ["job"],
-    }),
-
-    updateJobStatus: builder.mutation({
-      query: ({ jobId, status }) => ({
-        url: `/jobs/${jobId}/status`,
+    applyJob: builder.mutation<IJob, string>({
+      query: (jobId) => ({
+        url: `/jobs/${jobId}/apply`,
         method: "PATCH",
-        body: { status },
       }),
-      invalidatesTags: ["job"],
+      invalidatesTags: ["jobs"],
     }),
   }),
+  overrideExisting: true,
 });
 
 export const {
   useGetAllJobsQuery,
+  useGetMyJobsQuery,
+  useGetSingleJobQuery,
   useCreateJobMutation,
   useUpdateJobMutation,
   useDeleteJobMutation,
-  useSubmitProposalMutation,
-  useUpdateJobStatusMutation,
+  useApplyJobMutation,
 } = jobApi;

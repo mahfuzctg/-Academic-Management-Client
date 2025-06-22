@@ -28,7 +28,7 @@ export interface TStudent {
 }
 
 export type TUser = {
-  _id: string;
+  _id: string | any;
   id: string;
   email: string;
   needsPasswordChange: boolean;

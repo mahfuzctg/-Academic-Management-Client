@@ -52,6 +52,15 @@ export const blogApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["blogs"],
     }),
+
+    // VOTE BLOG
+    voteBlog: builder.mutation<IBlog, string>({
+      query: (id) => ({
+        url: `/blogs/${id}/vote`,
+        method: "PATCH",
+      }),
+      invalidatesTags: ["blogs"],
+    }),
   }),
   overrideExisting: true,
 });
@@ -62,4 +71,5 @@ export const {
   useCreateBlogMutation,
   useUpdateBlogMutation,
   useDeleteBlogMutation,
+  useVoteBlogMutation,
 } = blogApi;

@@ -19,6 +19,47 @@ import { useGetMyEnrolledCoursesQuery } from "@/redux/features/enrollmentCourse/
 import GradingHistoryTable from "./GradingHistoryTable";
 
 /**
+ * @description Calculates the best 3 class test marks from 4 class tests
+ * @param {number} ct1 - Class Test 1 marks
+ * @param {number} ct2 - Class Test 2 marks
+ * @param {number} ct3 - Class Test 3 marks
+ * @param {number} ct4 - Class Test 4 marks
+ * @returns {number} Sum of best 3 class test marks (max 60)
+ */
+const calculateBestThreeCT = (
+  ct1: number,
+  ct2: number,
+  ct3: number,
+  ct4: number
+): number => {
+  const marks = [ct1, ct2, ct3, ct4].map((mark) => Math.min(mark, 20)); // Cap each CT at 20
+  marks.sort((a, b) => b - a); // Sort in descending order
+  return marks.slice(0, 3).reduce((sum, mark) => sum + mark, 0); // Sum of best 3
+};
+
+/**
+ * @description Calculates the final total marks with the new grading system
+ * @param {number} ct1 - Class Test 1 marks
+ * @param {number} ct2 - Class Test 2 marks
+ * @param {number} ct3 - Class Test 3 marks
+ * @param {number} ct4 - Class Test 4 marks
+ * @param {number} finalExam - Final Exam marks
+ * @returns {number} Final total marks (capped at 210)
+ */
+const calculateFinalTotal = (
+  ct1: number,
+  ct2: number,
+  ct3: number,
+  ct4: number,
+  finalExam: number
+): number => {
+  const bestThreeCT = calculateBestThreeCT(ct1, ct2, ct3, ct4);
+  const finalExamCapped = Math.min(finalExam, 210); // Cap final exam at 210
+  const total = bestThreeCT + finalExamCapped;
+  return Math.min(total, 210); // Cap total at 210
+};
+
+/**
  * @description Calculates the letter grade based on total marks.
  * @param {number} marks - The total marks.
  * @returns {string} The letter grade.
@@ -176,11 +217,19 @@ export default function StudentGradesPage() {
                             </p>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-1">
                               {course.subjectMarks.map((subject) => {
-                                const total =
-                                  subject.marks.classTest1 +
-                                  subject.marks.classTest2 +
-                                  subject.marks.midTerm +
-                                  subject.marks.finalTerm;
+                                const total = calculateFinalTotal(
+                                  subject.marks.classTest1 ?? 0,
+                                  subject.marks.classTest2 ?? 0,
+                                  subject.marks.classTest3 ?? 0,
+                                  subject.marks.classTest4 ?? 0,
+                                  subject.marks.finalExam ?? 0
+                                );
+                                const bestThreeCT = calculateBestThreeCT(
+                                  subject.marks.classTest1 ?? 0,
+                                  subject.marks.classTest2 ?? 0,
+                                  subject.marks.classTest3 ?? 0,
+                                  subject.marks.classTest4 ?? 0
+                                );
                                 return (
                                   <div
                                     key={subject.subjectName}
@@ -189,6 +238,8 @@ export default function StudentGradesPage() {
                                     <p className="font-medium">
                                       {subject.subjectName}
                                     </p>
+                                    <p>Best 3 CT: {bestThreeCT}</p>
+                                    <p>Final: {subject.marks.finalExam ?? 0}</p>
                                     <p>Total: {total}</p>
                                     <p>Grade: {calculateGrade(total)}</p>
                                   </div>

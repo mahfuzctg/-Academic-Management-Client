@@ -1,4 +1,6 @@
+import MyBlogSection from "@/pages/blogs/MyBlogSection";
 import { StudentDashboard } from "@/pages/Dashboard/StudentDashboard";
+import JobManagement from "@/pages/Jobs/JobManagement";
 import AcademicCourseShow from "@/pages/share/facultyAndStudent/academicCourseShow";
 import AcademicDepartmentShow from "@/pages/share/facultyAndStudent/academicDepartmentShow";
 import AcademicFacultyShow from "@/pages/share/facultyAndStudent/academicfacultyShow";
@@ -10,6 +12,7 @@ import StudentGradesPage from "@/pages/Students/StudentGrades/StudentGradesPage"
 import StudentProfile from "@/pages/Students/StudentProfile";
 import {
   Award,
+  Blocks,
   BookOpen,
   Building2,
   CalendarDays,
@@ -82,5 +85,17 @@ export const studentPaths = [
     path: "offered-course",
     element: <AcademicOfferedCourseShow />,
     icon: <BookOpen className="w-5 h-5" />,
+  },
+  {
+    name: "My Blog",
+    path: "my-blog",
+    element: <MyBlogSection />,
+    icon: <Blocks className="w-5 h-5" />,
+  },
+  {
+    name: "My Job",
+    path: "my-job",
+    element: <JobManagement />,
+    icon: <Blocks className="w-5 h-5" />,
   },
 ];
