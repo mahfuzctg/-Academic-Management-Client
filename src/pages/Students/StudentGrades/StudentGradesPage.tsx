@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { CheckCircle2, GraduationCap } from "lucide-react";
-import { toast } from "sonner";
+
 import type { TEnrolledCourse } from "@/types/enrolledCourse";
 import { useGetMyEnrolledCoursesQuery } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
 import GradingHistoryTable from "./GradingHistoryTable";
@@ -22,6 +22,7 @@ import {
   useUpdateStudentMutation,
 } from "@/redux/features/student/studentApi";
 import { useGetAllSemesterRegistrationsQuery } from "@/redux/features/semesterRegistration/semesterRegistrationApi";
+import { toast } from "@/components/ui/use-toast";
 
 /**
  * @description Calculates the best 3 class test marks from 4 class tests
@@ -164,7 +165,10 @@ export default function StudentGradesPage() {
       const nextSemesterId = getNextSemesterId();
 
       if (!nextSemesterId) {
-        toast.error("Next semester not found. Please contact administration.");
+        toast({
+          title: "Next semester not found. Please contact administration.",
+          variant: "destructive",
+        });
         return;
       }
 
@@ -175,6 +179,13 @@ export default function StudentGradesPage() {
 
       console.log("student", student?.data?._id);
       const studentId = student?.data?._id;
+      if (!studentId) {
+        toast({
+          title: "Student ID not found. Please contact administration.",
+          variant: "destructive",
+        });
+        return;
+      }
 
       await updateOwnProfile({
         id: studentId || "",
@@ -187,9 +198,11 @@ export default function StudentGradesPage() {
         ...registrationData,
       });
 
-      toast.success(
-        "Registration submitted successfully! Your admission semester has been updated."
-      );
+      toast({
+        title:
+          "Registration submitted successfully! Your admission semester has been updated.",
+        variant: "default",
+      });
       setIsModalOpen(false);
       setRegistrationData({
         preferredSubjects: "",
@@ -198,7 +211,10 @@ export default function StudentGradesPage() {
       });
     } catch (error) {
       console.error("Registration error:", error);
-      toast.error("Failed to submit registration. Please try again.");
+      toast({
+        title: "Failed to submit registration. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 

@@ -19,14 +19,6 @@ import {
 import GradeEntryTable from "./components/GradeEntryTable";
 import type { TStudentMarks } from "./components/SubjectMarksTable";
 
-/**
- * @description Calculates the best 3 class test marks from 4 class tests
- * @param {number} ct1 - Class Test 1 marks
- * @param {number} ct2 - Class Test 2 marks
- * @param {number} ct3 - Class Test 3 marks
- * @param {number} ct4 - Class Test 4 marks
- * @returns {number} Sum of best 3 class test marks (max 60)
- */
 const calculateBestThreeCT = (
   ct1: number,
   ct2: number,
@@ -38,15 +30,6 @@ const calculateBestThreeCT = (
   return marks.slice(0, 3).reduce((sum, mark) => sum + mark, 0); // Sum of best 3
 };
 
-/**
- * @description Calculates the final total marks with the new grading system
- * @param {number} ct1 - Class Test 1 marks
- * @param {number} ct2 - Class Test 2 marks
- * @param {number} ct3 - Class Test 3 marks
- * @param {number} ct4 - Class Test 4 marks
- * @param {number} finalExam - Final Exam marks
- * @returns {number} Final total marks (capped at 210)
- */
 const calculateFinalTotal = (
   ct1: number,
   ct2: number,
@@ -60,15 +43,10 @@ const calculateFinalTotal = (
   return Math.min(total, 210); // Cap total at 210
 };
 
-/**
- * @description Calculates the letter grade based on total marks (out of 210).
- * @param {number} marks - The total marks (0-210).
- * @returns {string} The letter grade.
- */
 function calculateGrade(marks: number) {
   // Convert marks to percentage (210 is 100%)
   const percentage = (marks / 210) * 100;
-  
+
   if (percentage >= 90) return "A+";
   if (percentage >= 80) return "A";
   if (percentage >= 70) return "B";
@@ -77,11 +55,6 @@ function calculateGrade(marks: number) {
   return "F";
 }
 
-/**
- * @description Determines the result status (PASS/FAIL) based on total marks (out of 210).
- * @param {number} marks - The total marks (0-210).
- * @returns {string} The result status.
- */
 function getResultStatus(marks: number) {
   // Convert marks to percentage (210 is 100%)
   const percentage = (marks / 210) * 100;
@@ -104,7 +77,7 @@ export default function GradesPage() {
       if (c.course && c.course._id) {
         courses.set(
           c.course._id,
-          c.course as unknown as { _id: string; title: string }
+          c.course.title as unknown as { _id: string; title: string }
         );
       }
     });
