@@ -19,7 +19,46 @@ import {
 import GradeEntryTable from "./components/GradeEntryTable";
 import type { TStudentMarks } from "./components/SubjectMarksTable";
 
+/**
+ * @description Calculates the best 3 class test marks from 4 class tests
+ * @param {number} ct1 - Class Test 1 marks
+ * @param {number} ct2 - Class Test 2 marks
+ * @param {number} ct3 - Class Test 3 marks
+ * @param {number} ct4 - Class Test 4 marks
+ * @returns {number} Sum of best 3 class test marks (max 60)
+ */
+const calculateBestThreeCT = (
+  ct1: number,
+  ct2: number,
+  ct3: number,
+  ct4: number
+): number => {
+  const marks = [ct1, ct2, ct3, ct4].map((mark) => Math.min(mark, 20)); // Cap each CT at 20
+  marks.sort((a, b) => b - a); // Sort in descending order
+  return marks.slice(0, 3).reduce((sum, mark) => sum + mark, 0); // Sum of best 3
+};
 
+/**
+ * @description Calculates the final total marks with the new grading system
+ * @param {number} ct1 - Class Test 1 marks
+ * @param {number} ct2 - Class Test 2 marks
+ * @param {number} ct3 - Class Test 3 marks
+ * @param {number} ct4 - Class Test 4 marks
+ * @param {number} finalExam - Final Exam marks
+ * @returns {number} Final total marks (capped at 210)
+ */
+const calculateFinalTotal = (
+  ct1: number,
+  ct2: number,
+  ct3: number,
+  ct4: number,
+  finalExam: number
+): number => {
+  const bestThreeCT = calculateBestThreeCT(ct1, ct2, ct3, ct4);
+  const finalExamCapped = Math.min(finalExam, 210); // Cap final exam at 210
+  const total = bestThreeCT + finalExamCapped;
+  return Math.min(total, 210); // Cap total at 210
+};
 
 function calculateGrade(marks: number) {
   if (marks >= 90) return "A+";
@@ -83,8 +122,9 @@ export default function GradesPage() {
           initialMarks[enrollment.student.id][subject] = {
             classTest1: subjectMarks?.marks.classTest1 || 0,
             classTest2: subjectMarks?.marks.classTest2 || 0,
-            midTerm: subjectMarks?.marks.midTerm || 0,
-            finalTerm: subjectMarks?.marks.finalTerm || 0,
+            classTest3: subjectMarks?.marks.classTest3 || 0,
+            classTest4: subjectMarks?.marks.classTest4 || 0,
+            finalExam: subjectMarks?.marks.finalExam || 0,
           };
         });
       });
@@ -127,19 +167,21 @@ export default function GradesPage() {
             );
             if (isAlreadyGraded) return null;
 
-            const totalMarks =
-              (marks.classTest1 ?? 0) +
-              (marks.classTest2 ?? 0) +
-              (marks.midTerm ?? 0) +
-              (marks.finalTerm ?? 0);
+            const total = calculateFinalTotal(
+              marks.classTest1 ?? 0,
+              marks.classTest2 ?? 0,
+              marks.classTest3 ?? 0,
+              marks.classTest4 ?? 0,
+              marks.finalExam ?? 0
+            );
 
             const gradeData = {
               studentId,
               courseId: student.course._id,
               subjectName,
               marks,
-              grade: calculateGrade(totalMarks),
-              isPassed: getResultStatus(totalMarks) === "PASS",
+              grade: calculateGrade(total),
+              isPassed: getResultStatus(total) === "PASS",
             };
             return updateEnrolledCourseMarks(gradeData).unwrap();
           });
@@ -176,8 +218,10 @@ export default function GradesPage() {
             Subject: "N/A",
             ClassTest1: "N/A",
             ClassTest2: "N/A",
-            MidTerm: "N/A",
-            FinalTerm: "N/A",
+            ClassTest3: "N/A",
+            ClassTest4: "N/A",
+            Best3CT: "N/A",
+            FinalExam: "N/A",
             Total: "N/A",
             Grade: "N/A",
             Result: "N/A",
@@ -189,14 +233,26 @@ export default function GradesPage() {
         const marksObj = studentMarks[enrollment.student.id]?.[subject] || {
           classTest1: 0,
           classTest2: 0,
-          midTerm: 0,
-          finalTerm: 0,
+          classTest3: 0,
+          classTest4: 0,
+          finalExam: 0,
         };
-        const total =
-          (marksObj.classTest1 ?? 0) +
-          (marksObj.classTest2 ?? 0) +
-          (marksObj.midTerm ?? 0) +
-          (marksObj.finalTerm ?? 0);
+
+        const bestThreeCT = calculateBestThreeCT(
+          marksObj.classTest1 ?? 0,
+          marksObj.classTest2 ?? 0,
+          marksObj.classTest3 ?? 0,
+          marksObj.classTest4 ?? 0
+        );
+
+        const total = calculateFinalTotal(
+          marksObj.classTest1 ?? 0,
+          marksObj.classTest2 ?? 0,
+          marksObj.classTest3 ?? 0,
+          marksObj.classTest4 ?? 0,
+          marksObj.finalExam ?? 0
+        );
+
         const grade = calculateGrade(total);
         const result = getResultStatus(total);
 
@@ -207,8 +263,10 @@ export default function GradesPage() {
           Subject: subject,
           ClassTest1: marksObj.classTest1,
           ClassTest2: marksObj.classTest2,
-          MidTerm: marksObj.midTerm,
-          FinalTerm: marksObj.finalTerm,
+          ClassTest3: marksObj.classTest3,
+          ClassTest4: marksObj.classTest4,
+          Best3CT: bestThreeCT,
+          FinalExam: marksObj.finalExam,
           Total: total,
           Grade: grade,
           Result: result,
