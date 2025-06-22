@@ -11,7 +11,7 @@ export const academicSemesterApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["AcademicSemester"],
+      invalidatesTags: ["academicSemester"],
     }),
 
     getSingleAcademicSemester: build.query({
@@ -19,7 +19,7 @@ export const academicSemesterApi = baseApi.injectEndpoints({
         url: `/academic-semesters/${id}`,
         method: "GET",
       }),
-      providesTags: ["AcademicSemester"],
+      providesTags: ["academicSemester"],
     }),
 
     updateAcademicSemester: build.mutation({
@@ -28,7 +28,7 @@ export const academicSemesterApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: ["AcademicSemester"],
+      invalidatesTags: ["academicSemester"],
     }),
 
     deleteAcademicSemester: build.mutation({
@@ -36,7 +36,7 @@ export const academicSemesterApi = baseApi.injectEndpoints({
         url: `/academic-semesters/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["AcademicSemester"],
+      invalidatesTags: ["academicSemester"],
     }),
 
     getAllAcademicSemesters: build.query({
@@ -60,7 +60,7 @@ export const academicSemesterApi = baseApi.injectEndpoints({
           meta: response.meta,
         };
       },
-      providesTags: ["AcademicSemester"],
+      providesTags: ["academicSemester"],
     }),
   }),
 });

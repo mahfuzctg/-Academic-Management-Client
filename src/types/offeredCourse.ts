@@ -30,6 +30,11 @@ export interface TAcademicSemester {
 export interface TSemesterRegistration {
   _id: string;
   status: string;
+  academicSemester?: TAcademicSemester;
+  startDate?: string;
+  endDate?: string;
+  minCredit?: number;
+  maxCredit?: number;
 }
 
 export type Days = "Sat" | "Sun" | "Mon" | "Tue" | "Wed" | "Thu" | "Fri";

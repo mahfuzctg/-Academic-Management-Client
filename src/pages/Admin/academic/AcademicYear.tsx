@@ -54,6 +54,7 @@ const AcademicYear = () => {
     isLoading,
     isError,
   } = useGetAllAcademicYearsQuery([]);
+  console.log("academick", isError);
 
   const form = useForm<AcademicYearFormData>({
     resolver: zodResolver(academicYearSchema),
@@ -116,27 +117,6 @@ const AcademicYear = () => {
     });
     setIsDialogOpen(true);
   };
-
-  if (isError) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex flex-col items-center justify-center min-h-[400px] gap-4"
-      >
-        <div className="bg-red-100 p-6 rounded-full">
-          <Calendar className="h-10 w-10 text-red-500" />
-        </div>
-        <p className="text-red-500 text-center max-w-md text-lg">
-          Failed to load academic years. Please refresh the page or try again
-          later.
-        </p>
-        <Button variant="outline" onClick={() => window.location.reload()}>
-          Retry
-        </Button>
-      </motion.div>
-    );
-  }
 
   return (
     <motion.div

@@ -26,7 +26,7 @@ const CourseRow: React.FC<Props> = ({
   handleStatusChange,
 }) => {
   return (
-    <TableRow key={course.id}>
+    <TableRow key={course._id}>
       <TableCell>{course.title}</TableCell>
       <TableCell>{course.code}</TableCell>
       <TableCell>{course.prefix}</TableCell>
@@ -50,7 +50,7 @@ const CourseRow: React.FC<Props> = ({
         <Badge
           variant={course.isActive ? "default" : "secondary"}
           className="cursor-pointer"
-          onClick={() => handleStatusChange(course.id, !course.isActive)}
+          onClick={() => handleStatusChange(course._id, !course.isActive)}
         >
           {course.isActive ? "Active" : "Inactive"}
         </Badge>

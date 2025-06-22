@@ -255,14 +255,14 @@ const AdmissionSemester = () => {
                   form={form}
                   name="name"
                   label="Semester Name"
-                  options={semesterNameOptions}
+                  options={semesterNameOptions || []}
                   required
                 />
                 <FormFields.Select
                   form={form}
                   name="code"
                   label="Semester Code"
-                  options={semesterCodeOptions}
+                  options={semesterCodeOptions || []}
                   required
                   disabled
                 />
@@ -271,7 +271,7 @@ const AdmissionSemester = () => {
                   form={form}
                   name="academicYear"
                   label="Academic Year"
-                  options={academicYearOptions}
+                  options={academicYearOptions || []}
                   required
                 />
 
