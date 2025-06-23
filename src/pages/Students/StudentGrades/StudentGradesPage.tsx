@@ -111,8 +111,8 @@ export default function StudentGradesPage() {
     if (!currentSemester) return null;
 
     // Find current semester in registrations to get its details
-    const currentSemesterData = semesterRegistrations.data.find(
-      (semester) => semester._id === currentSemester
+    const currentSemesterData = semesterRegistrations?.data?.find(
+      (semester) => semester.academicSemester?._id === currentSemester
     );
 
     if (!currentSemesterData?.academicSemester) return null;
