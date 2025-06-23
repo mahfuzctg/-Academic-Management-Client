@@ -80,7 +80,7 @@ export default function StudentGradesPage() {
 
   const { data: semesterRegistrations } =
     useGetAllSemesterRegistrationsQuery(undefined);
-  const [updateOwnProfile, { isLoading: updateLoading }] =
+  const [updateStudent, { isLoading: updateLoading }] =
     useUpdateStudentMutation();
 
   const enrolledCourses: TEnrolledCourse[] = enrolledCoursesData?.data || [];
@@ -172,10 +172,7 @@ export default function StudentGradesPage() {
         return;
       }
 
-      // Update student's admission semester to next semester
-      const updateData = {
-        admissionSemester: nextSemesterId,
-      };
+      // Update student's admission semester to next semester using nested structure
 
       console.log("student", student?.data?._id);
       const studentId = student?.data?._id;
@@ -187,9 +184,13 @@ export default function StudentGradesPage() {
         return;
       }
 
-      await updateOwnProfile({
-        id: studentId || "",
-        body: updateData,
+      await updateStudent({
+        id: studentId,
+        updatedData: {
+          student: {
+            admissionSemester: nextSemesterId,
+          },
+        },
       }).unwrap();
 
       console.log("Registration data:", {

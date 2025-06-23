@@ -75,7 +75,7 @@ export const studentApi = baseApi.injectEndpoints({
         url: `/students/${studentId}/courses`,
         method: "GET",
       }),
-      providesTags: ["student-courses"],
+      providesTags: ["studentCourses"],
     }),
 
     // Enroll in a course
@@ -90,7 +90,7 @@ export const studentApi = baseApi.injectEndpoints({
         url: `/students/${studentId}/courses/${courseId}/enroll`,
         method: "POST",
       }),
-      invalidatesTags: ["student-courses"],
+      invalidatesTags: ["studentCourses"],
     }),
 
     // Drop a course
@@ -105,7 +105,7 @@ export const studentApi = baseApi.injectEndpoints({
         url: `/students/${studentId}/courses/${courseId}/drop`,
         method: "DELETE",
       }),
-      invalidatesTags: ["student-courses"],
+      invalidatesTags: ["studentCourses"],
     }),
 
     // Get student enrollments
@@ -115,7 +115,7 @@ export const studentApi = baseApi.injectEndpoints({
           url: `/students/${studentId}/enrollments`,
           method: "GET",
         }),
-        providesTags: ["student-enrollments"],
+        providesTags: ["studentEnrollments"],
       }
     ),
 
@@ -125,7 +125,7 @@ export const studentApi = baseApi.injectEndpoints({
         url: "/students/my-profile",
         method: "GET",
       }),
-      providesTags: ["student-profile"],
+      providesTags: ["studentProfiles"],
     }),
 
     // Get any student's profile
@@ -134,17 +134,17 @@ export const studentApi = baseApi.injectEndpoints({
         url: `/students/${studentId}`,
         method: "GET",
       }),
-      providesTags: ["student-profile"],
+      providesTags: ["studentProfiles"],
     }),
 
     // Update own profile
     updateOwnProfile: builder.mutation({
-      query: ({ id, body }) => ({
+      query: ({ id, updateData }) => ({
         url: `/students/${id}`,
         method: "PATCH",
-        body,
+        body: updateData,
       }),
-      invalidatesTags: ["student-profile"],
+      invalidatesTags: ["studentProfiles"],
     }),
 
     // Delete student
@@ -162,7 +162,7 @@ export const studentApi = baseApi.injectEndpoints({
         url: "/users/me",
         method: "GET",
       }),
-      providesTags: ["user-profile"],
+      providesTags: ["userProfiles"],
     }),
   }),
 });
