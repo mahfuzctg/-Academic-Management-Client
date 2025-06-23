@@ -101,9 +101,7 @@ export default function LoginForm() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() =>
-                    onSubmit({ id: "2025020002", password: "Student@123" })
-                  }
+                  onClick={() => onSubmit({ id: "010001", password: "123456" })}
                 >
                   Login as Student
                 </Button>

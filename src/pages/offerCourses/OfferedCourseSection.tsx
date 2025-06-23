@@ -1,31 +1,10 @@
 import SectionHeader from "@/components/resuable/SectionHeader";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
-import {
-  useGetAllOfferedCoursesQuery,
-  useGetOfferedCoursesBySemesterQuery,
-} from "@/redux/features/course/offerCourseApi";
+import { useGetAllOfferedCoursesQuery } from "@/redux/features/course/offerCourseApi";
 import {
   useCreateEnrolledCourseMutation,
   useGetMyEnrolledCoursesQuery,
@@ -36,15 +15,7 @@ import type {
   TCourse as TBaseCourse,
 } from "@/types/offeredCourse";
 import { AnimatePresence, motion } from "framer-motion";
-import {
-  BookOpen,
-  CalendarDays,
-  CheckCircle2,
-  Clock,
-  GraduationCap,
-  Search,
-  Users,
-} from "lucide-react";
+import { BookOpen, GraduationCap, Search } from "lucide-react";
 import { useEffect, useState } from "react";
 import CourseCard from "./components/CourseCard";
 import EnrollmentDialog from "./components/EnrollmentDialog";
@@ -166,8 +137,8 @@ const OfferedCourseSection = () => {
           transition={{ delay: 0.2 }}
         >
           <SectionHeader
-            title="Our Offered Courses"
-            subtitle="Discover a curated selection of academic and skill-based courses tailored to your goals. Enroll in the right course and take a step closer to your career aspirations."
+            title="Subjects You Can Explore"
+            subtitle="Discover a curated selection of academic and skill-based subjects tailored to your goals. Choose the right subject and take a step closer to your career aspirations."
           />
         </motion.div>
 

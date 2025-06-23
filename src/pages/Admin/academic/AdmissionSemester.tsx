@@ -1,6 +1,13 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { Form } from "@/components/ui/form";
+import { FormFields } from "@/components/ui/form-field";
 import {
   Table,
   TableBody,
@@ -9,30 +16,23 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Form } from "@/components/ui/form";
 import {
   useCreateAcademicSemesterMutation,
   useGetAllAcademicSemestersQuery,
   useUpdateAcademicSemesterMutation,
 } from "@/redux/features/academic/academicSemesterApi";
+import { useGetAllAcademicYearsQuery } from "@/redux/features/academic/academicYearApi";
 import {
-  type Semester,
   type CreateSemesterDto,
   Months,
+  type Semester,
 } from "@/types/academic";
-import { FormFields } from "@/components/ui/form-field";
-import { useGetAllAcademicYearsQuery } from "@/redux/features/academic/academicYearApi";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { motion } from "framer-motion";
+import { useEffect, useState } from "react";
+import { useForm } from "react-hook-form";
+import * as z from "zod";
 
 export type TAcademicSemesterName =
   | "1st Semester"
@@ -168,6 +168,7 @@ const AdmissionSemester = () => {
       form.reset();
       setSelectedSemester(null);
     } catch (error) {
+      console.log(error);
       toast({
         title: "Error",
         description: "Failed to save semester",
@@ -322,6 +323,7 @@ const AdmissionSemester = () => {
                     ? semester.academicYear.name
                     : semester.academicYear || "N/A"}
                 </TableCell>
+
                 {/* <TableCell>{semester.year}</TableCell> */}
                 <TableCell>{semester.code}</TableCell>
                 <TableCell>{semester.startMonth}</TableCell>

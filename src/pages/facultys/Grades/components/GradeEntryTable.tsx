@@ -1,7 +1,7 @@
 import type { TEnrolledCourse } from "@/types/enrolledCourse";
 import { useState, type FC } from "react";
-import { type TStudentMarks } from "./SubjectMarksTable";
 import { StudentRow } from "./StudentRow";
+import { type TStudentMarks } from "./SubjectMarksTable";
 
 interface GradeEntryTableProps {
   studentsForCourse: TEnrolledCourse[];
@@ -59,9 +59,9 @@ const GradeEntryTable: FC<GradeEntryTableProps> = ({
           ) : (
             studentsForCourse.map((enrollment) => (
               <StudentRow
-                key={enrollment.student.id}
+                key={enrollment.student?.id}
                 enrollment={enrollment}
-                isExpanded={expandedStudent === enrollment.student.id}
+                isExpanded={expandedStudent === enrollment.student?.id}
                 onToggle={toggleStudentExpansion}
                 studentMarks={studentMarks}
                 handleMarkChange={handleMarkChange}

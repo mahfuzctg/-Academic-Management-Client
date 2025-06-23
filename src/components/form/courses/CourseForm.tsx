@@ -1,7 +1,6 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Form,
   FormControl,
@@ -21,11 +20,12 @@ import {
 import { useToast } from "@/components/ui/use-toast";
 import {
   useCreateCourseMutation,
-  useUpdateCourseMutation,
   useGetAllCoursesQuery,
+  useUpdateCourseMutation,
 } from "@/redux/features/course/courseApi";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
 // Types
 export type TPreRequisiteCourses = {

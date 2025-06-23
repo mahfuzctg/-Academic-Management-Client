@@ -1,11 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { SubjectMarksTable, type TStudentMarks } from "./SubjectMarksTable";
+import { useUpdateEnrolledCourseMarksMutation } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
 import type { TEnrolledCourse } from "@/types/enrolledCourse";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { type FC } from "react";
 import { toast } from "sonner";
-import { useUpdateEnrolledCourseMarksMutation } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
+import { SubjectMarksTable, type TStudentMarks } from "./SubjectMarksTable";
 
 /**
  * @description Calculates the best 3 class test marks from 4 class tests
@@ -70,9 +70,9 @@ export const StudentRow: FC<{
   calculateGrade,
   getResultStatus,
 }) => {
-  const studentFullName = `${enrollment.student.name.firstName} ${
-    enrollment.student.name.middleName || ""
-  } ${enrollment.student.name.lastName}`;
+  const studentFullName = `${enrollment.student?.name?.firstName} ${
+    enrollment.student?.name?.middleName || ""
+  } ${enrollment.student?.name?.lastName}`;
 
   const [updateEnrolledCourseMarks, { isLoading: isSubmitting }] =
     useUpdateEnrolledCourseMarksMutation();
@@ -170,7 +170,7 @@ export const StudentRow: FC<{
           />
         </td>
         <td className="px-4 py-2 border font-semibold">
-          {studentFullName} ({enrollment.student.id})
+          {studentFullName} ({enrollment?.student?.id})
         </td>
         <td className="px-4 py-2 border">{enrollment.course.title}</td>
         <td className="px-4 py-2 border text-center">
@@ -206,7 +206,7 @@ export const StudentRow: FC<{
                   </div>
                   <SubjectMarksTable
                     enrollment={enrollment}
-                    studentId={enrollment.student.id}
+                    studentId={enrollment.student?.id}
                     studentMarks={studentMarks}
                     handleMarkChange={handleMarkChange}
                     calculateGrade={calculateGrade}

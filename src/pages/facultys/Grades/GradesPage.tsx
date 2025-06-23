@@ -1,21 +1,21 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Select,
-  SelectTrigger,
   SelectContent,
   SelectItem,
+  SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import * as XLSX from "xlsx";
-import { toast } from "sonner";
-import type { TEnrolledCourse } from "@/types/enrolledCourse";
 import {
   useGetAllEnrolledCoursesQuery,
   useUpdateEnrolledCourseMarksMutation,
 } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
+import type { TEnrolledCourse } from "@/types/enrolledCourse";
+import { motion } from "framer-motion";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import * as XLSX from "xlsx";
 import GradeEntryTable from "./components/GradeEntryTable";
 import type { TStudentMarks } from "./components/SubjectMarksTable";
 
@@ -58,7 +58,7 @@ function calculateGrade(marks: number) {
 function getResultStatus(marks: number) {
   // Convert marks to percentage (210 is 100%)
   const percentage = (marks / 210) * 100;
-  return percentage >= 50 ? "PASS" : "FAIL";
+  return percentage >= 50 ? "PASS" : " FAIL";
 }
 
 export default function GradesPage() {
@@ -73,6 +73,7 @@ export default function GradesPage() {
 
   const courseOptions = useMemo(() => {
     const courses = new Map<string, { _id: string; title: string }>();
+
     enrolledCourses.forEach((c) => {
       if (c.course && c.course._id) {
         courses.set(
@@ -84,6 +85,7 @@ export default function GradesPage() {
     return Array.from(courses.values());
   }, [enrolledCourses]);
 
+  console.log(enrolledCourses);
   const studentsForCourse = useMemo(() => {
     if (!selectedCourseId) return [];
     return enrolledCourses.filter((c) => c.course._id === selectedCourseId);
@@ -102,12 +104,12 @@ export default function GradesPage() {
       );
 
       studentsInCourse.forEach((enrollment) => {
-        initialMarks[enrollment.student.id] = {};
+        initialMarks[enrollment.student?.id] = {};
         enrollment.selectedSubjects?.forEach((subject) => {
           const subjectMarks = enrollment.subjectMarks?.find(
             (sm) => sm.subjectName === subject
           );
-          initialMarks[enrollment.student.id][subject] = {
+          initialMarks[enrollment.student?.id][subject] = {
             classTest1: subjectMarks?.marks.classTest1 || 0,
             classTest2: subjectMarks?.marks.classTest2 || 0,
             classTest3: subjectMarks?.marks.classTest3 || 0,
