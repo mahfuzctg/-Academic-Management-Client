@@ -85,7 +85,8 @@ export default function GradesPage() {
     return Array.from(courses.values());
   }, [enrolledCourses]);
 
-  console.log(enrolledCourses);
+  console.log({ enrolledCourses });
+  console.log({ courseOptions });
   const studentsForCourse = useMemo(() => {
     if (!selectedCourseId) return [];
     return enrolledCourses.filter((c) => c.course._id === selectedCourseId);

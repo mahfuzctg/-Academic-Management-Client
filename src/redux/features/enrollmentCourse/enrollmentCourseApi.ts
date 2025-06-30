@@ -18,7 +18,7 @@ const enrollmentCourseApi = baseApi.injectEndpoints({
           params: params,
         };
       },
-      providesTags: ["EnrolledCourse"],
+      providesTags: ["enrolledCourses"],
       transformResponse: (response: TResponseRedux<TEnrolledCourse[]>) => ({
         data: response.data,
         meta: response.meta,
@@ -39,7 +39,7 @@ const enrollmentCourseApi = baseApi.injectEndpoints({
           params: params,
         };
       },
-      providesTags: ["EnrolledCourse"],
+      providesTags: ["enrolledCourses"],
       transformResponse: (response: TResponseRedux<TEnrolledCourse[]>) => ({
         data: response.data,
         meta: response.meta,
@@ -52,7 +52,7 @@ const enrollmentCourseApi = baseApi.injectEndpoints({
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["EnrolledCourse"],
+      invalidatesTags: ["enrolledCourses"],
     }),
 
     updateEnrolledCourseMarks: builder.mutation({
@@ -61,7 +61,7 @@ const enrollmentCourseApi = baseApi.injectEndpoints({
         method: "PATCH",
         body: data,
       }),
-      invalidatesTags: ["EnrolledCourse"],
+      invalidatesTags: ["enrolledCourses"],
     }),
   }),
 });
