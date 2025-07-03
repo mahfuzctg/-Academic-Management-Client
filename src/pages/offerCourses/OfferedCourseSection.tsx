@@ -44,6 +44,7 @@ const OfferedCourseSection = () => {
     useGetAllOfferedCoursesQuery(queryParams);
   const { data: enrolledCoursesData } = useGetMyEnrolledCoursesQuery(undefined);
 
+  console.log("data", data);
   const [createEnrolledCourse] = useCreateEnrolledCourseMutation();
 
   const enrolledCourses = enrolledCoursesData?.data || [];
