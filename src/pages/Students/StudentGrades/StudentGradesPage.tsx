@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -131,7 +131,7 @@ export default function StudentGradesPage() {
   // Get current semester name
   const currentSemesterName = semesterNames[currentSemesterNumber - 1];
   const currentSemesterCourses = coursesBySemester[currentSemesterName] || [];
-
+  console.log("currentSemesterName", currentSemesterName);
   // Check if all current semester courses have isMarkSubmitted: true
   const canRegisterNext =
     currentSemesterCourses.length > 0 &&
@@ -139,6 +139,13 @@ export default function StudentGradesPage() {
 
   // Only show tabs up to the student's current semester
   const visibleSemesterNames = semesterNames.slice(0, currentSemesterNumber);
+  console.log("visibleSemesterNames", visibleSemesterNames);
+
+  // Controlled tab state
+  const [activeTab, setActiveTab] = useState(currentSemesterName);
+  useEffect(() => {
+    setActiveTab(currentSemesterName);
+  }, [currentSemesterName]);
 
   /**
    * @description Opens the registration modal for a specific course.
@@ -173,13 +180,19 @@ export default function StudentGradesPage() {
         });
         return;
       }
+
+      const updatedData = {
+        student: {
+          currentSemester: nextSemesterNumberString,
+        },
+      };
+      console.log("studentId", studentId);
+      console.log("nextSemesterNumberString", nextSemesterNumberString);
+      console.log("updatedData", updatedData);
+
       await updateStudent({
         id: studentId,
-        updatedData: {
-          student: {
-            currentSemester: nextSemesterNumberString,
-          },
-        },
+        updatedData,
       }).unwrap();
       toast({
         title: `Registration submitted! You are now in ${nextSemesterNumberString}.`,
@@ -249,7 +262,11 @@ export default function StudentGradesPage() {
       </Card>
 
       {/* Semester Tabs */}
-      <Tabs defaultValue={currentSemesterName} className="w-full mt-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full mt-6"
+      >
         <TabsList className="flex flex-wrap gap-2">
           {visibleSemesterNames.map((name) => (
             <TabsTrigger key={name} value={name} className="capitalize">
@@ -320,7 +337,7 @@ export default function StudentGradesPage() {
                           )}
                       </div>
                       {/* Only show registration button for current semester tab and if all marks submitted */}
-                      {name === currentSemesterName && canRegisterNext && (
+                      {course.isExamDone && (
                         <Button
                           onClick={() => openRegistrationModal(course)}
                           className="bg-green-600 hover:bg-green-700"

@@ -24,7 +24,6 @@ import {
   useGetAllOfferedCoursesQuery,
 } from "@/redux/features/course/offerCourseApi";
 
-import OfferedCourseList from "@/components/form/offerCourses/OfferedCourseList";
 import type { TQueryParam } from "@/types/global";
 import { useDebounce } from "@/hooks/useDebounce";
 

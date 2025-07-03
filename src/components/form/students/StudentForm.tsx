@@ -162,8 +162,11 @@ const StudentForm = ({ student, onSuccess }: StudentFormProps) => {
         await updateStudent({
           id: student.id,
           updatedData: {
-            ...data,
-            user: student.user,
+            student: {
+              ...data,
+              user: student.user,
+              id: student.id,
+            },
           },
         }).unwrap();
         toast({
