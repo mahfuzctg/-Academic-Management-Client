@@ -1,13 +1,12 @@
-import { useState } from "react";
-import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
 import StudentForm from "@/components/form/students/StudentForm";
 import StudentList from "@/components/form/students/StudentList";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 import type { TStudent } from "@/types/student";
+import { Plus } from "lucide-react";
+import { useState } from "react";
 export default function StudentManagement() {
   const { toast } = useToast();
   const [isFormOpen, setIsFormOpen] = useState(false);
