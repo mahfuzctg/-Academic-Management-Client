@@ -162,7 +162,7 @@ export const studentApi = baseApi.injectEndpoints({
         url: "/users/me",
         method: "GET",
       }),
-      providesTags: ["userProfiles"],
+      providesTags: ["userProfiles", "student"],
     }),
   }),
 });
