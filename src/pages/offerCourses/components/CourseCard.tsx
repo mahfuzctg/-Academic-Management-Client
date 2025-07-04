@@ -45,13 +45,13 @@ const CourseCard = ({ course, isEnrolled, onEnroll }: CourseCardProps) => {
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent" />
             <Badge className="absolute top-3 right-3 bg-white/90 text-foreground hover:bg-white shadow-sm">
-              {course.course?.code}
+              {course.academicSemester?.name}
             </Badge>
           </div>
         )}
         <CardHeader>
           <CardTitle className="text-lg font-semibold line-clamp-2">
-            {course.course?.title}
+            {course.course?.title} {course.course?.code}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm flex-grow">
