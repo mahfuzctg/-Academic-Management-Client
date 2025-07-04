@@ -71,7 +71,7 @@ const AcademicFaculty = () => {
     isLoading,
     isError,
   } = useGetAllAcademicFacultiesQuery([]);
-
+  console.log("faculties", faculties);
   const { data: academicYears } = useGetAllAcademicYearsQuery([]);
 
   const form = useForm<FacultyFormData>({

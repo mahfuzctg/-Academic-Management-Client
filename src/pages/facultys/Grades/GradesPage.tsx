@@ -68,7 +68,7 @@ export default function GradesPage() {
     isLoading,
   } = useGetAllEnrolledCoursesQuery(undefined);
   const enrolledCourses: TEnrolledCourse[] = facultyCoursesData?.data || [];
-
+  console.log("enrolledCourses", enrolledCourses);
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
 
   const courseOptions = useMemo(() => {
@@ -76,16 +76,17 @@ export default function GradesPage() {
 
     enrolledCourses.forEach((c) => {
       if (c.course && c.course._id) {
-        courses.set(
-          c.course._id,
-          c.course.title as unknown as { _id: string; title: string }
-        );
+        courses.set(c.course._id, {
+          _id: c.course._id,
+          title: c.course.title as unknown as string,
+        });
       }
     });
     return Array.from(courses.values());
   }, [enrolledCourses]);
 
-  console.log(enrolledCourses);
+  console.log({ enrolledCourses });
+  console.log({ courseOptions });
   const studentsForCourse = useMemo(() => {
     if (!selectedCourseId) return [];
     return enrolledCourses.filter((c) => c.course._id === selectedCourseId);
@@ -298,7 +299,7 @@ export default function GradesPage() {
               <SelectContent>
                 {courseOptions.map((course) => (
                   <SelectItem key={course._id} value={course._id}>
-                    {course.title}
+                    {course?.title}
                   </SelectItem>
                 ))}
               </SelectContent>

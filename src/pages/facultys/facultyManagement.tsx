@@ -88,7 +88,7 @@ export default function FacultyManagement() {
   }
 
   const { data: facultyData, isLoading } = useGetAllFacultiesQuery(queryParams);
-
+  console.log("facultyData", facultyData);
   const handleSearch = (value: string) => {
     setFilters((prev) => ({ ...prev, search: value }));
     setPage(1);

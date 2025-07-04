@@ -81,66 +81,80 @@ const GradingHistoryTable: FC<GradingHistoryTableProps> = ({
           {history.length > 0 ? (
             history.flatMap((enrollment) =>
               enrollment.subjectMarks && enrollment.subjectMarks.length > 0
-                ? enrollment.subjectMarks.map((subjectMark, idx) => {
-                    const bestThreeCT = calculateBestThreeCT(
-                      subjectMark.marks.classTest1 ?? 0,
-                      subjectMark.marks.classTest2 ?? 0,
-                      subjectMark.marks.classTest3 ?? 0,
-                      subjectMark.marks.classTest4 ?? 0
-                    );
-                    const total = calculateFinalTotal(
-                      subjectMark.marks.classTest1 ?? 0,
-                      subjectMark.marks.classTest2 ?? 0,
-                      subjectMark.marks.classTest3 ?? 0,
-                      subjectMark.marks.classTest4 ?? 0,
-                      subjectMark.marks.finalExam ?? 0
-                    );
-                    const grade = calculateGrade(total);
-                    const result = getResultStatus(total);
-                    return (
-                      <tr
-                        key={`${enrollment.student.id}-${subjectMark.subjectName}-${idx}`}
+                ? [
+                    // Course group row
+                    <tr
+                      key={`${enrollment.student.id}-${enrollment.course.title}-group`}
+                    >
+                      <td
+                        colSpan={12}
+                        className="bg-gray-200 font-bold px-4 py-2"
                       >
-                        <td className="px-4 py-2 border">
-                          {getStudentFullName(enrollment.student)} (
-                          {enrollment.student.id})
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {enrollment.course.title}
-                        </td>
-                        <td className="px-4 py-2 border font-semibold">
-                          {subjectMark.subjectName}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {subjectMark.marks.classTest1 ?? 0}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {subjectMark.marks.classTest2 ?? 0}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {subjectMark.marks.classTest3 ?? 0}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {subjectMark.marks.classTest4 ?? 0}
-                        </td>
-                        <td className="px-4 py-2 border font-semibold text-center bg-blue-50">
-                          {bestThreeCT}
-                        </td>
-                        <td className="px-4 py-2 border">
-                          {subjectMark.marks.finalExam ?? 0}
-                        </td>
-                        <td className="px-4 py-2 border font-semibold text-center bg-green-50">
-                          {total}
-                        </td>
-                        <td className="px-4 py-2 border font-semibold">
-                          {grade}
-                        </td>
-                        <td className="px-4 py-2 border font-semibold">
-                          {result}
-                        </td>
-                      </tr>
-                    );
-                  })
+                        Course: {enrollment.course.title}
+                      </td>
+                    </tr>,
+                    // Subject rows
+                    ...enrollment.subjectMarks.map((subjectMark, idx) => {
+                      const bestThreeCT = calculateBestThreeCT(
+                        subjectMark.marks.classTest1 ?? 0,
+                        subjectMark.marks.classTest2 ?? 0,
+                        subjectMark.marks.classTest3 ?? 0,
+                        subjectMark.marks.classTest4 ?? 0
+                      );
+                      const total = calculateFinalTotal(
+                        subjectMark.marks.classTest1 ?? 0,
+                        subjectMark.marks.classTest2 ?? 0,
+                        subjectMark.marks.classTest3 ?? 0,
+                        subjectMark.marks.classTest4 ?? 0,
+                        subjectMark.marks.finalExam ?? 0
+                      );
+                      const grade = calculateGrade(total);
+                      const result = getResultStatus(total);
+                      return (
+                        <tr
+                          key={`${enrollment.student.id}-${subjectMark.subjectName}-${idx}`}
+                        >
+                          <td className="px-4 py-2 border">
+                            {getStudentFullName(enrollment.student)} (
+                            {enrollment.student.id})
+                          </td>
+                          <td className="px-4 py-2 border">
+                            {enrollment.course.title}
+                          </td>
+                          <td className="px-4 py-2 border font-semibold">
+                            {subjectMark.subjectName}
+                          </td>
+                          <td className="px-4 py-2 border">
+                            {subjectMark.marks.classTest1 ?? 0}
+                          </td>
+                          <td className="px-4 py-2 border">
+                            {subjectMark.marks.classTest2 ?? 0}
+                          </td>
+                          <td className="px-4 py-2 border">
+                            {subjectMark.marks.classTest3 ?? 0}
+                          </td>
+                          <td className="px-4 py-2 border">
+                            {subjectMark.marks.classTest4 ?? 0}
+                          </td>
+                          <td className="px-4 py-2 border font-semibold text-center bg-blue-50">
+                            {bestThreeCT}
+                          </td>
+                          <td className="px-4 py-2 border">
+                            {subjectMark.marks.finalExam ?? 0}
+                          </td>
+                          <td className="px-4 py-2 border font-semibold text-center bg-green-50">
+                            {total}
+                          </td>
+                          <td className="px-4 py-2 border font-semibold">
+                            {grade}
+                          </td>
+                          <td className="px-4 py-2 border font-semibold">
+                            {result}
+                          </td>
+                        </tr>
+                      );
+                    }),
+                  ]
                 : []
             )
           ) : (

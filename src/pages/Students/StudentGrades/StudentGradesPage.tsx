@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { motion } from "framer-motion";
 import { GraduationCap } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { toast } from "@/components/ui/use-toast";
 import { useGetMyEnrolledCoursesQuery } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
@@ -22,7 +23,6 @@ import {
   useUpdateStudentMutation,
 } from "@/redux/features/student/studentApi";
 import type { TEnrolledCourse } from "@/types/enrolledCourse";
-import { useState } from "react";
 import GradingHistoryTable from "./GradingHistoryTable";
 
 /**
@@ -131,7 +131,7 @@ export default function StudentGradesPage() {
   // Get current semester name
   const currentSemesterName = semesterNames[currentSemesterNumber - 1];
   const currentSemesterCourses = coursesBySemester[currentSemesterName] || [];
-
+  console.log("currentSemesterName", currentSemesterName);
   // Check if all current semester courses have isMarkSubmitted: true
   const canRegisterNext =
     currentSemesterCourses.length > 0 &&
@@ -139,6 +139,13 @@ export default function StudentGradesPage() {
 
   // Only show tabs up to the student's current semester
   const visibleSemesterNames = semesterNames.slice(0, currentSemesterNumber);
+  console.log("visibleSemesterNames", visibleSemesterNames);
+
+  // Controlled tab state
+  const [activeTab, setActiveTab] = useState(currentSemesterName);
+  useEffect(() => {
+    setActiveTab(currentSemesterName);
+  }, [currentSemesterName]);
 
   /**
    * @description Opens the registration modal for a specific course.
@@ -173,13 +180,17 @@ export default function StudentGradesPage() {
         });
         return;
       }
+
+      const updatedData = {
+        student: {
+          currentSemester: nextSemesterNumberString,
+          isNextSemesterRegistrationDone: true,
+        },
+      };
+
       await updateStudent({
         id: studentId,
-        updatedData: {
-          student: {
-            currentSemester: nextSemesterNumberString,
-          },
-        },
+        updatedData,
       }).unwrap();
       toast({
         title: `Registration submitted! You are now in ${nextSemesterNumberString}.`,
@@ -249,7 +260,11 @@ export default function StudentGradesPage() {
       </Card>
 
       {/* Semester Tabs */}
-      <Tabs defaultValue={currentSemesterName} className="w-full mt-6">
+      <Tabs
+        value={activeTab}
+        onValueChange={setActiveTab}
+        className="w-full mt-6"
+      >
         <TabsList className="flex flex-wrap gap-2">
           {visibleSemesterNames.map((name) => (
             <TabsTrigger key={name} value={name} className="capitalize">
@@ -257,106 +272,94 @@ export default function StudentGradesPage() {
             </TabsTrigger>
           ))}
         </TabsList>
-        {visibleSemesterNames.map((name) => (
-          <TabsContent key={name} value={name}>
-            {(coursesBySemester[name] || []).length === 0 ? (
-              <p className="text-gray-500">No courses for this semester.</p>
-            ) : (
-              <div className="space-y-4">
-                {(coursesBySemester[name] || []).map((course) => (
-                  <div
-                    key={course._id}
-                    className="border rounded-lg p-4 bg-gray-50"
-                  >
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-lg">
-                          {course.course.title}
-                        </h3>
-                        <p className="text-sm text-gray-600">
-                          Grade: {course.grade} | Status:{" "}
-                          {course.isPassed ? "PASS" : "FAIL"}
-                        </p>
-                        {course.subjectMarks &&
-                          course.subjectMarks.length > 0 && (
-                            <div className="mt-2">
-                              <p className="text-sm font-medium">
-                                Subject Marks:
-                              </p>
-                              <div className="grid grid-cols-2 md:grid-cols-4 gap-2 mt-1">
-                                {course.subjectMarks.map((subject) => {
-                                  const total = calculateFinalTotal(
-                                    subject.marks.classTest1 ?? 0,
-                                    subject.marks.classTest2 ?? 0,
-                                    subject.marks.classTest3 ?? 0,
-                                    subject.marks.classTest4 ?? 0,
-                                    subject.marks.finalExam ?? 0
-                                  );
-                                  const bestThreeCT = calculateBestThreeCT(
-                                    subject.marks.classTest1 ?? 0,
-                                    subject.marks.classTest2 ?? 0,
-                                    subject.marks.classTest3 ?? 0,
-                                    subject.marks.classTest4 ?? 0
-                                  );
-                                  return (
-                                    <div
-                                      key={subject.subjectName}
-                                      className="text-xs bg-white p-2 rounded"
-                                    >
-                                      <p className="font-medium">
-                                        {subject.subjectName}
-                                      </p>
-                                      <p>Best 3 CT: {bestThreeCT}</p>
-                                      <p>
-                                        Final: {subject.marks.finalExam ?? 0}
-                                      </p>
-                                      <p>Total: {total}</p>
-                                      <p>Grade: {calculateGrade(total)}</p>
-                                    </div>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          )}
-                      </div>
-                      {/* Only show registration button for current semester tab and if all marks submitted */}
-                      {name === currentSemesterName && canRegisterNext && (
-                        <Button
-                          onClick={() => openRegistrationModal(course)}
-                          className="bg-green-600 hover:bg-green-700"
-                          disabled={updateLoading}
-                        >
-                          {updateLoading
-                            ? "Processing..."
-                            : "Register Next Semester"}
-                        </Button>
+        {visibleSemesterNames.map((name) => {
+          const semesterCourses = coursesBySemester[name] || [];
+          // Show button if all courses in this semester have isExamDone=true and isNextSemesterRegistrationDone is false
+          const allExamsDone =
+            semesterCourses.length > 0 &&
+            semesterCourses.every((c) => c.isExamDone);
+          const nextSemesterRegistered =
+            semesterCourses.length > 0 &&
+            semesterCourses.every((c) => c.isNextSemesterRegistrationDone);
+          // Calculate pass/fail summary
+          const passedCount = semesterCourses.filter((c) => c.isPassed).length;
+          const failedCount = semesterCourses.filter(
+            (c) => c.isPassed === false
+          ).length;
+          const totalCount = semesterCourses.length;
+          const semesterPassed = totalCount > 0 && passedCount === totalCount;
+          return (
+            <TabsContent key={name} value={name}>
+              {semesterCourses.length === 0 ? (
+                <p className="text-gray-500">No courses for this semester.</p>
+              ) : (
+                <>
+                  {/* Semester Summary */}
+                  <div className="mb-4 p-4 rounded-lg bg-gray-100 border flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+                    <div>
+                      <span className="font-semibold text-lg">{name}</span>
+                      {semesterCourses.length > 0 && (
+                        <div className="mt-1 text-sm text-gray-700">
+                          <span className="font-medium">Courses:</span>
+                          <ul className="list-disc list-inside ml-4">
+                            {semesterCourses.map((c) => (
+                              <li key={c._id}>
+                                {c.course?.title || "Untitled Course"}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
                       )}
                     </div>
+                    <div className="flex flex-wrap gap-4">
+                      <span className="text-green-700 font-medium">
+                        Passed: {passedCount}
+                      </span>
+                      <span className="text-red-700 font-medium">
+                        Failed: {failedCount}
+                      </span>
+                      <span className="text-blue-700 font-medium">
+                        Total: {totalCount}
+                      </span>
+                      <span
+                        className={
+                          semesterPassed
+                            ? "text-green-800 font-bold"
+                            : "text-red-800 font-bold"
+                        }
+                      >
+                        Semester Status:{" "}
+                        {semesterPassed ? "PASSED" : "NOT PASSED"}
+                      </span>
+                    </div>
                   </div>
-                ))}
-              </div>
-            )}
-          </TabsContent>
-        ))}
+                  {name === currentSemesterName &&
+                    allExamsDone &&
+                    !nextSemesterRegistered && (
+                      <Button
+                        className="mb-4 bg-green-600 hover:bg-green-700"
+                        onClick={() => {
+                          // Use the first course in the semester for registration context
+                          openRegistrationModal(semesterCourses[0]);
+                        }}
+                        disabled={updateLoading}
+                      >
+                        {updateLoading
+                          ? "Processing..."
+                          : "Register Next Semester"}
+                      </Button>
+                    )}
+                  <GradingHistoryTable
+                    history={semesterCourses}
+                    calculateGrade={calculateGrade}
+                    getResultStatus={getResultStatus}
+                  />
+                </>
+              )}
+            </TabsContent>
+          );
+        })}
       </Tabs>
-
-      {/* Detailed Grades Table - only show current semester's courses */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Detailed Grade Report</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {coursesLoading ? (
-            <p>Loading grades...</p>
-          ) : (
-            <GradingHistoryTable
-              history={currentSemesterCourses}
-              calculateGrade={calculateGrade}
-              getResultStatus={getResultStatus}
-            />
-          )}
-        </CardContent>
-      </Card>
 
       {/* Registration Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>

@@ -57,6 +57,7 @@ const FacultyList = ({ onEdit, onViewSubjects }: FacultyListProps) => {
   });
 
   const { data: facultyData, isLoading } = useGetAllFacultiesQuery(filters);
+  console.log("facultyData", facultyData);
   const [deleteFaculty] = useDeleteFacultyMutation();
 
   const handleSearch = (value: string) => {

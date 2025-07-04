@@ -78,4 +78,6 @@ export type TEnrolledCourse = {
   isPassed: boolean;
   selectedSubjects?: string[];
   defaultSubjects?: TSubject[];
+  isExamDone: boolean;
+  isNextSemesterRegistrationDone: boolean;
 };
