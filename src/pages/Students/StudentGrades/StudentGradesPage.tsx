@@ -163,12 +163,24 @@ export default function StudentGradesPage() {
     try {
       console.log("currentSemesterNumber", parseInt(currentSemesterNumber));
       const nextSemesterNumber = parseInt(currentSemesterNumber) + 1;
-      const nextSemesterNumberString = nextSemesterNumber;
-
-      if (nextSemesterNumberString > 8) {
+      const nextSemesterName = semesterNames[nextSemesterNumber - 1];
+      const nextSemesterRegistration = semesterRegistrations?.data?.find(
+        (reg) => reg.academicSemester?.name === nextSemesterName
+      );
+      const nextSemesterId = nextSemesterRegistration?._id;
+      console.log({ nextSemesterId });
+      if (nextSemesterNumber > 8) {
         toast({
           title: "You have completed all semesters!",
           variant: "default",
+        });
+        return;
+      }
+      if (!nextSemesterId) {
+        toast({
+          title:
+            "Next semester registration not found. Please contact administration.",
+          variant: "destructive",
         });
         return;
       }
@@ -183,8 +195,9 @@ export default function StudentGradesPage() {
 
       const updatedData = {
         student: {
-          currentSemester: nextSemesterNumberString,
+          currentSemester: nextSemesterNumber,
           isNextSemesterRegistrationDone: true,
+          admissionSemester: nextSemesterId,
         },
       };
 
@@ -193,7 +206,8 @@ export default function StudentGradesPage() {
         updatedData,
       }).unwrap();
       toast({
-        title: `Registration submitted! You are now in ${nextSemesterNumberString}.`,
+        title: `Registration submitted! You are now in ${nextSemesterNumber}.
+          Admission semester updated.`,
         variant: "default",
       });
       setIsModalOpen(false);
