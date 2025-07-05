@@ -1,4 +1,3 @@
-import { InstructorDashboard } from "@/pages/Dashboard/InstructorDashboard";
 import FacultyProfile from "@/pages/facultys/FacultyProfile";
 import GradesPage from "@/pages/facultys/Grades/GradesPage";
 import AcademicCourseShow from "@/pages/share/facultyAndStudent/academicCourseShow";
@@ -7,24 +6,15 @@ import AcademicFacultyShow from "@/pages/share/facultyAndStudent/academicfaculty
 import AcademicInstructorShow from "@/pages/share/facultyAndStudent/academicInstructorShow";
 import AcademicSemesterShow from "@/pages/share/facultyAndStudent/AcademickSemesterShow";
 import AcademicOfferedCourseShow from "@/pages/share/facultyAndStudent/academicOfferedCourseShow";
-import StudentManagement from "@/pages/Students/StudentManagement";
-import {
-  LayoutDashboard,
-  GraduationCap,
-  Building2,
-  Users,
-  CalendarDays,
-  BookOpen,
-  User,
-} from "lucide-react";
+import { BookOpen, Building2, CalendarDays, User, Users } from "lucide-react";
 
 export const facultyPaths = [
-  {
-    name: "Dashboard",
-    path: "dashboard",
-    element: <InstructorDashboard />,
-    icon: <LayoutDashboard className="w-5 h-5" />,
-  },
+  // {
+  //   name: "Dashboard",
+  //   path: "dashboard",
+  //   element: <InstructorDashboard />,
+  //   icon: <LayoutDashboard className="w-5 h-5" />,
+  // },
   {
     name: "Profile",
     path: "profile",

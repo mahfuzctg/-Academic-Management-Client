@@ -1,5 +1,4 @@
 import MyBlogSection from "@/pages/blogs/MyBlogSection";
-import { StudentDashboard } from "@/pages/Dashboard/StudentDashboard";
 import JobManagement from "@/pages/Jobs/JobManagement";
 import AcademicCourseShow from "@/pages/share/facultyAndStudent/academicCourseShow";
 import AcademicDepartmentShow from "@/pages/share/facultyAndStudent/academicDepartmentShow";
@@ -16,18 +15,17 @@ import {
   BookOpen,
   Building2,
   CalendarDays,
-  LayoutDashboard,
   User,
   Users,
 } from "lucide-react";
 
 export const studentPaths = [
-  {
-    name: "Dashboard",
-    path: "dashboard",
-    element: <StudentDashboard />,
-    icon: <LayoutDashboard className="w-5 h-5" />,
-  },
+  // {
+  //   name: "Dashboard",
+  //   path: "dashboard",
+  //   element: <StudentDashboard />,
+  //   icon: <LayoutDashboard className="w-5 h-5" />,
+  // },
   {
     name: "Profile",
     path: "profile",

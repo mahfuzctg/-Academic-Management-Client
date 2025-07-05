@@ -16,7 +16,7 @@ const DEFAULT_BANNER_IMAGE =
   "https://i.postimg.cc/9MZ38R1Z/post-a-job-jobs-in-Portugal.webp";
 
 const JobCardSkeleton = () => (
-  <div className=" grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3  gap-6">
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
     {[...Array(3)].map((_, i) => (
       <Skeleton key={i} className="aspect-[4/3] w-full rounded-lg" />
     ))}
@@ -27,7 +27,6 @@ const JobSection = () => {
   const { data: jobs, isLoading, refetch } = useGetAllJobsQuery();
   const [applyJob, { isLoading: applying }] = useApplyJobMutation();
   const { user } = useAppSelector((state) => state.auth);
-
   const [loadingJobs, setLoadingJobs] = useState<Set<string>>(new Set());
 
   const handleApply = async (jobId: string) => {
@@ -35,23 +34,25 @@ const JobSection = () => {
 
     setLoadingJobs((prev) => new Set(prev).add(jobId));
     try {
-      await applyJob(jobId).unwrap();
+      await applyJob({ jobId }).unwrap();
+
       toast({
         title: "Success",
         description: "You have successfully applied for the job.",
       });
       await refetch();
-    } catch (error) {
+    } catch (error: any) {
       toast({
         variant: "destructive",
         title: "Failed to apply",
-        description: "Please try again later.",
+        description:
+          error?.data?.message || error?.error || "Please try again later.",
       });
     } finally {
       setLoadingJobs((prev) => {
-        const copy = new Set(prev);
-        copy.delete(jobId);
-        return copy;
+        const updated = new Set(prev);
+        updated.delete(jobId);
+        return updated;
       });
     }
   };
@@ -62,7 +63,10 @@ const JobSection = () => {
     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-9/12 mx-auto">
       {jobs?.map((job) => {
         const isApplied = job.appliedBy?.some(
-          (id: { _id: any }) => id === user?._id || id?._id === user?._id
+          (id: any) =>
+            id === user?.userId ||
+            id?._id === user?.userId ||
+            id === String(user?.userId)
         );
         const isApplying = loadingJobs.has(job._id);
 
