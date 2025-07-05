@@ -4,7 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
-import { useGetAllOfferedCoursesQuery } from "@/redux/features/course/offerCourseApi";
+import {
+  useGetAllOfferedCoursesQuery,
+  useGetOfferedCoursesBySemesterQuery,
+} from "@/redux/features/course/offerCourseApi";
 import {
   useCreateEnrolledCourseMutation,
   useGetMyEnrolledCoursesQuery,
@@ -20,6 +23,10 @@ import { useEffect, useState } from "react";
 import CourseCard from "./components/CourseCard";
 import EnrollmentDialog from "./components/EnrollmentDialog";
 import SubjectSelectionDialog from "./components/SubjectSelectionDialog";
+import {
+  useGetMeQuery,
+  useGetMyStudentProfileQuery,
+} from "@/redux/features/student/studentApi";
 
 // Extend types to include new fields for subject selection
 type TExtendedCourse = TBaseCourse & {
@@ -40,11 +47,14 @@ const OfferedCourseSection = () => {
   const [subjectSelectDialogOpen, setSubjectSelectDialogOpen] = useState(false);
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
+  const { data: studentData, isLoading: studentLoading } =
+    useGetMeQuery(undefined);
+  const academicSemesterId = studentData?.data?.admissionSemester;
+
   const { data, isLoading, isError } =
-    useGetAllOfferedCoursesQuery(queryParams);
+    useGetOfferedCoursesBySemesterQuery(academicSemesterId);
   const { data: enrolledCoursesData } = useGetMyEnrolledCoursesQuery(undefined);
 
-  console.log("data", data);
   const [createEnrolledCourse] = useCreateEnrolledCourseMutation();
 
   const enrolledCourses = enrolledCoursesData?.data || [];
