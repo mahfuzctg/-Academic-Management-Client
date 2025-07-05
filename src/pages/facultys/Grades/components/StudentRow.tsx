@@ -177,7 +177,13 @@ export const StudentRow: FC<{
           {enrollment.selectedSubjects?.length || 0}
         </td>
         <td className="px-4 py-2 border text-center">
-          {enrollment.isPassed ? "Passed" : "Failed"}
+          {enrollment.subjectMarks &&
+          enrollment.subjectMarks.length > 0 &&
+          enrollment.grade !== "NA" ? (
+            <span className="text-green-600 font-medium">✓ Submitted</span>
+          ) : (
+            <span className="text-yellow-600 font-medium">⚠ Pending</span>
+          )}
         </td>
       </tr>
       <AnimatePresence>
@@ -196,12 +202,26 @@ export const StudentRow: FC<{
                       Subject Marks for {studentFullName}
                     </h4>
                     <div className="flex justify-end mb-2">
-                      <Button
-                        onClick={handleAssignGrades}
-                        disabled={isSubmitting}
-                      >
-                        {isSubmitting ? "Saving..." : "Save Grades"}
-                      </Button>
+                      {enrollment.subjectMarks &&
+                      enrollment.subjectMarks.length > 0 &&
+                      enrollment.grade !== "NA" ? (
+                        <span className="text-green-600 font-medium">
+                          ✓ Grades Submitted
+                        </span>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <span className="text-yellow-600 font-medium">
+                            ⚠ Pending Submission
+                          </span>
+                          <Button
+                            onClick={handleAssignGrades}
+                            disabled={isSubmitting}
+                            size="sm"
+                          >
+                            {isSubmitting ? "Saving..." : "Save Grades"}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                   <SubjectMarksTable

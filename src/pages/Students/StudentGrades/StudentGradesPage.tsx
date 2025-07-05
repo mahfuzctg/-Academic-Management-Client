@@ -24,6 +24,8 @@ import {
 } from "@/redux/features/student/studentApi";
 import type { TEnrolledCourse } from "@/types/enrolledCourse";
 import GradingHistoryTable from "./GradingHistoryTable";
+import { useGetAllAcademicSemestersQuery } from "@/redux/features/academic/academicSemesterApi";
+import type { TAcademicSemester } from "@/types/academicManagement.type";
 
 /**
  * @description Calculates the best 3 class test marks from 4 class tests
@@ -84,6 +86,10 @@ export default function StudentGradesPage() {
   const [updateStudent, { isLoading: updateLoading }] =
     useUpdateStudentMutation();
 
+  const { data: academicSemestersData } =
+    useGetAllAcademicSemestersQuery(undefined);
+  const academicSemesters: TAcademicSemester[] =
+    academicSemestersData?.data || [];
   const enrolledCourses: TEnrolledCourse[] = enrolledCoursesData?.data || [];
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -99,53 +105,106 @@ export default function StudentGradesPage() {
   });
 
   // Get current semester as a number (1-8)
-  const currentSemesterNumber = student?.data?.currentSemester;
-  console.log(currentSemesterNumber);
-  // Group enrolled courses by academicSemester (assuming academicSemester is a string like '1st Semester', '2nd Semester', ...)
-  const semesterNames = [
-    "1st Semester",
-    "2nd Semester",
-    "3rd Semester",
-    "4th Semester",
-    "5th Semester",
-    "6th Semester",
-    "7th Semester",
-    "8th Semester",
-  ];
+  const currentSemesterNumber = (student?.data as any)?.currentSemester || 1;
 
-  // Map semester name to number for easier comparison
-  const semesterNameToNumber = (name: string) => {
-    const idx = semesterNames.indexOf(name);
-    return idx === -1 ? null : idx + 1;
-  };
-
-  // Group courses by semester name
-  const coursesBySemester: Record<string, TEnrolledCourse[]> = {};
-  enrolledCourses.forEach((course) => {
-    const semesterIdx = semesterNameToNumber(course.academicSemester);
-    const semesterName = semesterNames[semesterIdx ? semesterIdx - 1 : 0];
-    if (!coursesBySemester[semesterName]) coursesBySemester[semesterName] = [];
-    coursesBySemester[semesterName].push(course);
+  // Create semester mapping from academic semesters
+  const semesterMapping: Record<
+    string,
+    { name: string; number: number; semester: TAcademicSemester }
+  > = {};
+  academicSemesters.forEach((semester) => {
+    const semesterNumber = semester.name.match(/(\d+)/)?.[1];
+    if (semesterNumber) {
+      semesterMapping[semester._id] = {
+        name: semester.name,
+        number: parseInt(semesterNumber),
+        semester: semester,
+      };
+    }
   });
 
-  // Get current semester name
-  const currentSemesterName = semesterNames[currentSemesterNumber - 1];
-  const currentSemesterCourses = coursesBySemester[currentSemesterName] || [];
-  console.log("currentSemesterName", currentSemesterName);
-  // Check if all current semester courses have isMarkSubmitted: true
+  console.log("Semester mapping:", semesterMapping);
+
+  // Group courses by semester using actual semester IDs
+  const coursesBySemester: Record<string, TEnrolledCourse[]> = {};
+  const semesterInfo: Record<string, TAcademicSemester> = {};
+
+  // Initialize all semesters
+  academicSemesters.forEach((semester) => {
+    const semesterNumber = semester.name.match(/(\d+)/)?.[1];
+    if (semesterNumber) {
+      const semesterKey = `Semester ${semesterNumber}`;
+      coursesBySemester[semesterKey] = [];
+      semesterInfo[semesterKey] = semester;
+    }
+  });
+
+  // Group courses by their actual semester
+  enrolledCourses.forEach((course) => {
+    // Handle both string ID and object formats
+    const semesterId =
+      typeof course.academicSemester === "string"
+        ? course.academicSemester
+        : course.academicSemester &&
+          typeof course.academicSemester === "object" &&
+          "_id" in course.academicSemester
+        ? (course.academicSemester as any)._id
+        : null;
+
+    console.log("Course:", course.course?.title, "Semester ID:", semesterId);
+
+    const semesterData = semesterId ? semesterMapping[semesterId] : null;
+    if (semesterData) {
+      const semesterKey = `Semester ${semesterData.number}`;
+      if (!coursesBySemester[semesterKey]) {
+        coursesBySemester[semesterKey] = [];
+      }
+      coursesBySemester[semesterKey].push(course);
+      console.log(`Added course to ${semesterKey}`);
+    } else {
+      console.log("No semester mapping found for ID:", semesterId);
+      // Fallback: add to first semester if no mapping found
+      if (academicSemesters.length > 0) {
+        const firstSemester = academicSemesters[0];
+        const firstSemesterNumber = firstSemester.name.match(/(\d+)/)?.[1];
+        if (firstSemesterNumber) {
+          const fallbackKey = `Semester ${firstSemesterNumber}`;
+          if (!coursesBySemester[fallbackKey]) {
+            coursesBySemester[fallbackKey] = [];
+          }
+          coursesBySemester[fallbackKey].push(course);
+          console.log(`Added course to fallback ${fallbackKey}`);
+        }
+      }
+    }
+  });
+
+  console.log("Courses by semester:", coursesBySemester);
+
+  // Get current semester key
+  const currentSemesterKey = `Semester ${currentSemesterNumber}`;
+  const currentSemesterCourses = coursesBySemester[currentSemesterKey] || [];
+
+  // Check if all current semester courses have grades submitted
   const canRegisterNext =
     currentSemesterCourses.length > 0 &&
-    currentSemesterCourses.every((c) => (c as any).isMarkSubmitted === true);
+    currentSemesterCourses.every(
+      (c) => c.subjectMarks && c.subjectMarks.length > 0 && c.grade !== "NA"
+    );
 
-  // Only show tabs up to the student's current semester
-  const visibleSemesterNames = semesterNames.slice(0, currentSemesterNumber);
-  console.log("visibleSemesterNames", visibleSemesterNames);
+  // Create visible semester keys up to current semester
+  const visibleSemesterKeys = [];
+  for (let i = 1; i <= currentSemesterNumber; i++) {
+    visibleSemesterKeys.push(`Semester ${i}`);
+  }
+
+  console.log("Visible semester keys:", visibleSemesterKeys);
 
   // Controlled tab state
-  const [activeTab, setActiveTab] = useState(currentSemesterName);
+  const [activeTab, setActiveTab] = useState(currentSemesterKey);
   useEffect(() => {
-    setActiveTab(currentSemesterName);
-  }, [currentSemesterName]);
+    setActiveTab(currentSemesterKey);
+  }, [currentSemesterKey]);
 
   /**
    * @description Opens the registration modal for a specific course.
@@ -163,11 +222,13 @@ export default function StudentGradesPage() {
     try {
       console.log("currentSemesterNumber", parseInt(currentSemesterNumber));
       const nextSemesterNumber = parseInt(currentSemesterNumber) + 1;
-      const nextSemesterName = semesterNames[nextSemesterNumber - 1];
+      const nextSemesterKey = `Semester ${nextSemesterNumber}`;
+      const nextSemester = semesterInfo[nextSemesterKey];
       const nextSemesterRegistration = semesterRegistrations?.data?.find(
-        (reg) => reg.academicSemester?.name === nextSemesterName
+        (reg) => reg.academicSemester?._id === nextSemester?._id
       );
-      console.log(nextSemesterRegistration);
+      console.log("Next semester:", nextSemester);
+      console.log("Next semester registration:", nextSemesterRegistration);
       const nextSemesterId = nextSemesterRegistration?.academicSemester?._id;
       console.log({ nextSemesterId });
       if (nextSemesterNumber > 8) {
@@ -185,7 +246,7 @@ export default function StudentGradesPage() {
         });
         return;
       }
-      const studentId = student?.data?._id;
+      const studentId = (student?.data as any)?._id;
       if (!studentId) {
         toast({
           title: "Student ID not found. Please contact administration.",
@@ -281,13 +342,13 @@ export default function StudentGradesPage() {
         className="w-full mt-6"
       >
         <TabsList className="flex flex-wrap gap-2">
-          {visibleSemesterNames.map((name) => (
+          {visibleSemesterKeys.map((name) => (
             <TabsTrigger key={name} value={name} className="capitalize">
               {name}
             </TabsTrigger>
           ))}
         </TabsList>
-        {visibleSemesterNames.map((name) => {
+        {visibleSemesterKeys.map((name) => {
           const semesterCourses = coursesBySemester[name] || [];
           // Show button if all courses in this semester have isExamDone=true and isNextSemesterRegistrationDone is false
           const allExamsDone =
@@ -348,7 +409,7 @@ export default function StudentGradesPage() {
                       </span>
                     </div>
                   </div>
-                  {name === currentSemesterName &&
+                  {name === currentSemesterKey &&
                     allExamsDone &&
                     !nextSemesterRegistered && (
                       <Button
