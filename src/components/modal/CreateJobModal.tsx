@@ -9,7 +9,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import { useCreateJobMutation } from "@/redux/features/job/jobApi";
 import { useAppSelector } from "@/redux/hooks";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 type WorkMode = "remote" | "onsite" | "hybrid";
 
@@ -22,7 +22,7 @@ interface CreateJobModalProps {
 const CreateJobModal = ({ open, onClose, onCreated }: CreateJobModalProps) => {
   const { toast } = useToast();
   const { user } = useAppSelector((state) => state.auth);
-  const [createJob, { isLoading }] = useCreateJobMutation();
+  const [createJob, { isLoading, isSuccess }] = useCreateJobMutation();
 
   const [form, setForm] = useState({
     title: "",
@@ -36,6 +36,21 @@ const CreateJobModal = ({ open, onClose, onCreated }: CreateJobModalProps) => {
     vacancy: "",
     workMode: "remote" as WorkMode,
   });
+
+  const resetForm = () => {
+    setForm({
+      title: "",
+      category: "",
+      description: "",
+      bannerImage: "",
+      profileImage: "",
+      minPrice: "",
+      maxPrice: "",
+      deadline: "",
+      vacancy: "",
+      workMode: "remote",
+    });
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -76,7 +91,7 @@ const CreateJobModal = ({ open, onClose, onCreated }: CreateJobModalProps) => {
     }
 
     try {
-      await createJob({
+      const payload = {
         title,
         category,
         description,
@@ -87,39 +102,45 @@ const CreateJobModal = ({ open, onClose, onCreated }: CreateJobModalProps) => {
         deadline,
         vacancy: Number(vacancy),
         workMode,
-      }).unwrap();
+        // author: user?._id,
+      };
 
-      toast({
-        title: "Job Created",
-        description: "Job posted successfully.",
-      });
+      if (
+        isNaN(payload.minPrice) ||
+        isNaN(payload.maxPrice) ||
+        isNaN(payload.vacancy)
+      ) {
+        throw new Error("Price and vacancy must be valid numbers.");
+      }
 
-      onCreated();
-      onClose();
-
-      setForm({
-        title: "",
-        category: "",
-        description: "",
-        bannerImage: "",
-        profileImage: "",
-        minPrice: "",
-        maxPrice: "",
-        deadline: "",
-        vacancy: "",
-        workMode: "remote",
-      });
+      await createJob(payload).unwrap();
     } catch (err: any) {
+      console.error("Create job error:", err);
       toast({
         title: "Creation Failed",
         description:
           err?.data?.message ||
           err?.error ||
+          err?.message ||
           "Failed to post job, please try again.",
         variant: "destructive",
       });
     }
   };
+
+  // ✅ Handle success: show toast, close modal, reset form
+  useEffect(() => {
+    if (isSuccess) {
+      toast({
+        title: "Job Created",
+        description: "Job posted successfully.",
+      });
+
+      onCreated?.(); // if exists
+      resetForm();
+      onClose?.(); // safely call onClose
+    }
+  }, [isSuccess]);
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

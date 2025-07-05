@@ -1,5 +1,6 @@
 import OfferedCourseSection from "../offerCourses/OfferedCourseSection";
 import Announcements from "./Announcements";
+import BlogBoard from "./BlogBoard";
 import Contact from "./Contact";
 import FacultySection from "./FacultySection";
 import Features from "./Features";
@@ -18,6 +19,7 @@ export default function Home() {
         <FacultySection />
         <Announcements />
         <JobBoard />
+        <BlogBoard />
         <Testimonials />
         <Statistics />
         <Contact />

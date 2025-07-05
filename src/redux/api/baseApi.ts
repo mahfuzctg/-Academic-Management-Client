@@ -45,8 +45,8 @@ const baseQueryWithRefreshToken: BaseQueryFn<
     console.log("Sending refresh token");
 
     const res = await fetch(
-      "https://academic-management-one.vercel.app/api/v1/auth/refresh-token",
-      // "http://localhost:5000/api/v1/auth/refresh-token",
+      // "https://academic-management-one.vercel.app/api/v1/auth/refresh-token",
+      "http://localhost:5000/api/v1/auth/refresh-token",
       {
         method: "POST",
         credentials: "include",

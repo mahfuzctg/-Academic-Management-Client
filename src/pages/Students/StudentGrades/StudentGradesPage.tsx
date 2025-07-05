@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -12,18 +10,20 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { CheckCircle2, GraduationCap } from "lucide-react";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { motion } from "framer-motion";
+import { GraduationCap } from "lucide-react";
+import { useEffect, useState } from "react";
 
-import type { TEnrolledCourse } from "@/types/enrolledCourse";
+import { toast } from "@/components/ui/use-toast";
 import { useGetMyEnrolledCoursesQuery } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
-import GradingHistoryTable from "./GradingHistoryTable";
+import { useGetAllSemesterRegistrationsQuery } from "@/redux/features/semesterRegistration/semesterRegistrationApi";
 import {
   useGetMeQuery,
   useUpdateStudentMutation,
 } from "@/redux/features/student/studentApi";
-import { useGetAllSemesterRegistrationsQuery } from "@/redux/features/semesterRegistration/semesterRegistrationApi";
-import { toast } from "@/components/ui/use-toast";
+import type { TEnrolledCourse } from "@/types/enrolledCourse";
+import GradingHistoryTable from "./GradingHistoryTable";
 
 /**
  * @description Calculates the best 3 class test marks from 4 class tests
