@@ -72,14 +72,30 @@ export default function GradesPage() {
   const [selectedCourseId, setSelectedCourseId] = useState<string>("");
 
   const courseOptions = useMemo(() => {
-    const courses = new Map<string, { _id: string; title: string }>();
+    const courses = new Map<
+      string,
+      { _id: string; title: string; isGraded?: boolean; studentCount?: number }
+    >();
 
     enrolledCourses.forEach((c) => {
       if (c.course && c.course._id) {
-        courses.set(c.course._id, {
-          _id: c.course._id,
-          title: c.course.title as unknown as string,
-        });
+        const existingCourse = courses.get(c.course._id);
+        // Check if grades have been submitted by looking at subjectMarks or grade
+        const hasGrades =
+          c.subjectMarks && c.subjectMarks.length > 0 && c.grade !== "NA";
+
+        if (existingCourse) {
+          // Update existing course with grading status
+          existingCourse.isGraded = existingCourse.isGraded || hasGrades;
+          existingCourse.studentCount = (existingCourse.studentCount || 0) + 1;
+        } else {
+          courses.set(c.course._id, {
+            _id: c.course._id,
+            title: c.course.title as unknown as string,
+            isGraded: hasGrades,
+            studentCount: 1,
+          });
+        }
       }
     });
     return Array.from(courses.values());
@@ -94,6 +110,30 @@ export default function GradesPage() {
 
   const [updateEnrolledCourseMarks, { isLoading: isSubmitting }] =
     useUpdateEnrolledCourseMarksMutation();
+
+  // Get grading status for selected course
+  const selectedCourseStatus = useMemo(() => {
+    if (!selectedCourseId) return null;
+
+    const studentsInCourse = enrolledCourses.filter(
+      (c) => c.course._id === selectedCourseId
+    );
+
+    const gradedStudents = studentsInCourse.filter(
+      (c) => c.subjectMarks && c.subjectMarks.length > 0 && c.grade !== "NA"
+    );
+
+    return {
+      totalStudents: studentsInCourse.length,
+      gradedStudents: gradedStudents.length,
+      isFullyGraded:
+        studentsInCourse.length > 0 &&
+        studentsInCourse.length === gradedStudents.length,
+      isPartiallyGraded:
+        gradedStudents.length > 0 &&
+        gradedStudents.length < studentsInCourse.length,
+    };
+  }, [enrolledCourses, selectedCourseId]);
 
   useEffect(() => {
     if (selectedCourseId) {
@@ -142,44 +182,94 @@ export default function GradesPage() {
   };
 
   const handleAssignGrades = async () => {
-    const toastId = toast.loading("Submitting grades...");
+    const toastId = toast.loading("Submitting grades for all students...");
     try {
-      const promises = studentsForCourse
-        .flatMap((student) => {
-          const studentId = student.student.id;
+      // Get all students for the selected course
+      const studentsInCourse = enrolledCourses.filter(
+        (c) => c.course._id === selectedCourseId
+      );
+
+      if (studentsInCourse.length === 0) {
+        toast.error("No students found for this course", { id: toastId });
+        return;
+      }
+
+      // Prepare all grade data for all students in this course
+      const allGradePromises = studentsInCourse
+        .map((enrollment) => {
+          const studentId = enrollment.student.id;
           const marksBySubject = studentMarks[studentId];
-          if (!marksBySubject) return [];
 
-          return Object.entries(marksBySubject).map(([subjectName, marks]) => {
-            const isAlreadyGraded = student.subjectMarks?.some(
-              (sm) => sm.subjectName === subjectName
-            );
-            if (isAlreadyGraded) return null;
+          if (!marksBySubject || !enrollment.selectedSubjects) {
+            return null; // Skip students without marks
+          }
 
-            const total = calculateFinalTotal(
-              marks.classTest1 ?? 0,
-              marks.classTest2 ?? 0,
-              marks.classTest3 ?? 0,
-              marks.classTest4 ?? 0,
-              marks.finalExam ?? 0
-            );
+          // Collect all subjects and their marks for this student
+          const allSubjectMarks = [];
+          let totalCourseMarks = {
+            classTest1: 0,
+            classTest2: 0,
+            classTest3: 0,
+            classTest4: 0,
+            finalExam: 0,
+          };
+          let totalMarks = 0;
+          let subjectCount = 0;
 
-            const gradeData = {
-              studentId,
-              courseId: student.course._id,
-              subjectName,
-              marks,
-              grade: calculateGrade(total),
-              isPassed: getResultStatus(total) === "PASS",
-            };
-            return updateEnrolledCourseMarks(gradeData).unwrap();
-          });
+          for (const subjectName of enrollment.selectedSubjects) {
+            const marks = marksBySubject[subjectName];
+            if (marks) {
+              const subjectTotal = calculateFinalTotal(
+                marks.classTest1 ?? 0,
+                marks.classTest2 ?? 0,
+                marks.classTest3 ?? 0,
+                marks.classTest4 ?? 0,
+                marks.finalExam ?? 0
+              );
+
+              // Add to subject marks array
+              allSubjectMarks.push({
+                subjectName,
+                marks,
+              });
+
+              // Accumulate course totals
+              totalCourseMarks.classTest1 += marks.classTest1 ?? 0;
+              totalCourseMarks.classTest2 += marks.classTest2 ?? 0;
+              totalCourseMarks.classTest3 += marks.classTest3 ?? 0;
+              totalCourseMarks.classTest4 += marks.classTest4 ?? 0;
+              totalCourseMarks.finalExam += marks.finalExam ?? 0;
+              totalMarks += subjectTotal;
+              subjectCount++;
+            }
+          }
+
+          // Calculate average course grade
+          const averageMarks = subjectCount > 0 ? totalMarks / subjectCount : 0;
+          const courseGrade = calculateGrade(averageMarks);
+          const isPassed = getResultStatus(averageMarks) === "PASS";
+
+          const gradeData = {
+            studentId,
+            courseId: enrollment.course._id,
+            courseMarks: totalCourseMarks,
+            subjectMarks: allSubjectMarks,
+            grade: courseGrade,
+            isPassed,
+            isMarkSubmitted: true,
+          };
+
+          return updateEnrolledCourseMarks(gradeData).unwrap();
         })
-        .filter((p) => p !== null);
+        .filter((promise) => promise !== null);
 
-      await Promise.all(promises);
+      // Execute all grade updates
+      await Promise.all(allGradePromises);
 
-      toast.success("Grades submitted successfully!", { id: toastId });
+      toast.success(
+        `Grades submitted successfully for ${allGradePromises.length} students!`,
+        { id: toastId }
+      );
       refetch();
     } catch (error) {
       console.error(error);
@@ -280,6 +370,35 @@ export default function GradesPage() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
+      {/* Grading Summary */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Grading Overview</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900">Total Courses</h3>
+              <p className="text-2xl font-bold text-blue-700">
+                {courseOptions.length}
+              </p>
+            </div>
+            <div className="bg-green-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-green-900">Graded Courses</h3>
+              <p className="text-2xl font-bold text-green-700">
+                {courseOptions.filter((c) => c.isGraded).length}
+              </p>
+            </div>
+            <div className="bg-yellow-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-yellow-900">Pending Courses</h3>
+              <p className="text-2xl font-bold text-yellow-700">
+                {courseOptions.filter((c) => !c.isGraded).length}
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
       <Card>
         <CardHeader>
           <CardTitle>Assign or Update Grades</CardTitle>
@@ -291,13 +410,25 @@ export default function GradesPage() {
               onValueChange={setSelectedCourseId}
               disabled={isLoading}
             >
-              <SelectTrigger className="w-[280px]">
+              <SelectTrigger className="w-[400px]">
                 <SelectValue placeholder="Select Course" />
               </SelectTrigger>
               <SelectContent>
                 {courseOptions.map((course) => (
                   <SelectItem key={course._id} value={course._id}>
-                    {course?.title}
+                    <div className="flex items-center justify-between w-full">
+                      <span>{course?.title}</span>
+                      <div className="flex items-center gap-2 ml-2">
+                        <span className="text-xs text-gray-500">
+                          {course.studentCount} students
+                        </span>
+                        {course.isGraded && (
+                          <span className="text-xs bg-green-100 text-green-800 px-2 py-1 rounded">
+                            Graded
+                          </span>
+                        )}
+                      </div>
+                    </div>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -310,7 +441,7 @@ export default function GradesPage() {
                 isSubmitting
               }
             >
-              {isSubmitting ? "Submitting..." : "Save Grades"}
+              {isSubmitting ? "Submitting..." : "Save All Grades"}
             </Button>
             <Button
               variant="secondary"
@@ -324,6 +455,55 @@ export default function GradesPage() {
               Export to Excel
             </Button>
           </div>
+
+          {/* Course Status Information */}
+          {selectedCourseStatus && (
+            <div className="bg-blue-50 p-4 rounded-lg">
+              <h3 className="font-semibold text-blue-900 mb-2">
+                Course Grading Status:
+              </h3>
+              <div className="text-sm text-blue-800 space-y-1">
+                <p>
+                  <strong>Course:</strong>{" "}
+                  {courseOptions.find((c) => c._id === selectedCourseId)?.title}
+                </p>
+                <p>
+                  <strong>Total Students:</strong>{" "}
+                  {selectedCourseStatus.totalStudents}
+                </p>
+                <p>
+                  <strong>Graded Students:</strong>{" "}
+                  {selectedCourseStatus.gradedStudents}
+                </p>
+                <p>
+                  <strong>Status:</strong>
+                  {selectedCourseStatus.isFullyGraded ? (
+                    <span className="text-green-600 font-medium">
+                      {" "}
+                      ✓ Fully Graded
+                    </span>
+                  ) : selectedCourseStatus.isPartiallyGraded ? (
+                    <span className="text-yellow-600 font-medium">
+                      {" "}
+                      ⚠ Partially Graded
+                    </span>
+                  ) : (
+                    <span className="text-red-600 font-medium">
+                      {" "}
+                      ✗ Not Graded
+                    </span>
+                  )}
+                </p>
+                {selectedCourseStatus.isPartiallyGraded && (
+                  <p className="text-yellow-700">
+                    <strong>Note:</strong> Some students have been graded. Click
+                    "Save All Grades" to update all remaining students.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
           {isLoading ? (
             <p>Loading...</p>
           ) : (

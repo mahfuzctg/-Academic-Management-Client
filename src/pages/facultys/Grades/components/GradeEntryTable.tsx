@@ -43,7 +43,7 @@ const GradeEntryTable: FC<GradeEntryTableProps> = ({
               Subjects Enrolled
             </th>
             <th className="px-4 py-3 font-medium text-center">
-              isMarkedProvided
+              Grading Status
             </th>
           </tr>
         </thead>
