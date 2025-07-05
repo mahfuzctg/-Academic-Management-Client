@@ -167,7 +167,8 @@ export default function StudentGradesPage() {
       const nextSemesterRegistration = semesterRegistrations?.data?.find(
         (reg) => reg.academicSemester?.name === nextSemesterName
       );
-      const nextSemesterId = nextSemesterRegistration?._id;
+      console.log(nextSemesterRegistration);
+      const nextSemesterId = nextSemesterRegistration?.academicSemester?._id;
       console.log({ nextSemesterId });
       if (nextSemesterNumber > 8) {
         toast({
