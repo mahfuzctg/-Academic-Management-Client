@@ -4,14 +4,12 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
-import {
-  useGetAllOfferedCoursesQuery,
-  useGetOfferedCoursesBySemesterQuery,
-} from "@/redux/features/course/offerCourseApi";
+import { useGetOfferedCoursesBySemesterQuery } from "@/redux/features/course/offerCourseApi";
 import {
   useCreateEnrolledCourseMutation,
   useGetMyEnrolledCoursesQuery,
 } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
+import { useGetMeQuery } from "@/redux/features/student/studentApi";
 import type { TQueryParam } from "@/types/global";
 import type {
   IOfferedCourse,
@@ -23,10 +21,6 @@ import { useEffect, useState } from "react";
 import CourseCard from "./components/CourseCard";
 import EnrollmentDialog from "./components/EnrollmentDialog";
 import SubjectSelectionDialog from "./components/SubjectSelectionDialog";
-import {
-  useGetMeQuery,
-  useGetMyStudentProfileQuery,
-} from "@/redux/features/student/studentApi";
 
 // Extend types to include new fields for subject selection
 type TExtendedCourse = TBaseCourse & {
@@ -49,14 +43,25 @@ const OfferedCourseSection = () => {
 
   const { data: studentData, isLoading: studentLoading } =
     useGetMeQuery(undefined);
+
+  const isLoggedIn = !!studentData?.data;
   const academicSemesterId = studentData?.data?.admissionSemester;
 
-  const { data, isLoading, isError } =
-    useGetOfferedCoursesBySemesterQuery(academicSemesterId);
-  const { data: enrolledCoursesData } = useGetMyEnrolledCoursesQuery(undefined);
+  const { data, isLoading, isError } = useGetOfferedCoursesBySemesterQuery(
+    academicSemesterId,
+    {
+      skip: !isLoggedIn,
+    }
+  );
+
+  const { data: enrolledCoursesData } = useGetMyEnrolledCoursesQuery(
+    undefined,
+    {
+      skip: !isLoggedIn,
+    }
+  );
 
   const [createEnrolledCourse] = useCreateEnrolledCourseMutation();
-
   const enrolledCourses = enrolledCoursesData?.data || [];
 
   useEffect(() => {
@@ -112,6 +117,8 @@ const OfferedCourseSection = () => {
       setSelectedCourse(null);
     }
   };
+
+  if (!isLoggedIn) return null;
 
   if (isError) {
     return (
