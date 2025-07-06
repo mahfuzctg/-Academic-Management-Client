@@ -1,17 +1,18 @@
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { motion } from "framer-motion";
 import {
-  Mail,
+  Building2,
   Facebook,
   Linkedin,
+  Mail,
   Phone,
   Youtube,
-  Building2,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 
 type Faculty = {
+  id: string;
   name: string;
   title: string;
   email: string;
@@ -21,6 +22,7 @@ type Faculty = {
 };
 
 const FacultyCard = ({
+  id,
   name,
   title,
   email,
@@ -28,6 +30,8 @@ const FacultyCard = ({
   department,
   image,
 }: Faculty) => {
+  const navigate = useNavigate();
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -100,27 +104,16 @@ const FacultyCard = ({
                   animate={{ opacity: 1 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <motion.div
-                    whileHover={{ y: -2, color: "#0A66C2" }}
-                    whileTap={{ scale: 0.9 }}
-                    className="hover:bg-blue-50 p-2 rounded-full transition-colors"
-                  >
-                    <Linkedin className="w-5 h-5 cursor-pointer" />
-                  </motion.div>
-                  <motion.div
-                    whileHover={{ y: -2, color: "#1877F2" }}
-                    whileTap={{ scale: 0.9 }}
-                    className="hover:bg-blue-50 p-2 rounded-full transition-colors"
-                  >
-                    <Facebook className="w-5 h-5 cursor-pointer" />
-                  </motion.div>
-                  <motion.div
-                    whileHover={{ y: -2, color: "#FF0000" }}
-                    whileTap={{ scale: 0.9 }}
-                    className="hover:bg-red-50 p-2 rounded-full transition-colors"
-                  >
-                    <Youtube className="w-5 h-5 cursor-pointer" />
-                  </motion.div>
+                  {[Linkedin, Facebook, Youtube].map((Icon, idx) => (
+                    <motion.div
+                      key={idx}
+                      whileHover={{ y: -2 }}
+                      whileTap={{ scale: 0.9 }}
+                      className="hover:bg-muted p-2 rounded-full transition-colors"
+                    >
+                      <Icon className="w-5 h-5 cursor-pointer" />
+                    </motion.div>
+                  ))}
                 </motion.div>
 
                 {/* Contact Info */}
@@ -147,13 +140,16 @@ const FacultyCard = ({
                 </motion.div>
               </div>
 
-              {/* Button */}
+              {/* View Profile Button */}
               <motion.div
                 className="mt-6"
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <Button className="w-full bg-primary hover:bg-primary/90 transition-colors">
+                <Button
+                  className="w-full bg-primary hover:bg-primary/90 transition-colors"
+                  onClick={() => navigate("/faculty/profile")}
+                >
                   View Profile
                 </Button>
               </motion.div>

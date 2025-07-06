@@ -110,6 +110,7 @@ export const baseApi = createApi({
     "studentCourses",
     "userProfiles",
     "blogs",
+    "semesterBlogs",
   ],
   endpoints: () => ({}),
 });

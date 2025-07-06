@@ -1,31 +1,31 @@
-import { useState } from "react";
 import FacultyProfileSkeleton from "@/components/skeleton/Profile/FacultyProfileSkeleton";
-import { useGetMeQuery } from "@/redux/features/users/userApi";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
+import { useGetMeQuery } from "@/redux/features/users/userApi";
 import {
-  Pencil,
-  Mail,
-  Phone,
-  MapPin,
-  Calendar,
-  User,
-  Shield,
-  GraduationCap,
-  Briefcase,
-  BookOpen,
   Award,
+  BookOpen,
+  Briefcase,
+  Calendar,
+  GraduationCap,
+  Mail,
+  MapPin,
+  Pencil,
+  Phone,
+  Shield,
+  User,
 } from "lucide-react";
-// import FacultyForm from "@/components/form/faculty/FacultyForm";
-import { useToast } from "@/components/ui/use-toast";
-import { useParams } from "react-router-dom";
-import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useState } from "react";
+
+import FacultyForm from "@/components/form/faculty/facultyForm";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import FacultyForm from "@/components/form/faculty/facultyForm";
+import { useToast } from "@/components/ui/use-toast";
+import { motion } from "framer-motion";
+import { useParams } from "react-router-dom";
 
 const FacultyProfile = () => {
   const { id } = useParams();
