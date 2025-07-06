@@ -36,6 +36,8 @@ const AdminProfile = () => {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { data, isLoading, error } = useGetMeQuery(undefined);
 
+  console.log(data);
+
   if (isLoading) return <FacultyProfileSkeleton />;
 
   if (error)
@@ -45,7 +47,7 @@ const AdminProfile = () => {
       </div>
     );
 
-  const user = data?.data;
+  const user = data;
   const isOwnProfile = !id || id === user?.id;
 
   const fullName = `${user?.name?.firstName || ""} ${
