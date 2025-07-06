@@ -127,7 +127,7 @@ export default function AnnouncementDetails({
                 </span>
               </div>
 
-              {announcement.endDate && (
+              {announcement?.endDate && (
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4 text-muted-foreground" />
                   <span className="font-medium">End Date:</span>
@@ -194,7 +194,7 @@ export default function AnnouncementDetails({
             </div>
           </div>
 
-          {announcement.endDate &&
+          {announcement?.endDate &&
             new Date(announcement.endDate) < new Date() && (
               <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                 <div className="flex items-center gap-2">

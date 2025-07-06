@@ -60,6 +60,7 @@ export default function AnnouncementForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    console.log(formData);
     try {
       if (announcement) {
         await updateAnnouncement({
@@ -72,6 +73,7 @@ export default function AnnouncementForm({
 
       onSuccess();
     } catch (error) {
+      console.log(error);
       toast({
         title: "Error",
         description: announcement

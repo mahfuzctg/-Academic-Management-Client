@@ -40,7 +40,7 @@ const Announcements = () => {
     { name: "limit", value: "8" },
   ]);
 
-  const announcements = data?.data || [];
+  const announcements = data?.data?.result || [];
 
   if (isLoading) {
     return (

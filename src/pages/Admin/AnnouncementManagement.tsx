@@ -83,8 +83,8 @@ export default function AnnouncementManagement() {
     useGetAllAnnouncementsQuery(queryParams);
   const [deleteAnnouncement] = useDeleteAnnouncementMutation();
 
-  const announcements = announcementsData?.data || [];
-
+  const announcements = announcementsData?.data.result || [];
+  console.log(announcements);
   const handleCreate = () => {
     setSelectedAnnouncement(null);
     setIsFormOpen(true);
@@ -277,7 +277,7 @@ export default function AnnouncementManagement() {
             </div>
           ) : (
             <div className="space-y-4">
-              {announcements.map((announcement) => (
+              {announcements?.map((announcement) => (
                 <motion.div
                   key={announcement._id}
                   initial={{ opacity: 0, y: 20 }}
