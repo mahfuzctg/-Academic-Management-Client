@@ -1,4 +1,5 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
@@ -9,6 +10,7 @@ import {
 import { useAppSelector } from "@/redux/hooks";
 import { CheckCircle, ThumbsUp } from "lucide-react";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const formatDate = (dateStr: string) => {
   const options: Intl.DateTimeFormatOptions = {
@@ -25,6 +27,7 @@ const SemesterBlogPage: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { toast } = useToast();
   const [votedBlogIds, setVotedBlogIds] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   const handleVote = async (blogId: string) => {
     try {
@@ -157,6 +160,15 @@ const SemesterBlogPage: React.FC = () => {
                         )}
                       </button>
                     </div>
+
+                    {/* ✅ View Full Blog Button */}
+                    <Button
+                      variant="outline"
+                      onClick={() => navigate(`/semester-blogs/${blog._id}`)}
+                      className="w-full text-sm font-medium mt-3"
+                    >
+                      View Full Blog
+                    </Button>
                   </CardContent>
                 </Card>
               );

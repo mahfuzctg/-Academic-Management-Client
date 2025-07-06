@@ -1,9 +1,10 @@
+import AnnouncementManagement from "@/pages/Admin/AnnouncementManagement";
 import FacultyProfile from "@/pages/facultys/FacultyProfile";
 import GradesPage from "@/pages/facultys/Grades/GradesPage";
 import AcademicCourseShow from "@/pages/share/facultyAndStudent/academicCourseShow";
 import AcademicInstructorShow from "@/pages/share/facultyAndStudent/academicInstructorShow";
 import AcademicOfferedCourseShow from "@/pages/share/facultyAndStudent/academicOfferedCourseShow";
-import { BookOpen, User } from "lucide-react";
+import { BookOpen, Megaphone, User } from "lucide-react";
 
 export const facultyPaths = [
   // {
@@ -62,5 +63,11 @@ export const facultyPaths = [
     path: "grades",
     element: <GradesPage />,
     icon: <BookOpen className="w-5 h-5" />,
+  },
+  {
+    name: "Announce Management",
+    path: "announcement-management",
+    element: <AnnouncementManagement />,
+    icon: <Megaphone className="w-5 h-5" />,
   },
 ];

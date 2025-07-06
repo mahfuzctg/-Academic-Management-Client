@@ -31,72 +31,72 @@ const adminApi = baseApi.injectEndpoints({
         response,
     }),
 
-    getAnnouncements: builder.query<TResponseRedux<Announcement[]>, void>({
-      query: () => ({
-        url: "/admin/announcements",
-        method: "GET",
-      }),
-      providesTags: ["admin"],
-      transformResponse: (response: TResponseRedux<Announcement[]>) => response,
-    }),
+    // getAnnouncements: builder.query<TResponseRedux<Announcement[]>, void>({
+    //   query: () => ({
+    //     url: "/admin/announcements",
+    //     method: "GET",
+    //   }),
+    //   providesTags: ["admin"],
+    //   transformResponse: (response: TResponseRedux<Announcement[]>) => response,
+    // }),
 
-    createAnnouncement: builder.mutation<
-      TResponseRedux<Announcement>,
-      Partial<Announcement>
-    >({
-      query: (data) => ({
-        url: "/admin/announcements",
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: ["admin"],
-      transformResponse: (response: TResponseRedux<Announcement>) => response,
-    }),
+    // createAnnouncement: builder.mutation<
+    //   TResponseRedux<Announcement>,
+    //   Partial<Announcement>
+    // >({
+    //   query: (data) => ({
+    //     url: "/admin/announcements",
+    //     method: "POST",
+    //     body: data,
+    //   }),
+    //   invalidatesTags: ["admin"],
+    //   transformResponse: (response: TResponseRedux<Announcement>) => response,
+    // }),
 
-    // Chat endpoints
-    getChatRooms: builder.query<TResponseRedux<ChatRoom[]>, void>({
-      query: () => ({
-        url: "/admin/chat/rooms",
-        method: "GET",
-      }),
-      providesTags: ["admin"],
-      transformResponse: (response: TResponseRedux<ChatRoom[]>) => response,
-    }),
+    // // Chat endpoints
+    // getChatRooms: builder.query<TResponseRedux<ChatRoom[]>, void>({
+    //   query: () => ({
+    //     url: "/admin/chat/rooms",
+    //     method: "GET",
+    //   }),
+    //   providesTags: ["admin"],
+    //   transformResponse: (response: TResponseRedux<ChatRoom[]>) => response,
+    // }),
 
-    getChatMessages: builder.query<TResponseRedux<ChatMessage[]>, string>({
-      query: (roomId) => ({
-        url: `/admin/chat/rooms/${roomId}/messages`,
-        method: "GET",
-      }),
-      providesTags: ["admin"],
-      transformResponse: (response: TResponseRedux<ChatMessage[]>) => response,
-    }),
+    // getChatMessages: builder.query<TResponseRedux<ChatMessage[]>, string>({
+    //   query: (roomId) => ({
+    //     url: `/admin/chat/rooms/${roomId}/messages`,
+    //     method: "GET",
+    //   }),
+    //   providesTags: ["admin"],
+    //   transformResponse: (response: TResponseRedux<ChatMessage[]>) => response,
+    // }),
 
-    sendMessage: builder.mutation<
-      TResponseRedux<ChatMessage>,
-      { roomId: string; message: string }
-    >({
-      query: ({ roomId, message }) => ({
-        url: `/admin/chat/rooms/${roomId}/messages`,
-        method: "POST",
-        body: { message },
-      }),
-      invalidatesTags: ["admin"],
-      transformResponse: (response: TResponseRedux<ChatMessage>) => response,
-    }),
+    // sendMessage: builder.mutation<
+    //   TResponseRedux<ChatMessage>,
+    //   { roomId: string; message: string }
+    // >({
+    //   query: ({ roomId, message }) => ({
+    //     url: `/admin/chat/rooms/${roomId}/messages`,
+    //     method: "POST",
+    //     body: { message },
+    //   }),
+    //   invalidatesTags: ["admin"],
+    //   transformResponse: (response: TResponseRedux<ChatMessage>) => response,
+    // }),
 
-    createChatRoom: builder.mutation<
-      TResponseRedux<ChatRoom>,
-      { name: string; participants: string[] }
-    >({
-      query: (data) => ({
-        url: "/admin/chat/rooms",
-        method: "POST",
-        body: data,
-      }),
-      invalidatesTags: ["admin"],
-      transformResponse: (response: TResponseRedux<ChatRoom>) => response,
-    }),
+    // createChatRoom: builder.mutation<
+    //   TResponseRedux<ChatRoom>,
+    //   { name: string; participants: string[] }
+    // >({
+    //   query: (data) => ({
+    //     url: "/admin/chat/rooms",
+    //     method: "POST",
+    //     body: data,
+    //   }),
+    //   invalidatesTags: ["admin"],
+    //   transformResponse: (response: TResponseRedux<ChatRoom>) => response,
+    // }),
 
     getAllAdmins: builder.query({
       query: (args) => {
@@ -150,12 +150,12 @@ const adminApi = baseApi.injectEndpoints({
 export const {
   useGetSystemStatsQuery,
   useGetRecentActivitiesQuery,
-  useGetAnnouncementsQuery,
-  useCreateAnnouncementMutation,
-  useGetChatRoomsQuery,
-  useGetChatMessagesQuery,
-  useSendMessageMutation,
-  useCreateChatRoomMutation,
+  // useGetAnnouncementsQuery,
+  // useCreateAnnouncementMutation,
+  // useGetChatRoomsQuery,
+  // useGetChatMessagesQuery,
+  // useSendMessageMutation,
+  // useCreateChatRoomMutation,
   useGetAllAdminsQuery,
   useCreateAdminMutation,
   useUpdateAdminMutation,
