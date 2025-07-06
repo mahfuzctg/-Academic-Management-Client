@@ -13,6 +13,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { adminPaths } from "./admin.routes";
 import { studentPaths } from "./student.routes";
 
+import BlogDetails from "@/pages/blogs/BlogDetails";
 import BlogsSection from "@/pages/blogs/BlogsSection";
 import SemesterBlogDetails from "@/pages/blogs/SemesterBlogDetails";
 import SemesterBlogSection from "@/pages/blogs/SemesterBlogPage";
@@ -50,6 +51,10 @@ const router = createBrowserRouter([
       {
         path: "blogs",
         element: <BlogsSection />,
+      },
+      {
+        path: "/blogs/:id",
+        element: <BlogDetails />,
       },
       {
         path: "semester-blogs",

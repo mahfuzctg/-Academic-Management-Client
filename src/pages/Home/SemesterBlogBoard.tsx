@@ -46,7 +46,7 @@ const SemesterBlogBoard: React.FC = () => {
     }
   };
 
-  const displayedBlogs = blogs?.slice(0, 4);
+  const displayedBlogs = blogs?.slice(0, 3);
 
   return (
     <div className="w-10/12 mx-auto py-8 space-y-8">

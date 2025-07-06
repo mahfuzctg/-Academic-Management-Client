@@ -1,7 +1,8 @@
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/components/ui/use-toast"; // shadcn toast
+import { useToast } from "@/components/ui/use-toast";
 import {
   useGetAllBlogsQuery,
   useVoteBlogMutation,
@@ -9,6 +10,7 @@ import {
 import { useAppSelector } from "@/redux/hooks";
 import { CheckCircle, ThumbsUp } from "lucide-react";
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const formatDate = (dateStr: string) => {
   const options: Intl.DateTimeFormatOptions = {
@@ -25,6 +27,7 @@ const BlogsSection: React.FC = () => {
   const { user } = useAppSelector((state) => state.auth);
   const { toast } = useToast();
   const [votedBlogIds, setVotedBlogIds] = useState<string[]>([]);
+  const navigate = useNavigate();
 
   const handleVote = async (blogId: string) => {
     try {
@@ -103,35 +106,24 @@ const BlogsSection: React.FC = () => {
                   </p>
 
                   <div className="flex justify-between items-center pt-4">
-                    {blog.link && (
-                      <a
-                        href={blog.link}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-medium text-primary underline transition-colors hover:text-primary/80"
-                      >
-                        Read full article
-                      </a>
-                    )}
-
                     <span className="text-sm text-muted-foreground dark:text-gray-400 whitespace-nowrap">
                       {blog.createdAt ? formatDate(blog.createdAt) : "No date"}
                     </span>
                   </div>
+
                   <button
                     onClick={() => {
                       if (!hasVoted && blog._id) handleVote(blog._id);
                     }}
                     disabled={hasVoted}
                     aria-label={hasVoted ? "You have voted" : "Vote this blog"}
-                    className={`
-    mt-4 w-full flex items-center justify-center gap-3 rounded-lg border px-5 py-2 text-sm font-semibold shadow-sm transition-colors duration-300
-    ${
-      hasVoted
-        ? "bg-gray-900 text-white border-gray-900 cursor-not-allowed"
-        : "bg-white text-gray-900 border-gray-900 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white"
-    }
-  `}
+                    className={`mt-4 w-full flex items-center justify-center gap-3 rounded-lg border px-5 py-2 text-sm font-semibold shadow-sm transition-colors duration-300
+                      ${
+                        hasVoted
+                          ? "bg-gray-900 text-white border-gray-900 cursor-not-allowed"
+                          : "bg-white text-gray-900 border-gray-900 hover:bg-gray-100 dark:bg-gray-700 dark:text-gray-200 dark:border-gray-600 dark:hover:bg-gray-600 dark:hover:text-white"
+                      }
+                    `}
                   >
                     {hasVoted ? (
                       <CheckCircle className="w-5 h-5 text-white" />
@@ -140,6 +132,15 @@ const BlogsSection: React.FC = () => {
                     )}
                     {hasVoted ? "Voted" : `Vote (${blog.votes ?? 0})`}
                   </button>
+
+                  {/*  View Full Blog Button */}
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(`/blogs/${blog._id}`)}
+                    className="w-full text-sm font-medium mt-3"
+                  >
+                    View Full Blog
+                  </Button>
                 </CardContent>
               </Card>
             );

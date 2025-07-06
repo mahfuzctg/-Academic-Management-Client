@@ -119,16 +119,6 @@ const SemesterBlogPage: React.FC = () => {
                     </p>
 
                     <div className="flex justify-between items-center pt-4">
-                      {blog.link && (
-                        <a
-                          href={blog.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm font-medium text-primary underline hover:text-primary/80"
-                        >
-                          Read more
-                        </a>
-                      )}
                       <span className="text-sm text-muted-foreground">
                         {blog.createdAt ? formatDate(blog.createdAt) : "N/A"}
                       </span>
@@ -161,7 +151,7 @@ const SemesterBlogPage: React.FC = () => {
                       </button>
                     </div>
 
-                    {/* ✅ View Full Blog Button */}
+                    {/*  View Full Blog Button */}
                     <Button
                       variant="outline"
                       onClick={() => navigate(`/semester-blogs/${blog._id}`)}
