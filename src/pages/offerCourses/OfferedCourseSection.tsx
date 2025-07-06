@@ -4,14 +4,15 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/components/ui/use-toast";
 import { useDebounce } from "@/hooks/useDebounce";
-import {
-  useGetAllOfferedCoursesQuery,
-  useGetOfferedCoursesBySemesterQuery,
-} from "@/redux/features/course/offerCourseApi";
+import { useGetOfferedCoursesBySemesterQuery } from "@/redux/features/course/offerCourseApi";
 import {
   useCreateEnrolledCourseMutation,
   useGetMyEnrolledCoursesQuery,
 } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
+import {
+  useGetMeQuery,
+  useGetMyStudentProfileQuery,
+} from "@/redux/features/student/studentApi";
 import type { TQueryParam } from "@/types/global";
 import type {
   IOfferedCourse,
@@ -23,16 +24,13 @@ import { useEffect, useState } from "react";
 import CourseCard from "./components/CourseCard";
 import EnrollmentDialog from "./components/EnrollmentDialog";
 import SubjectSelectionDialog from "./components/SubjectSelectionDialog";
-import {
-  useGetMeQuery,
-  useGetMyStudentProfileQuery,
-} from "@/redux/features/student/studentApi";
 
 // Extend types to include new fields for subject selection
 type TExtendedCourse = TBaseCourse & {
   subjectsToSelect?: number;
   optionalSubjects?: { name: string; credits: number }[];
 };
+
 type TExtendedOfferedCourse = Omit<IOfferedCourse, "course"> & {
   course: TExtendedCourse;
 };
@@ -47,14 +45,19 @@ const OfferedCourseSection = () => {
   const [subjectSelectDialogOpen, setSubjectSelectDialogOpen] = useState(false);
   const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-  const { data: studentData, isLoading: studentLoading } =
+  // Get student profile to access admission semester
+  const { data: studentProfile, isLoading: studentLoading } =
     useGetMeQuery(undefined);
-  const academicSemesterId = studentData?.data?.admissionSemester;
 
+  // Extract admission semester ID from student profile
+  const admissionSemesterId = studentProfile?.admissionSemester;
+
+  // Get offered courses for the student's admission semester
   const { data, isLoading, isError } =
-    useGetOfferedCoursesBySemesterQuery(academicSemesterId);
-  const { data: enrolledCoursesData } = useGetMyEnrolledCoursesQuery(undefined);
+    useGetOfferedCoursesBySemesterQuery(admissionSemesterId);
 
+  // Get enrolled courses to check enrollment status
+  const { data: enrolledCoursesData } = useGetMyEnrolledCoursesQuery(undefined);
   const [createEnrolledCourse] = useCreateEnrolledCourseMutation();
 
   const enrolledCourses = enrolledCoursesData?.data || [];
@@ -113,6 +116,18 @@ const OfferedCourseSection = () => {
     }
   };
 
+  // Show loading state while fetching student profile
+  if (studentLoading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, index) => (
+          <Skeleton key={index} className="h-[450px] w-full rounded-lg" />
+        ))}
+      </div>
+    );
+  }
+
+  // Show error state
   if (isError) {
     return (
       <motion.div
@@ -142,7 +157,7 @@ const OfferedCourseSection = () => {
     >
       <div className="flex flex-col gap-6">
         <motion.div
-          className=" space-y-2"
+          className="space-y-2"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
@@ -170,7 +185,7 @@ const OfferedCourseSection = () => {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 ">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, index) => (
             <Skeleton key={index} className="h-[450px] w-full rounded-lg" />
           ))}
