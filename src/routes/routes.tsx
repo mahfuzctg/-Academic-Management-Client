@@ -14,6 +14,7 @@ import { adminPaths } from "./admin.routes";
 import { studentPaths } from "./student.routes";
 
 import BlogsSection from "@/pages/blogs/BlogsSection";
+import SemesterBlogSection from "@/pages/blogs/SemesterBlogPage";
 import FacultyProfile from "@/pages/facultys/FacultyProfile";
 import JobSection from "@/pages/Jobs/JobSection";
 import { NotFoundPage } from "@/pages/NotFound";
@@ -48,6 +49,10 @@ const router = createBrowserRouter([
       {
         path: "blogs",
         element: <BlogsSection />,
+      },
+      {
+        path: "semester-blogs",
+        element: <SemesterBlogSection />,
       },
 
       {

@@ -1,3 +1,4 @@
+import SemesterBlogSection from "../blogs/SemesterBlogPage";
 import OfferedCourseSection from "../offerCourses/OfferedCourseSection";
 import Announcements from "./Announcements";
 import BlogBoard from "./BlogBoard";
@@ -20,6 +21,7 @@ export default function Home() {
         <Announcements />
         <JobBoard />
         <BlogBoard />
+        <SemesterBlogSection />
         <Testimonials />
         <Statistics />
         <Contact />

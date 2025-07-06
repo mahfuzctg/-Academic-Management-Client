@@ -1,5 +1,3 @@
-import { Types } from "mongoose";
-
 export interface ISemesterBlog {
   _id?: string;
   title: string;
@@ -11,7 +9,7 @@ export interface ISemesterBlog {
   profileImage?: string;
   isDeleted?: boolean;
   votes?: number;
-  votedBy?: Types.ObjectId[] | string[];
+  votedBy?: string[];
   createdAt?: string;
   updatedAt?: string;
 }

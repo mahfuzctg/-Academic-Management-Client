@@ -19,6 +19,7 @@ const getNavLinks = (role?: string) => {
     { label: "Courses", to: "/courses" },
     { label: "Jobs", to: "/jobs" },
     { label: "Blogs", to: "/blogs" },
+    { label: "Semester Blogs", to: "/semester-blogs" },
   ];
 
   switch (role) {
