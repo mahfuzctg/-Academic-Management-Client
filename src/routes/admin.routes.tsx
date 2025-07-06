@@ -5,6 +5,7 @@ import AcademicYear from "@/pages/Admin/academic/AcademicYear";
 import AcademicSemester from "@/pages/Admin/academic/AdmissionSemester";
 import AdminManagement from "@/pages/Admin/AdminManagement";
 import AdminProfile from "@/pages/Admin/AdminProfile";
+import AnnouncementManagement from "@/pages/Admin/AnnouncementManagement";
 import AdminCourseList from "@/pages/Admin/courses/AdminCourseList";
 import AdminOfferedCourseSection from "@/pages/Admin/offeredCourses/AdminOfferedCourseSection";
 
@@ -20,6 +21,7 @@ import {
   Calendar,
   CalendarDays,
   GraduationCap,
+  Megaphone,
   User,
   Users,
 } from "lucide-react";
@@ -55,6 +57,7 @@ export const adminPaths = [
     element: <AcademicDepartment />,
     icon: <Building2 className="w-5 h-5" />,
   },
+
   {
     name: "Academic Semester",
     path: "academic-semester",
@@ -74,7 +77,7 @@ export const adminPaths = [
     icon: <GraduationCap className="w-5 h-5" />,
   },
   {
-    name: "Instructors Management",
+    name: "Faculty Management",
     path: "instructorsmanagement",
     element: <InstructorManagement />,
     icon: <BookOpen className="w-5 h-5" />,
@@ -102,5 +105,11 @@ export const adminPaths = [
     path: "offered-course-management",
     element: <AdminOfferedCourseSection />,
     icon: <BookOpen className="w-5 h-5" />,
+  },
+  {
+    name: "Announce Management",
+    path: "announcement-management",
+    element: <AnnouncementManagement />,
+    icon: <Megaphone className="w-5 h-5" />,
   },
 ];
