@@ -44,9 +44,7 @@ const FacultyCard = ({
         <CardContent className="p-0">
           <motion.div
             className="grid md:grid-cols-[1fr_2fr] gap-6 p-6"
-            whileHover={{
-              transition: { staggerChildren: 0.1 },
-            }}
+            whileHover={{ transition: { staggerChildren: 0.1 } }}
           >
             {/* Image Section */}
             <motion.div
@@ -140,7 +138,7 @@ const FacultyCard = ({
                 </motion.div>
               </div>
 
-              {/* View Profile Button */}
+              {/*  View Profile Button */}
               <motion.div
                 className="mt-6"
                 whileHover={{ scale: 1.02 }}
@@ -148,7 +146,7 @@ const FacultyCard = ({
               >
                 <Button
                   className="w-full bg-primary hover:bg-primary/90 transition-colors"
-                  onClick={() => navigate("/faculty/profile")}
+                  onClick={() => navigate(`/faculty/profile`)}
                 >
                   View Profile
                 </Button>

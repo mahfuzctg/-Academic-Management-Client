@@ -17,7 +17,7 @@ import BlogDetails from "@/pages/blogs/BlogDetails";
 import BlogsSection from "@/pages/blogs/BlogsSection";
 import SemesterBlogDetails from "@/pages/blogs/SemesterBlogDetails";
 import SemesterBlogSection from "@/pages/blogs/SemesterBlogPage";
-import FacultyProfile from "@/pages/facultys/FacultyProfile";
+import FacultyDetailsPage from "@/pages/Home/FacultyDetailsPage";
 import JobSection from "@/pages/Jobs/JobSection";
 import { NotFoundPage } from "@/pages/NotFound";
 import StudentCourseList from "@/pages/Students/courses/StudentCourseList";
@@ -64,10 +64,9 @@ const router = createBrowserRouter([
         path: "/semester-blogs/:id",
         element: <SemesterBlogDetails />,
       },
-
       {
-        path: "profile",
-        element: <FacultyProfile />,
+        path: "/faculty/:id",
+        element: <FacultyDetailsPage />,
       },
 
       {

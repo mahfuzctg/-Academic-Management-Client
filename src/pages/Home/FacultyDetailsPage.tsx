@@ -1,52 +1,91 @@
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetSingleFacultyQuery } from "@/redux/features/faculty/facultyApi";
+import React from "react";
 import { useParams } from "react-router-dom";
 
-const FacultyDetails = () => {
+const FacultyDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { data, isLoading, error } = useGetSingleFacultyQuery(id ?? "");
 
-  if (isLoading) {
-    return <Skeleton className="h-96 w-full" />;
+  if (!id) {
+    return <p className="p-6 text-center text-red-600">Invalid Faculty ID.</p>;
   }
 
-  if (error || !data?.data) {
+  const { data: response, isLoading, error } = useGetSingleFacultyQuery(id);
+
+  if (isLoading)
     return (
-      <div className="text-center text-red-500">Failed to load details</div>
+      <div className="w-10/12 mx-auto py-10">
+        <Skeleton className="h-8 w-64 mb-6" />
+        <Skeleton className="h-44 w-full rounded-xl mb-6" />
+        <Skeleton className="h-6 w-48 mb-2" />
+        <Skeleton className="h-6 w-48 mb-2" />
+        <Skeleton className="h-6 w-64 mb-2" />
+      </div>
     );
-  }
 
-  const faculty = data.data;
+  if (error || !response?.data)
+    return (
+      <div className="w-10/12 mx-auto py-10 text-center text-red-600">
+        Faculty not found or error occurred.
+      </div>
+    );
+
+  const faculty = response.data;
 
   return (
-    <div className="max-w-3xl mx-auto py-12 px-4">
-      <Card className="flex flex-col sm:flex-row items-center gap-6 p-6 shadow-md">
-        <img
-          src={faculty.profileImg || "/placeholder-faculty.jpg"}
-          alt={`${faculty.name.firstName} ${faculty.name.lastName}`}
-          className="w-40 h-40 rounded-full object-cover border"
-        />
-        <CardContent className="space-y-4 text-center sm:text-left">
-          <CardTitle className="text-2xl font-bold">
-            {faculty.name.firstName} {faculty.name.middleName ?? ""}{" "}
-            {faculty.name.lastName}
-          </CardTitle>
-          <p className="text-muted-foreground">{faculty.email}</p>
+    <div className="max-w-4xl mx-auto py-10 space-y-6">
+      <h1 className="text-3xl font-bold">{faculty.name}</h1>
+      <Badge>{faculty.title}</Badge>
 
-          {/* Static Paragraph */}
-          <p className="text-sm text-gray-600 leading-relaxed">
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-            dignissim, orci nec dapibus cursus, justo neque suscipit nisi, et
-            varius elit justo eget purus. Vivamus vitae orci sapien. Fusce
-            finibus, velit in malesuada feugiat, tortor erat tincidunt orci,
-            quis posuere augue magna nec mi. Integer sit amet magna in ipsum
-            pretium semper.
-          </p>
-        </CardContent>
-      </Card>
+      {faculty.image && (
+        <img
+          src={faculty.image}
+          alt={faculty.name}
+          className="w-full h-64 object-cover rounded-lg"
+        />
+      )}
+
+      <div className="flex items-center gap-6 pt-4">
+        <div className="flex flex-col">
+          <span className="font-semibold">Email:</span>
+          <a
+            href={`mailto:${faculty.email}`}
+            className="text-blue-600 underline"
+          >
+            {faculty.email}
+          </a>
+        </div>
+        <div className="flex flex-col">
+          <span className="font-semibold">Phone:</span>
+          <a href={`tel:${faculty.phone}`} className="text-blue-600 underline">
+            {faculty.phone}
+          </a>
+        </div>
+      </div>
+
+      <div>
+        <h2 className="text-xl font-semibold mb-2">Academic Department</h2>
+        <p>{faculty.academicDepartment?.name || "N/A"}</p>
+      </div>
+
+      <div>
+        <h2 className="text-xl font-semibold mb-2">Academic Faculty</h2>
+        <p>{faculty.academicFaculty?.name || "N/A"}</p>
+      </div>
+
+      <div className="pt-6">
+        <Button
+          onClick={() => window.history.back()}
+          variant="outline"
+          className="w-full max-w-xs"
+        >
+          Back to List
+        </Button>
+      </div>
     </div>
   );
 };
 
-export default FacultyDetails;
+export default FacultyDetailsPage;
