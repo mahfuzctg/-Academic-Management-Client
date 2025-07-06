@@ -65,7 +65,7 @@ const router = createBrowserRouter([
         element: <SemesterBlogDetails />,
       },
       {
-        path: "/faculty/:id",
+        path: "/faculty-details",
         element: <FacultyDetailsPage />,
       },
 

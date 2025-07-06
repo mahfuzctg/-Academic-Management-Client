@@ -37,6 +37,19 @@ const facultyApi = baseApi.injectEndpoints({
       }),
     }),
 
+    //  NEW: Get faculty by user ID
+    getFacultyByUserId: builder.query({
+      query: (userId: string) => ({
+        url: `/faculties/users/${userId}`,
+        method: "GET",
+      }),
+      providesTags: ["Faculty"],
+      transformResponse: (response: TResponseRedux<TFaculty>) => ({
+        data: response.data,
+        meta: response.meta,
+      }),
+    }),
+
     createFaculty: builder.mutation({
       query: (data) => ({
         url: "/users/create-faculty",
@@ -68,6 +81,7 @@ const facultyApi = baseApi.injectEndpoints({
 export const {
   useGetAllFacultiesQuery,
   useGetSingleFacultyQuery,
+  useGetFacultyByUserIdQuery,
   useCreateFacultyMutation,
   useUpdateFacultyMutation,
   useDeleteFacultyMutation,
