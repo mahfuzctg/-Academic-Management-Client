@@ -59,7 +59,6 @@ const OfferedCourseSection = () => {
   // Get enrolled courses to check enrollment status
   const { data: enrolledCoursesData } = useGetMyEnrolledCoursesQuery(undefined);
   const [createEnrolledCourse] = useCreateEnrolledCourseMutation();
-
   const enrolledCourses = enrolledCoursesData?.data || [];
 
   useEffect(() => {

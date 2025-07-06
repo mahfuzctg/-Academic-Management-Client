@@ -7,32 +7,24 @@ import AdminManagement from "@/pages/Admin/AdminManagement";
 import AdminProfile from "@/pages/Admin/AdminProfile";
 import AdminCourseList from "@/pages/Admin/courses/AdminCourseList";
 import AdminOfferedCourseSection from "@/pages/Admin/offeredCourses/AdminOfferedCourseSection";
+
 import SemesterRegistrationPage from "@/pages/Admin/SemesterRegistration/SemesterRegistrationPage";
 
-import { AdminDashboard } from "@/pages/Dashboard/AdminDashboard";
 import InstructorManagement from "@/pages/facultys/facultyManagement";
 import JobManagement from "@/pages/Jobs/JobManagement";
-import OfferedCourseSection from "@/pages/offerCourses/OfferedCourseSection";
 import StudentManagement from "@/pages/Students/StudentManagement";
 import {
-  LayoutDashboard,
-  GraduationCap,
-  Users,
-  Building2,
-  CalendarDays,
   BookOpen,
   Briefcase,
+  Building2,
   Calendar,
+  CalendarDays,
+  GraduationCap,
   User,
+  Users,
 } from "lucide-react";
 
 export const adminPaths = [
-  // {
-  //   name: "Dashboard",
-  //   path: "dashboard",
-  //   element: <AdminDashboard />,
-  //   icon: <LayoutDashboard className="w-5 h-5" />,
-  // },
   {
     name: "Academic Management",
     path: "academic-management",

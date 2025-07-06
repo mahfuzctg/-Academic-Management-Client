@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import * as z from "zod";
 
 const loginSchema = z.object({
-  id: z.string(),
+  id: z.string().nonempty("ID is required"),
   password: z
     .string()
     .min(6, { message: "Password must be at least 6 characters" }),
@@ -38,15 +38,13 @@ export default function LoginForm() {
     try {
       const res = await login(data).unwrap();
 
-      console.log(res);
-
       if (res?.data?.accessToken) {
         const user = verifyToken(res.data.accessToken) as TUser;
-        dispatch(setUser({ user: user, token: res.data.accessToken }));
-        toast.success("Logged in");
+        dispatch(setUser({ user, token: res.data.accessToken }));
+        toast.success("Login successful");
 
         if (res.data.needsPasswordChange) {
-          navigate(`/${user.role}/dashboard`);
+          navigate(`/${user.role}/profile`);
         } else {
           navigate(`/change-password`);
         }
@@ -57,37 +55,53 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center ">
-      <Card className="w-full max-w-md shadow-lg">
+    <div className="flex min-h-screen items-center justify-center bg-muted px-4">
+      <Card className="w-full max-w-md shadow-xl border border-border">
         <CardHeader>
-          <CardTitle className="text-center text-2xl">Login</CardTitle>
+          <CardTitle className="text-center text-3xl font-semibold text-primary">
+            Welcome Back
+          </CardTitle>
+          <p className="text-sm text-muted-foreground text-center">
+            Please login to continue
+          </p>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-            <div>
-              <Label htmlFor="id">ID</Label>
-              <Input id="id" type="text" {...register("id")} />
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="id">User ID</Label>
+              <Input
+                id="id"
+                placeholder="Enter your ID (e.g., A-0001)"
+                {...register("id")}
+              />
               {errors.id && (
-                <p className="text-sm text-red-500">{errors.id.message}</p>
+                <p className="text-xs text-red-500">{errors.id.message}</p>
               )}
             </div>
 
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" {...register("password")} />
+              <Input
+                id="password"
+                type="password"
+                placeholder="Enter your password"
+                {...register("password")}
+              />
               {errors.password && (
-                <p className="text-sm text-red-500">
+                <p className="text-xs text-red-500">
                   {errors.password.message}
                 </p>
               )}
             </div>
 
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full text-base">
               Sign In
             </Button>
 
-            <div className="mt-4 space-y-2">
-              <p className="text-sm text-center text-gray-500">Quick Login</p>
+            <div className="mt-6 space-y-2">
+              <p className="text-sm text-center text-muted-foreground">
+                Quick Login Options
+              </p>
               <div className="grid grid-cols-1 gap-2">
                 <Button
                   type="button"
