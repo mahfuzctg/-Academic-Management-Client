@@ -83,8 +83,7 @@ export default function AnnouncementManagement() {
     useGetAllAnnouncementsQuery(queryParams);
   const [deleteAnnouncement] = useDeleteAnnouncementMutation();
 
-  const announcements = announcementsData?.data.result || [];
-  console.log(announcements);
+  const announcements = announcementsData?.data || [];
   const handleCreate = () => {
     setSelectedAnnouncement(null);
     setIsFormOpen(true);
