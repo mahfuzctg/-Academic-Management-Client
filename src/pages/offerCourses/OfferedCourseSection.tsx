@@ -47,8 +47,8 @@ const OfferedCourseSection = () => {
     useGetMeQuery(undefined);
 
   // Extract admission semester ID from student profile
-  const admissionSemesterId = studentProfile?.admissionSemester;
-
+  const admissionSemesterId = studentProfile?.data?.admissionSemester;
+  console.log(studentProfile);
   // Get offered courses for the student's admission semester
   const { data, isLoading, isError } =
     useGetOfferedCoursesBySemesterQuery(admissionSemesterId);
