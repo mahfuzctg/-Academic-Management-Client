@@ -138,6 +138,19 @@ const JobSection = () => {
           </Card>
         );
       })}
+
+      {/* Upcoming Job Board Button */}
+      <div className="col-span-full flex justify-center my-10">
+        <a
+          href="https://solo-sphere-9771a.web.app/"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Button className="text-white  bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md px-8 py-3 rounded-full text-lg">
+            🚀 Upcoming Job Board
+          </Button>
+        </a>
+      </div>
     </section>
   );
 };

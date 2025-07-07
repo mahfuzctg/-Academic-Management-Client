@@ -9,10 +9,7 @@ import {
   useCreateEnrolledCourseMutation,
   useGetMyEnrolledCoursesQuery,
 } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
-import {
-  useGetMeQuery,
-  useGetMyStudentProfileQuery,
-} from "@/redux/features/student/studentApi";
+import { useGetMeQuery } from "@/redux/features/student/studentApi";
 import type { TQueryParam } from "@/types/global";
 import type {
   IOfferedCourse,

@@ -12,8 +12,8 @@ import { logout, setUser } from "../features/auth/authSlice";
 import type { RootState } from "../store";
 
 const baseQuery = fetchBaseQuery({
-  baseUrl: "http://localhost:5000/api/v1",
-  // baseUrl: "https://academic-management-one.vercel.app/api/v1",
+  // baseUrl: "http://localhost:5000/api/v1",
+  baseUrl: "https://academic-management-one.vercel.app/api/v1",
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.token;
