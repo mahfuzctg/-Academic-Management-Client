@@ -9,10 +9,7 @@ import {
   useCreateEnrolledCourseMutation,
   useGetMyEnrolledCoursesQuery,
 } from "@/redux/features/enrollmentCourse/enrollmentCourseApi";
-import {
-  useGetMeQuery,
-  useGetMyStudentProfileQuery,
-} from "@/redux/features/student/studentApi";
+import { useGetMeQuery } from "@/redux/features/student/studentApi";
 import type { TQueryParam } from "@/types/global";
 import type {
   IOfferedCourse,
@@ -50,8 +47,8 @@ const OfferedCourseSection = () => {
     useGetMeQuery(undefined);
 
   // Extract admission semester ID from student profile
-  const admissionSemesterId = studentProfile?.admissionSemester;
-
+  const admissionSemesterId = studentProfile?.data?.admissionSemester;
+  console.log(studentProfile);
   // Get offered courses for the student's admission semester
   const { data, isLoading, isError } =
     useGetOfferedCoursesBySemesterQuery(admissionSemesterId);

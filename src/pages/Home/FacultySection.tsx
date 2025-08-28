@@ -62,6 +62,7 @@ const FacultySection = () => {
                   faculty.academicDepartment?.name || "Unknown Department"
                 }
                 image={faculty.profileImg || "/placeholder-faculty.jpg"}
+                id={""}
               />
             ))}
       </motion.div>

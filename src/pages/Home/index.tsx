@@ -1,3 +1,6 @@
+import { selectCurrentUser } from "../../redux/features/auth/authSlice";
+import { useAppSelector } from "../../redux/hooks";
+import SemesterBlogSection from "../blogs/SemesterBlogPage";
 import OfferedCourseSection from "../offerCourses/OfferedCourseSection";
 import Announcements from "./Announcements";
 import BlogBoard from "./BlogBoard";
@@ -8,8 +11,6 @@ import Hero from "./Hero";
 import JobBoard from "./JobBoard";
 import Statistics from "./Statistics";
 import Testimonials from "./Testimonials";
-import { useAppSelector } from "../../redux/hooks";
-import { selectCurrentUser } from "../../redux/features/auth/authSlice";
 
 export default function Home() {
   const user = useAppSelector(selectCurrentUser);
@@ -19,12 +20,15 @@ export default function Home() {
       <Hero />
       <main className="flex-grow  w-9/12 mx-auto">
         {user && user.role === "student" && <OfferedCourseSection />}
-        <Features />
-        <FacultySection />
+
         <Announcements />
         <JobBoard />
+        <FacultySection />
+
         <BlogBoard />
+        <SemesterBlogSection />
         <Testimonials />
+        <Features />
         <Statistics />
         <Contact />
       </main>

@@ -19,6 +19,7 @@ const getNavLinks = (role?: string) => {
     { label: "Courses", to: "/courses" },
     { label: "Jobs", to: "/jobs" },
     { label: "Blogs", to: "/blogs" },
+    { label: "Semester Blogs", to: "/semester-blogs" },
   ];
 
   switch (role) {
@@ -38,12 +39,7 @@ const getNavLinks = (role?: string) => {
       ];
     case "admin":
     case "superAdmin":
-      return [
-        ...commonLinks,
-        { label: "Dashboard", to: "/admin/dashboard" },
-        { label: "Students", to: "/students" },
-        { label: "faculty", to: "/faculty" },
-      ];
+      return [...commonLinks, { label: "Dashboard", to: "/admin/dashboard" }];
     default:
       return commonLinks;
   }

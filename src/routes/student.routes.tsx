@@ -1,23 +1,12 @@
 import MyBlogSection from "@/pages/blogs/MyBlogSection";
+import MyBlogSemesterSection from "@/pages/blogs/MySemesterBlogSection";
 import JobManagement from "@/pages/Jobs/JobManagement";
 import AcademicCourseShow from "@/pages/share/facultyAndStudent/academicCourseShow";
-import AcademicDepartmentShow from "@/pages/share/facultyAndStudent/academicDepartmentShow";
-import AcademicFacultyShow from "@/pages/share/facultyAndStudent/academicfacultyShow";
-import AcademicInstructorShow from "@/pages/share/facultyAndStudent/academicInstructorShow";
-import AcademicSemesterShow from "@/pages/share/facultyAndStudent/AcademickSemesterShow";
 import AcademicOfferedCourseShow from "@/pages/share/facultyAndStudent/academicOfferedCourseShow";
 import MyCourses from "@/pages/Students/courses/MyCourses";
 import StudentGradesPage from "@/pages/Students/StudentGrades/StudentGradesPage";
 import StudentProfile from "@/pages/Students/StudentProfile";
-import {
-  Award,
-  Blocks,
-  BookOpen,
-  Building2,
-  CalendarDays,
-  User,
-  Users,
-} from "lucide-react";
+import { Award, Blocks, BookOpen, User } from "lucide-react";
 
 export const studentPaths = [
   // {
@@ -64,30 +53,29 @@ export const studentPaths = [
   //   icon: <CalendarDays className="w-5 h-5" />,
   // },
 
-  // {
-  //   name: "Faculty ",
-  //   path: "faculty",
-  //   element: <AcademicInstructorShow />,
-  //   icon: <BookOpen className="w-5 h-5" />,
-  // },
+  {
+    name: "Course ",
+    path: "course",
+    element: <AcademicCourseShow />,
+    icon: <BookOpen className="w-5 h-5" />,
+  },
 
-  // {
-  //   name: "Course ",
-  //   path: "course",
-  //   element: <AcademicCourseShow />,
-  //   icon: <BookOpen className="w-5 h-5" />,
-  // },
-
-  // {
-  //   name: "OfferCourse ",
-  //   path: "offered-course",
-  //   element: <AcademicOfferedCourseShow />,
-  //   icon: <BookOpen className="w-5 h-5" />,
-  // },
+  {
+    name: "Optional Subjects",
+    path: "offered-course",
+    element: <AcademicOfferedCourseShow />,
+    icon: <BookOpen className="w-5 h-5" />,
+  },
   {
     name: "My Blog",
     path: "my-blog",
     element: <MyBlogSection />,
+    icon: <Blocks className="w-5 h-5" />,
+  },
+  {
+    name: "My Semester Blog",
+    path: "my-semester-blog",
+    element: <MyBlogSemesterSection />,
     icon: <Blocks className="w-5 h-5" />,
   },
   {
